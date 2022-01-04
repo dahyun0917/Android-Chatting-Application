@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ChatUserListAcitivity">
+    tools:context=".ChatUserListAcitivity"
+    android:orientation="horizontal">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -27,7 +28,7 @@
             android:text="검색"/>
 
     </LinearLayout>
-    
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/userList"
         android:layout_width="match_parent"

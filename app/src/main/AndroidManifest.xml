@@ -10,6 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Chat_de">
         <activity
+            android:name=".ChatUserListAcitivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChatListActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

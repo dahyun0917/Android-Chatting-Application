@@ -3,9 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/flash202/AppData/Local/Android/Sdk/platforms/android-32/data/res/layout/simple_spinner_item.xml" value="0.36614583333333334" />
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat.xml" value="0.33958333333333335" />
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat_list.xml" value="0.22" />
-        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat_user_list.xml" value="0.20104166666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat_user_list.xml" value="0.15415657788539144" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/recycler_item.xml" value="0.29010416666666666" />
       </map>
     </option>
   </component>

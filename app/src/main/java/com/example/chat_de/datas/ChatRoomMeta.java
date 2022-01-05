@@ -4,12 +4,13 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class ChatRoomMeta {
+    public enum Type { BY_COLLEGE, BY_YEAR, BY_USER }
     private String name;
     private int lastMessageIndex;
-    private String type;
+    private Type type;
 
     public ChatRoomMeta() { }
-    public ChatRoomMeta(String name, int lastMessageIndex, String type) {
+    public ChatRoomMeta(String name, int lastMessageIndex, Type type) {
         setName(name);
         setLastMessageIndex(lastMessageIndex);
         setType(type);
@@ -17,9 +18,9 @@ public class ChatRoomMeta {
 
     public String getName()             { return name; }
     public int getLastMessageIndex()    { return lastMessageIndex; }
-    public String getType()             { return type; }
+    public Type getType()             { return type; }
 
     public void setName(String name)                        { this.name = name; }
     public void setLastMessageIndex(int lastMessageIndex)   { this.lastMessageIndex = lastMessageIndex; }
-    public void setType(String type)                        { this.type = type; }
+    public void setType(Type type)                        { this.type = type; }
 }

@@ -8,6 +8,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.example.chat_de.datas.User;
+
 import java.util.ArrayList;
 
 public class ChatUserListAcitivity extends AppCompatActivity {
@@ -18,7 +20,7 @@ public class ChatUserListAcitivity extends AppCompatActivity {
         setContentView(R.layout.chat_user_list);
 
         Spinner spinner = findViewById(R.id.spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item,items
         );
         //항목 선택시 보이는 별도창의 각 아이템을 위한 레이아웃 설정
@@ -39,12 +41,12 @@ public class ChatUserListAcitivity extends AppCompatActivity {
         });
     }
 
-    private ArrayList<FirebaseDataStructure.User> getAllUserList(){
-        ArrayList<FirebaseDataStructure.User> userList = new ArrayList<>();
+    private ArrayList<User> getAllUserList(){
+        ArrayList<User> userList = new ArrayList<>();
         return userList;
     }
 
-    private void showUserList(ArrayList<FirebaseDataStructure.User> userList){
+    private void showUserList(ArrayList<User> userList){
 
     }
 

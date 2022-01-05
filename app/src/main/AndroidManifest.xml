@@ -16,10 +16,10 @@
             android:name=".ChatActivity"
             android:exported="false" />
         <activity
-            android:name=".ChatListActivity"
+            android:name=".ChatUserListAcitivity"
             android:exported="false" />
         <activity
-            android:name=".ChatUserListAcitivity"
+            android:name=".ChatListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

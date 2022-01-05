@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".ChatListActivity">
+    android:orientation="vertical">
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,10 +16,7 @@
         android:id="@+id/makeChat"
         android:text="채팅방 만들기"/>
     <ListView
-        android:id="@+id/chatList"
+        android:id="@+id/listview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </ListView>
-
+        android:layout_height="match_parent"/>
 </LinearLayout>

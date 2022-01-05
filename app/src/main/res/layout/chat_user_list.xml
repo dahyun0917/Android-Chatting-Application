@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ChatUserListAcitivity"
-    android:orientation="horizontal">
+    android:orientation="vertical">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -30,8 +30,11 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/userList"
+        android:id="@+id/recyclerUserList"
+        android:layout_gravity="center_vertical"
+        android:layout_above="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:paddingHorizontal="16dp"/>
 </LinearLayout>

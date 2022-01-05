@@ -75,10 +75,10 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         return to;*/
         //return myDataList.get(position).getViewType();
-        if(myDataList.get(position).getFrom().equals("user2"))
-            return 1;
-        else if(myDataList.get(position).getType().equals("SYSTEM"))
+        if(myDataList.get(position).getType().equals(Chat.Type.SYSTEM))
             return 2;
+        else if((myDataList.get(position).getFrom().equals("user2"))&&myDataList.get(position).getType().equals(Chat.Type.TEXT))
+            return 1;
         else
             return 0;
 

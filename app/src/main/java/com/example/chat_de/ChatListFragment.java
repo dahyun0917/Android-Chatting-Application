@@ -134,11 +134,13 @@ public class ChatListFragment extends Fragment {
         //intent.putExtra("user_name",USER_NAME);
         getActivity().startActivity(intent);
         //getActivity().startActivity(new Intent(getActivity(), ChatActivity.class));
+        getActivity().finish();
     }
     private void selelctUser(){
         //TODO("ChatUserListActivity로 넘어간 뒤, 종료")
         Intent intent = new Intent(getActivity(), ChatUserListAcitivity.class);
         getActivity().startActivity(intent);
+        getActivity().finish();
     }
 
 

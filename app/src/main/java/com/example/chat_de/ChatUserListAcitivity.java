@@ -1,20 +1,17 @@
 package com.example.chat_de;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.example.chat_de.datas.User;
-import com.example.chat_de.datas.UserMeta;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -22,10 +19,14 @@ import java.util.ArrayList;
 
 public class ChatUserListAcitivity extends AppCompatActivity {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기~"};
-    ArrayList<UserMeta> userList = new ArrayList<UserMeta>();
+    ArrayList<UserItem> userList = new ArrayList<UserItem>();
+
+    private UserListAdapter userListAdapter;
+    private RecyclerView recyclerView;
 
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,13 +54,28 @@ public class ChatUserListAcitivity extends AppCompatActivity {
             }
         });
 
+        /*리사이클러뷰 설정*/
+
+        //데이터 받아오기
+        //userList = getAllUserList();
+        userList.add(new UserItem("user1","",81,"hje"));
+        userList.add(new UserItem("user2","",10,"whs"));
+        userList.add(new UserItem("user3","",30,"rke"));
+        //어댑터 인스턴스 생성
+        userListAdapter = new UserListAdapter();
+        userListAdapter.setUserList(this.userList);
         //리사이클러뷰 설정
-        userList = getAllUserList();
+        recyclerView = findViewById(R.id.recyclerUserList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL,false));
+        recyclerView.setAdapter(userListAdapter);
+
+        Log.d("TAG",String.valueOf(userListAdapter.getItemCount()));
+
     }
 
-    private ArrayList<UserMeta> getAllUserList(){
+    private ArrayList<UserItem> getAllUserList(){
         // TODO : 유저 리스트 받아오기
-        ArrayList<UserMeta> userList = new ArrayList<UserMeta>();
+        ArrayList<UserItem> userList = new ArrayList<UserItem>();
         ArrayList<User> users = new ArrayList<User>();
 
 
@@ -70,7 +86,7 @@ public class ChatUserListAcitivity extends AppCompatActivity {
         return userList;
     }
 
-    private void showUserList(ArrayList<UserMeta> userList){
+    private void showUserList(ArrayList<UserItem> userList){
 
     }
 

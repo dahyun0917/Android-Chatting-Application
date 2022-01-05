@@ -38,5 +38,6 @@ public class ChatListActivity extends AppCompatActivity {
         mainFragment.setArguments(bundle);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, mainFragment).commit();
+
     }
 }

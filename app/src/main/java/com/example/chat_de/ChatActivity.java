@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -125,11 +126,14 @@ public class ChatActivity extends AppCompatActivity {
         if (chat_edit.getText().toString().equals(""))
             return;
         index=index+1;
+
         sendMessageToF();
         chat_edit.setText(""); //입력창 초기화
     }
     private void sendMessageToF(){
-        Chat chat = new Chat( chat_edit.getText().toString(),index,++index,"user2","TEXT"); //ChatDTO를 이용하여 데이터를 묶는다.
+        //Date today=new Date();
+
+        Chat chat = new Chat( chat_edit.getText().toString(),index,++index,"user2",Chat.Type.TEXT); //ChatDTO를 이용하여 데이터를 묶는다.
         databaseReference.child("pre_1").child("chatRooms").child("chatRoom1").child("chats").push().setValue(chat); // 데이터 푸쉬
     }
 

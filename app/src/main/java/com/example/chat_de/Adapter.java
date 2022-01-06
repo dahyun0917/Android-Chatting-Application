@@ -16,8 +16,9 @@ import com.example.chat_de.datas.ViewType;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.TimeZone;
+import java.util.Locale;
 
 public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<Chat> myDataList;
@@ -51,9 +52,10 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // 실제 각 뷰 홀더에 데이터를 연결해주는 함수
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-        DateFormat df = new SimpleDateFormat("HH:mm");
-        df.setTimeZone(TimeZone.getTimeZone("Japan")); // 강제로 한국/일본 시간대로 변경해 줌
-        String str=df.format(myDataList.get(position).normalDate());
+        //DateFormat df = new SimpleDateFormat("a HH:mm");
+        //String str=df.format(myDataList.get(position).normalDate());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
+        String str= simpleDateFormat.format(myDataList.get(position).normalDate());
 
         if(viewHolder instanceof CenterViewHolder){
             ((CenterViewHolder)viewHolder).textv.setText(myDataList.get(position).getText());

@@ -15,9 +15,10 @@ public class User {
         setUserMeta(userMeta);
     }
 
+
     public HashMap<String, UserChatRoom> getJoined()    { return joined; }
     public UserMeta getUserMeta()                       { return userMeta; }
 
-    public void setJoined(HashMap<String, UserChatRoom> joined) { this.joined = joined; }
-    public void setUserMeta(UserMeta userMeta)                  { this.userMeta = userMeta; }
+    public void setJoined(HashMap<String, UserChatRoom> joined) { this.joined = (HashMap<String, UserChatRoom>) joined.clone(); }
+    public void setUserMeta(UserMeta userMeta)                  { this.userMeta = new UserMeta(userMeta); }
 }

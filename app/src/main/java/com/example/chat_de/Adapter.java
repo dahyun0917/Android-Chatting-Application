@@ -1,6 +1,7 @@
 package com.example.chat_de;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,39 +11,40 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.example.chat_de.R;
 import com.example.chat_de.datas.Chat;
-import com.example.chat_de.Code;
+import com.example.chat_de.datas.ViewType;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-    ArrayList<Chat> myDataList=null;
+    private ArrayList<Chat> myDataList;
 
     public Adapter(ArrayList<Chat> dataList){
         myDataList = dataList;
     }
 
-
-    @NonNull
-    @Override
+    @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
         Context context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        if(viewType == Code.ViewType.CENTER_CONTENT){
-            view = inflater.inflate(R.layout.room_center_item_list,parent,false);
-            return new CenterViewHolder(view);
-        }else if(viewType == Code.ViewType.LEFT_CONTENT){
-            view = inflater.inflate(R.layout.room_left_item_list,parent,false);
-            return new LeftViewHolder(view);
-        }else{
-            view = inflater.inflate(R.layout.room_right_item_list,parent,false);
-            return new RightViewHolder(view);
+        switch(viewType) {
+            case ViewType.CENTER_CONTENT:
+                view = inflater.inflate(R.layout.room_center_item_list,parent,false);
+                return new CenterViewHolder(view);
+            case ViewType.LEFT_CONTENT:
+                view = inflater.inflate(R.layout.room_left_item_list,parent,false);
+                return new LeftViewHolder(view);
+            case ViewType.RIGHT_CONTENT:
+                view = inflater.inflate(R.layout.room_right_item_list,parent,false);
+                return new RightViewHolder(view);
+            default:
+                Log.e("VIEW_TYPE", "ViewType must be 1 or 2 or 3");
+                view = inflater.inflate(R.layout.room_right_item_list,parent,false);
+                return new RightViewHolder(view);
         }
     }
     // 실제 각 뷰 홀더에 데이터를 연결해주는 함수
@@ -97,7 +99,7 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public CenterViewHolder(@NonNull View itemView) {
             super(itemView);
-            textv = (TextView)itemView.findViewById(R.id.textv);
+            textv = itemView.findViewById(R.id.textv);
         }
     }
 
@@ -110,9 +112,9 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public LeftViewHolder(@NonNull View itemView) {
             super(itemView);
             //imgv = (CircleImageView)itemView.findViewById(R.id.imgv);
-            textv_nicname = (TextView)itemView.findViewById(R.id.textv_nicname);
-            textv_msg = (TextView)itemView.findViewById(R.id.textv_msg);
-            textv_time = (TextView)itemView.findViewById(R.id.textv_time);
+            textv_nicname = itemView.findViewById(R.id.textv_nicname);
+            textv_msg = itemView.findViewById(R.id.textv_msg);
+            textv_time = itemView.findViewById(R.id.textv_time);
 
         }
     }
@@ -124,9 +126,9 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public RightViewHolder(@NonNull View itemView) {
             super(itemView);
-            textv_nicname = (TextView)itemView.findViewById(R.id.textv_nicname);
-            textv_msg = (TextView)itemView.findViewById(R.id.textv_msg);
-            textv_time = (TextView)itemView.findViewById(R.id.textv_time);
+            textv_nicname = itemView.findViewById(R.id.textv_nicname);
+            textv_msg = itemView.findViewById(R.id.textv_msg);
+            textv_time = itemView.findViewById(R.id.textv_time);
         }
     }
 

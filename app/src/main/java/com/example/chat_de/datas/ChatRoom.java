@@ -1,5 +1,7 @@
 package com.example.chat_de.datas;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.HashMap;
@@ -16,12 +18,18 @@ public class ChatRoom {
         setUsers(users);
         setChatRoomMeta(chatRoomMeta);
     }
+    //Copy constructor
+    public ChatRoom(@NonNull ChatRoom original) {
+        setChats(original.getChats());
+        setUsers(original.getUsers());
+        setChatRoomMeta(original.getChatRoomMeta());
+    }
 
     public HashMap<String, Chat> getChats()         { return chats; }
     public HashMap<String, ChatRoomUser> getUsers() { return users; }
     public ChatRoomMeta getChatRoomMeta()           { return chatRoomMeta; }
 
-    public void setChats(HashMap<String, Chat> chats)           { this.chats = chats; }
-    public void setUsers(HashMap<String, ChatRoomUser> users)   { this.users = users; }
-    public void setChatRoomMeta( ChatRoomMeta chatRoomMeta)     { this.chatRoomMeta = chatRoomMeta; }
+    public void setChats(@NonNull HashMap<String, Chat> chats)          { this.chats = (HashMap<String, Chat>) chats.clone(); }
+    public void setUsers(@NonNull HashMap<String, ChatRoomUser> users)  { this.users = (HashMap<String, ChatRoomUser>) users.clone(); }
+    public void setChatRoomMeta(ChatRoomMeta chatRoomMeta)              { this.chatRoomMeta = new ChatRoomMeta(chatRoomMeta); }
 }

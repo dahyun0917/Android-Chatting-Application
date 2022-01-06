@@ -95,7 +95,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void getChatRoomMeta(String chatRoomKey){//chatRoomKey에 따른 채팅방 정보 불러옴
-    // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
+        // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
         databaseReference.child("pre_1").child("chatRooms").child("chatRoom1").child("chats").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {

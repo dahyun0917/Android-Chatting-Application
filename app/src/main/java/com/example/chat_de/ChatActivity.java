@@ -1,16 +1,22 @@
 package com.example.chat_de;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.example.chat_de.datas.Chat;
@@ -19,6 +25,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,10 +35,11 @@ public class ChatActivity extends AppCompatActivity {
     //private ListView chat_view;
     private EditText chat_edit;
     private Button chat_send;
+    private ImageButton file_send;
     private RecyclerView recyclerView;
-    private Button add_Button;
-    private String chatRoomKey;
+    private int GALLEY_CODE = 10;
 
+    private FirebaseStorage storage=FirebaseStorage.getInstance();;
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference;
 
@@ -42,11 +51,15 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
         recyclerView=findViewById(R.id.RecyclerView);
-        chat_edit = findViewById(R.id.chat_edit);
-        chat_send = findViewById(R.id.chat_sent);
-        add_Button= findViewById(R.id.add_button);
-        chatRoomKey = getIntent().getStringExtra("chatRoomKey");
-        databaseReference = firebaseDatabase.getReference("pre_1/chatRooms/" + chatRoomKey);
+
+        chat_edit =  findViewById(R.id.chat_edit);
+        chat_send =  findViewById(R.id.chat_sent);
+        file_send =  findViewById(R.id.file_send);
+//        add_Button=(Button)findViewById(R.id.add_button);
+
+        //Intent intent = getIntent();
+        //CHAT_NAME = intent.getStringExtra("chat_name");
+        //USER_NAME = intent.getStringExtra("user_name");
 
         // 메시지 전송 버튼에 대한 클릭 리스너 지정
         chat_send.setOnClickListener(new View.OnClickListener() {
@@ -55,10 +68,19 @@ public class ChatActivity extends AppCompatActivity {
                 sendMessage();
             }
         });
-        add_Button.setOnClickListener(new View.OnClickListener(){
+
+        /*add_Button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
                 inviteUser();
+            }
+        });*/
+
+        //파일 이미지 버튼에 대한 클릭 리스너 지정
+        file_send.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                sendimageMessage();
             }
         });
     }
@@ -69,7 +91,30 @@ public class ChatActivity extends AppCompatActivity {
         getMessageList(10);
     }
 
-    private void getMessageList(int max){//max에 지정된 개수까지 메세지 내용을 불러옴
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_chatting_addfr,menu);
+        return true;
+    }
+
+    //유저 추가 메뉴바 설정
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int curId = item.getItemId();
+        switch(curId){
+            case R.id.add_fr:
+                inviteUser();
+                break;
+            default:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    //max에 지정된 개수까지 메세지 내용을 불러옴
+    private void getMessageList(int max){
         dataList = new ArrayList<>();
         LinearLayoutManager manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         recyclerView.setLayoutManager(manager);
@@ -141,4 +186,11 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ChatUserListAcitivity.class);
         startActivity(intent);
     }
+
+    private void sendimageMessage(){
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+
+        startActivityForResult(intent,GALLEY_CODE);
+     }
 }

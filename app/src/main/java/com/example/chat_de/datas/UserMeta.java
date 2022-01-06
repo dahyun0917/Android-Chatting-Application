@@ -10,11 +10,11 @@ public class UserMeta {
     private String userKey;
 
     public UserMeta() { }
-    public UserMeta(String name, String pictureURL, int generation) {
+    public UserMeta(String name, String pictureURL, int generation, String userKey) {
         setName(name);
         setPictureURL(pictureURL);
         setGeneration(generation);
-        setUserKey(null);
+        setUserKey(userKey);
     }
     //Copy constructor
     public UserMeta(UserMeta original) {

@@ -44,7 +44,6 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
     private int mode = 0;
-    public Button completeButton;
 
 
     @Override
@@ -75,7 +74,7 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
 
         for (int i = 0; i<users.size() ;i++){
             //usermeta를 userList에 넣기
-            userList.add(new UserItem(users.get(i).getUserMeta()));
+            //userList.add(new UserItem(users.get(i).getUser()));
         }
         //임시방편
         userList.add(new UserItem("user1","",81,"hje"));

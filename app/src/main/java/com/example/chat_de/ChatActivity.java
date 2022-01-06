@@ -6,9 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -17,30 +15,32 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 
 import com.example.chat_de.datas.Chat;
+import com.example.chat_de.datas.ChatRoomUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-//import com.google.firebase.storage.FirebaseStorage;
-//import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 
 public class ChatActivity extends AppCompatActivity {
+    private final int GALLEY_CODE = 10;
+    private final int SYSTEM_MESSAGE = -2;
+    private final String USER_NAME = "user2";
+
     //private ListView chat_view;
     private EditText chat_edit;
     private Button chat_send;
     private ImageButton file_send;
     private RecyclerView recyclerView;
-    private int GALLEY_CODE = 10;
     private String chatRoomKey;
 
-//    private FirebaseStorage storage=FirebaseStorage.getInstance();;
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference;
 
@@ -51,8 +51,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
-        databaseReference = firebaseDatabase.getReference("pre_1/chatRooms/" + chatRoomKey);
-
+        databaseReference = firebaseDatabase.getReference("pre_2");
         setContentView(R.layout.chat);
         recyclerView=findViewById(R.id.RecyclerView);
 
@@ -84,7 +83,7 @@ public class ChatActivity extends AppCompatActivity {
         file_send.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                sendimageMessage();
+                sendImageMessage();
             }
         });
     }
@@ -130,7 +129,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void addMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
         Chat dataItem = dataSnapshot.getValue(Chat.class);
-        if(dataItem.getIndex() != -2)
+        if(dataItem.getIndex() != SYSTEM_MESSAGE)
             index = dataItem.getIndex();
         adapter.add(new Chat(dataItem));
     }
@@ -142,11 +141,12 @@ public class ChatActivity extends AppCompatActivity {
 
     private void getChatRoomMeta() { //채팅방 정보 불러옴
         // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
-        databaseReference.child("chats").addChildEventListener(new ChildEventListener() {
+        databaseReference.child("chatRooms").child(chatRoomKey).child("chats").addChildEventListener(new ChildEventListener() {
+
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 addMessage(dataSnapshot, dataList);
-                recyclerView.scrollToPosition(dataList.size()-1);
+                recyclerView.scrollToPosition(dataList.size() - 1);
                 recyclerView.setAdapter(new Adapter(dataList));
                 Log.e("LOG", "s:"+s);
             }
@@ -182,8 +182,18 @@ public class ChatActivity extends AppCompatActivity {
         chat_edit.setText(""); //입력창 초기화
     }
     private void sendMessageToF(){
-        Chat chat = new Chat(chat_edit.getText().toString(), index,"user2", Chat.Type.TEXT);
-        databaseReference.child("chats").push().setValue(chat); // 데이터 푸쉬
+        // USER_NAME 나중에 실제 user primary key로 바꿔줘야 함
+        Chat chat = new Chat(chat_edit.getText().toString(), index, USER_NAME, Chat.Type.TEXT);
+        databaseReference.child("chatRooms").child(chatRoomKey).child("chats").push().setValue(chat); // 데이터 푸쉬
+        databaseReference.child("chatRoomJoined").child(chatRoomKey).child(USER_NAME).child("lastReadIndex").setValue(index);
+
+        //이 부분은 firebase function으로 구현가능하면 그걸로 구현하는 것이 더 좋을 듯
+        databaseReference.child("chatRoomJoined").child(chatRoomKey).get().addOnCompleteListener(task -> {
+            HashMap<String, ChatRoomUser> users = (HashMap<String, ChatRoomUser>)task.getResult().getValue();
+            for(String userKey: users.keySet()) {
+                databaseReference.child("userJoined").child(userKey).child(chatRoomKey).child("lastMessageIndex").setValue(index);
+            }
+        });
     }
 
     private void inviteUser(){
@@ -191,7 +201,7 @@ public class ChatActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void sendimageMessage(){
+    private void sendImageMessage(){
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
 

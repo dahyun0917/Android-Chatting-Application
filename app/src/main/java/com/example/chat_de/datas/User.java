@@ -2,23 +2,35 @@ package com.example.chat_de.datas;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.util.HashMap;
-
 @IgnoreExtraProperties
 public class User {
-    private HashMap<String, UserChatRoom> joined;
-    private UserMeta userMeta;
+    private String name;
+    private String pictureURL;
+    private int generation;
+    private String userKey;
 
     public User() { }
-    public User(HashMap<String, UserChatRoom> joined, UserMeta userMeta) {
-        setJoined(joined);
-        setUserMeta(userMeta);
+    public User(String name, String pictureURL, int generation, String userKey) {
+        setName(name);
+        setPictureURL(pictureURL);
+        setGeneration(generation);
+        setUserKey(userKey);
+    }
+    //Copy constructor
+    public User(User original) {
+        setName(original.getName());
+        setPictureURL(original.getPictureURL());
+        setGeneration(original.getGeneration());
+        setUserKey(original.getUserKey());
     }
 
+    public String getName()         { return name; }
+    public String getPictureURL()   { return pictureURL; }
+    public int getGeneration()      { return generation; }
+    public String getUserKey()      { return userKey; }
 
-    public HashMap<String, UserChatRoom> getJoined()    { return joined; }
-    public UserMeta getUserMeta()                       { return userMeta; }
-
-    public void setJoined(HashMap<String, UserChatRoom> joined) { this.joined = (HashMap<String, UserChatRoom>) joined.clone(); }
-    public void setUserMeta(UserMeta userMeta)                  { this.userMeta = new UserMeta(userMeta); }
+    public void setName(String name)                { this.name = name; }
+    public void setPictureURL(String pictureURL)    { this.pictureURL = pictureURL; }
+    public void setGeneration(int generation)       { this.generation = generation; }
+    public void setUserKey(String userKey)          { this.userKey = userKey; }
 }

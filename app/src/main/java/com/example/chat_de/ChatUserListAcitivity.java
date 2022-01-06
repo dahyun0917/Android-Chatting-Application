@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -24,7 +23,7 @@ import java.util.ArrayList;
 
 public class ChatUserListAcitivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기~"};
-    ArrayList<UserItem> userList = new ArrayList<UserItem>();
+    ArrayList<UserItem> userList = new ArrayList<>();
 
     private UserListAdapter userListAdapter;
     private RecyclerView recyclerView;
@@ -69,7 +68,7 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
 
         /*스피너 설정*/
         Spinner spinner = findViewById(R.id.spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item,items
         );
         //항목 선택시 보이는 별도창의 각 아이템을 위한 레이아웃 설정
@@ -107,8 +106,8 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
 
     private ArrayList<UserItem> getAllUserList(){
         // TODO : 유저 리스트 받아오기
-        ArrayList<UserItem> userList = new ArrayList<UserItem>();
-        ArrayList<User> users = new ArrayList<User>();
+        ArrayList<UserItem> userList = new ArrayList<>();
+        ArrayList<User> users = new ArrayList<>();
 
 
         for (int i = 0; i<users.size() ;i++){

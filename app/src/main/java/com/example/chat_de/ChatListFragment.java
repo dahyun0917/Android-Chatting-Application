@@ -27,10 +27,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 public class ChatListFragment extends Fragment {
+    private final String USER_NAME = "user1";
 
-    ChatListActivity ChatActivity;
-
-
+    private ChatListActivity ChatActivity;
 
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
@@ -41,7 +40,7 @@ public class ChatListFragment extends Fragment {
     private ListView chatList;
     private Button makeChat;
 
-    ArrayList<String> clist = new ArrayList<>();
+    ArrayList<String> cList = new ArrayList<>();
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -54,8 +53,7 @@ public class ChatListFragment extends Fragment {
         ChatActivity = null;
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         ViewGroup rootview = (ViewGroup)inflater.inflate(R.layout.chat_list,container,false);
@@ -75,7 +73,7 @@ public class ChatListFragment extends Fragment {
         chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                enterChatRoom(i);
+                enterChatRoom(cList.get(i));
             }
         });
         makeChat.setOnClickListener(new View.OnClickListener(){
@@ -95,12 +93,13 @@ public class ChatListFragment extends Fragment {
         chatList.setAdapter(adapter);
 
         // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
-        databaseReference.child("pre_1").child("users").child("user1").child("joined").addChildEventListener(new ChildEventListener() {
+        // USER_NAME을 나중에 실제user의 primary key로 변경해야 함
+        databaseReference.child("pre_1").child("users").child(USER_NAME).child("joined").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.e("LOG", "dataSnapshot.getKey() : " + dataSnapshot.getKey());
                 adapter.add(dataSnapshot.getKey());
-                clist.add(dataSnapshot.getKey());
+                cList.add(dataSnapshot.getKey());
             }
 
             @Override
@@ -127,17 +126,13 @@ public class ChatListFragment extends Fragment {
         });
 
     }
-    private void enterChatRoom(int chatRoomnum){
+    private void enterChatRoom(String chatRoomKey){
         Intent intent = new Intent(getActivity(), ChatActivity.class);
-        //CHAT_NAME= clist.get(chatRoomnum);
-        //intent.putExtra("chat_name",CHAT_NAME);
-        //intent.putExtra("user_name",USER_NAME);
+        intent.putExtra("chatRoomKey", chatRoomKey);
         getActivity().startActivity(intent);
-        //getActivity().startActivity(new Intent(getActivity(), ChatActivity.class));
-        getActivity().finish();
     }
     private void selelctUser(){
-        //TODO("ChatUserListActivity로 넘어간 뒤, 종료")
+        //ChatUserListActivity로 넘어간 뒤, 종료
         Intent intent = new Intent(getActivity(), ChatUserListAcitivity.class);
         getActivity().startActivity(intent);
         getActivity().finish();

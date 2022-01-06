@@ -15,7 +15,7 @@
             android:id="@+id/userProfileImage"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="20dp"
             android:src="@drawable/user_icon"
             android:layout_gravity="center_vertical"/>
         <TextView

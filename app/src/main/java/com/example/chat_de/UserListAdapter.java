@@ -1,10 +1,12 @@
 package com.example.chat_de;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -39,7 +41,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
         return position;
     }
 
-    //뷰와 뷰홀더가 묶였을 때
+    //뷰와 뷰홀더 묶기, 체크박스 컨트롤
     @Override
     public void onBindViewHolder(@NonNull UserListViewHolder holder, int position) {
         final UserItem item = filteredUsers.get(position);
@@ -48,7 +50,6 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
 
         //모델 클래스의 getter로 체크박스 상태값을 가져옴.
         holder.checkBox.setChecked(item.getChecked());
-
         //체크상태의 상태값을 알기위한 리스너
         holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -58,13 +59,13 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
             }
         });
         holder.bind(this.filteredUsers.get(position));
-        //Log.d("TAG","position"+String.valueOf(position));
     }
 
     //외부에서 데이터 넘기기
     public void setUserList(ArrayList<UserItem> userList){
+        this.filteredUsers = userList;
         this.unFilteredUsers = userList;
-        notifyDataSetChanged();
+        this.notifyDataSetChanged();
     }
     //생성자
     public UserListAdapter(Context context, ArrayList<UserItem> list) {

@@ -33,7 +33,7 @@ public class UserListViewHolder extends RecyclerView.ViewHolder {
         userGenerationText.setText(String.valueOf(userItem.getGeneration()));
         checkBox.setChecked(userItem.getChecked());
 
-        // TODO 사진 설정 해줘야됨
+        // TODO : 사진 설정 해줘야됨
         //userMeta.setPictureURL(String.valueOf(userProfileImage.getResources()));
     }
 }

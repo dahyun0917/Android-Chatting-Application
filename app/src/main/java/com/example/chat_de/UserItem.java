@@ -1,5 +1,7 @@
 package com.example.chat_de;
 
+import com.example.chat_de.datas.UserMeta;
+
 import java.util.concurrent.ScheduledExecutorService;
 
 public class UserItem {
@@ -15,7 +17,25 @@ public class UserItem {
             setPictureURL(pictureURL);
             setGeneration(generation);
             setUserKey(userKey);
-            checked = false;
+            setChcked(false);
+        }
+
+        //유저메타로 생성
+        public UserItem(UserMeta original) {
+            setName(original.getName());
+            setPictureURL(original.getPictureURL());
+            setGeneration(original.getGeneration());
+            setUserKey(original.getUserKey());
+            setChcked(false);
+        }
+
+        //Copy constructor
+        public UserItem(UserItem original) {
+            setName(original.getName());
+            setPictureURL(original.getPictureURL());
+            setGeneration(original.getGeneration());
+            setUserKey(original.getUserKey());
+            setChcked(false);
         }
 
         public boolean getChecked()     { return checked; }

@@ -31,24 +31,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/file_send"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:layout_margin="10dp"
+                android:src="@drawable/file_image"
+                android:background="#00000000"
+                ></ImageButton>
             <EditText
                 android:id="@+id/chat_edit"
-                android:layout_width="350dp"
+                android:layout_width="300dp"
                 android:hint="Type a message..."
                 android:layout_height="wrap_content" />
             <Button
                 android:id="@+id/chat_sent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#000000"
                 android:text="send"
-                android:textSize="10dp"/>
+                android:textSize="10sp"/>
         </LinearLayout>
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="add"
-            android:backgroundTint="@color/black"
-            android:id="@+id/add_button"></Button>
     </LinearLayout>
 
 </RelativeLayout>

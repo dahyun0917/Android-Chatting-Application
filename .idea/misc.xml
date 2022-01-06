@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/drawable/chat_box_left.xml" value="0.25092592592592594" />
+        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/drawable/round_box.xml" value="0.25092592592592594" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/activity_main.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/chat.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/chat_list.xml" value="0.1852355072463768" />
@@ -12,6 +14,7 @@
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_left_item_list.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_right_item_list.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/test_chat.xml" value="0.1852355072463768" />
+        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/menu/menu.xml" value="0.24114583333333334" />
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat_user_list.xml" value="0.20104166666666667" />
       </map>
     </option>

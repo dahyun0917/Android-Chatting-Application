@@ -16,7 +16,9 @@ import com.example.chat_de.Code;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -48,8 +50,10 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // 실제 각 뷰 홀더에 데이터를 연결해주는 함수
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-        DateFormat df = new SimpleDateFormat("HH:mm");
-        String str=df.format(myDataList.get(position).normalDate());
+        //DateFormat df = new SimpleDateFormat("a HH:mm");
+        //String str=df.format(myDataList.get(position).normalDate());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
+        String str= simpleDateFormat.format(myDataList.get(position).normalDate());
 
         if(viewHolder instanceof CenterViewHolder){
             ((CenterViewHolder)viewHolder).textv.setText(myDataList.get(position).getText());
@@ -97,7 +101,7 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public CenterViewHolder(@NonNull View itemView) {
             super(itemView);
-            textv = (TextView)itemView.findViewById(R.id.textv);
+            textv = itemView.findViewById(R.id.textv);
         }
     }
 
@@ -110,9 +114,9 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public LeftViewHolder(@NonNull View itemView) {
             super(itemView);
             //imgv = (CircleImageView)itemView.findViewById(R.id.imgv);
-            textv_nicname = (TextView)itemView.findViewById(R.id.textv_nicname);
-            textv_msg = (TextView)itemView.findViewById(R.id.textv_msg);
-            textv_time = (TextView)itemView.findViewById(R.id.textv_time);
+            textv_nicname = itemView.findViewById(R.id.textv_nicname);
+            textv_msg = itemView.findViewById(R.id.textv_msg);
+            textv_time = itemView.findViewById(R.id.textv_time);
 
         }
     }
@@ -124,9 +128,9 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public RightViewHolder(@NonNull View itemView) {
             super(itemView);
-            textv_nicname = (TextView)itemView.findViewById(R.id.textv_nicname);
-            textv_msg = (TextView)itemView.findViewById(R.id.textv_msg);
-            textv_time = (TextView)itemView.findViewById(R.id.textv_time);
+            textv_nicname = itemView.findViewById(R.id.textv_nicname);
+            textv_msg = itemView.findViewById(R.id.textv_msg);
+            textv_time = itemView.findViewById(R.id.textv_time);
         }
     }
 

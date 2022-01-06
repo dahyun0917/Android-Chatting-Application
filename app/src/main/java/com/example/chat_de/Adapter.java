@@ -14,6 +14,8 @@ import com.example.chat_de.R;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.Code;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -46,14 +48,19 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // 실제 각 뷰 홀더에 데이터를 연결해주는 함수
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+        DateFormat df = new SimpleDateFormat("HH:mm");
+        String str=df.format(myDataList.get(position).normalDate());
+
         if(viewHolder instanceof CenterViewHolder){
             ((CenterViewHolder)viewHolder).textv.setText(myDataList.get(position).getText());
         }else if(viewHolder instanceof LeftViewHolder){
             ((LeftViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
             ((LeftViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
+            ((LeftViewHolder)viewHolder).textv_time.setText(str);
         }else{
             ((RightViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
             ((RightViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
+            ((RightViewHolder)viewHolder).textv_time.setText(str);
         }
     }
     // 리사이클러뷰안에서 들어갈 뷰 홀더의 개수

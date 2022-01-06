@@ -16,6 +16,13 @@ public class UserMeta {
         setGeneration(generation);
         setUserKey(userKey);
     }
+    //Copy constructor
+    public UserMeta(UserMeta original) {
+        setName(original.getName());
+        setPictureURL(original.getPictureURL());
+        setGeneration(original.getGeneration());
+        setUserKey(original.getUserKey());
+    }
 
     public String getName()         { return name; }
     public String getPictureURL()   { return pictureURL; }

@@ -1,6 +1,6 @@
 package com.example.chat_de;
 
-import com.example.chat_de.datas.UserMeta;
+import com.example.chat_de.datas.User;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -21,7 +21,7 @@ public class UserItem {
         }
 
         //유저메타로 생성
-        public UserItem(UserMeta original) {
+        public UserItem(User original) {
             setName(original.getName());
             setPictureURL(original.getPictureURL());
             setGeneration(original.getGeneration());

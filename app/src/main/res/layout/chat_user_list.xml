@@ -17,15 +17,20 @@
         <EditText
             android:id="@+id/searchText"
             android:layout_weight="8"
-            android:layout_width="240dp"
+            android:layout_width="220dp"
             android:layout_height="match_parent"
             android:hint="사용자 이름 검색"/>
-        <Button
+
+        <ImageButton
             android:id="@+id/searchButton"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_weight="3"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:text="검색"/>
+            android:adjustViewBounds="true"
+            android:padding="0sp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/clear_button" />
 
     </LinearLayout>
 

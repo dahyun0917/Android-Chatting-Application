@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -79,18 +80,22 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
-        Chat DataItem = dataSnapshot.getValue(Chat.class);
-        index=DataItem.getIndex();
-        adapter.add(new Chat(DataItem.getText(),DataItem.getIndex(), DataItem.getDate(), DataItem.getFrom(),DataItem.getType()));
+        Chat dataItem = dataSnapshot.getValue(Chat.class);
+        Chat item = new Chat(dataItem.getText(), dataItem.getIndex(), dataItem.getFrom(), dataItem.getType());
+        item.setDate(dataItem.getDate());
+        index = dataItem.getIndex();
+        adapter.add(item);
     }
 
     private void removeMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
-        Chat DataItem = dataSnapshot.getValue(Chat.class);
-        adapter.remove(new Chat(DataItem.getText(),DataItem.getIndex(), DataItem.getDate(), DataItem.getFrom(),DataItem.getType()));
+        Chat dataItem = dataSnapshot.getValue(Chat.class);
+        Chat item = new Chat(dataItem.getText(), dataItem.getIndex(), dataItem.getFrom(), dataItem.getType());
+        item.setDate(dataItem.getDate());
+        adapter.remove(dataItem);
     }
 
     private void getChatRoomMeta(String chatRoomKey){//chatRoomKey에 따른 채팅방 정보 불러옴
-    // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
+        // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
         databaseReference.child("pre_1").child("chatRooms").child("chatRoom1").child("chats").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -133,7 +138,7 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessageToF(){
         //Date today=new Date();
 
-        Chat chat = new Chat( chat_edit.getText().toString(),index,++index,"user2",Chat.Type.TEXT); //ChatDTO를 이용하여 데이터를 묶는다.
+        Chat chat = new Chat( chat_edit.getText().toString(),index,"user2",Chat.Type.TEXT); //ChatDTO를 이용하여 데이터를 묶는다.
         databaseReference.child("pre_1").child("chatRooms").child("chatRoom1").child("chats").push().setValue(chat); // 데이터 푸쉬
     }
 

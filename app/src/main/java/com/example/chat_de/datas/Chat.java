@@ -1,10 +1,11 @@
 package com.example.chat_de.datas;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ServerValue;
 
 import java.util.Date;
-import java.util.Map;
 
 @IgnoreExtraProperties
 public class Chat {
@@ -24,6 +25,14 @@ public class Chat {
         setFrom(from);
         setType(type);
     }
+    //Copy constructor
+    public Chat(@NonNull Chat original) {
+        setText(original.getText());
+        setIndex(original.getIndex());
+        setDate(original.getDate());
+        setFrom(original.getFrom());
+        setType(original.getType());
+    }
 
     public String getText() { return text; }
     public int getIndex()   { return index; }
@@ -37,10 +46,6 @@ public class Chat {
     public void setDate(Object date)    { this.date = date; }
     public void setFrom(String from)    { this.from = from; }
 
-    public long unixTime() {
-        return (long)date;
-    }
-    public Date normalDate() {
-        return new Date((long)date);
-    }
+    public long unixTime()      { return (long)date; }
+    public Date normalDate()    { return new Date((long)date); }
 }

@@ -25,8 +25,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+//import com.google.firebase.storage.FirebaseStorage;
+//import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,8 +38,9 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton file_send;
     private RecyclerView recyclerView;
     private int GALLEY_CODE = 10;
+    private String chatRoomKey;
 
-    private FirebaseStorage storage=FirebaseStorage.getInstance();;
+//    private FirebaseStorage storage=FirebaseStorage.getInstance();;
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference;
 
@@ -49,6 +50,9 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        chatRoomKey = getIntent().getStringExtra("chatRoomKey");
+        databaseReference = firebaseDatabase.getReference("pre_1/chatRooms/" + chatRoomKey);
+
         setContentView(R.layout.chat);
         recyclerView=findViewById(R.id.RecyclerView);
 

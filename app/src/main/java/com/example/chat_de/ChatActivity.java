@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class ChatActivity extends AppCompatActivity {
-
     //private ListView chat_view;
     private EditText chat_edit;
     private Button chat_send;
@@ -42,16 +41,17 @@ public class ChatActivity extends AppCompatActivity {
 
     private FirebaseStorage storage=FirebaseStorage.getInstance();;
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference databaseReference = firebaseDatabase.getReference();
+    private DatabaseReference databaseReference;
 
     private ArrayList<Chat> dataList;
-    private int index=0;
+    private int index=-1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
         recyclerView=findViewById(R.id.RecyclerView);
+
         chat_edit =  findViewById(R.id.chat_edit);
         chat_send =  findViewById(R.id.chat_sent);
         file_send =  findViewById(R.id.file_send);
@@ -60,8 +60,6 @@ public class ChatActivity extends AppCompatActivity {
         //Intent intent = getIntent();
         //CHAT_NAME = intent.getStringExtra("chat_name");
         //USER_NAME = intent.getStringExtra("user_name");
-
-        getMessageList(10);
 
         // 메시지 전송 버튼에 대한 클릭 리스너 지정
         chat_send.setOnClickListener(new View.OnClickListener() {
@@ -72,7 +70,6 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         /*add_Button.setOnClickListener(new View.OnClickListener(){
-
             @Override
             public void onClick(View view) {
                 inviteUser();
@@ -86,7 +83,12 @@ public class ChatActivity extends AppCompatActivity {
                 sendimageMessage();
             }
         });
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        getMessageList(10);
     }
 
     @Override
@@ -119,27 +121,24 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.scrollToPosition(dataList.size()-1);
         recyclerView.setAdapter(new Adapter(dataList));
 
-        getChatRoomMeta("D");
+        getChatRoomMeta();
     }
 
     private void addMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
         Chat dataItem = dataSnapshot.getValue(Chat.class);
-        Chat item = new Chat(dataItem.getText(), dataItem.getIndex(), dataItem.getFrom(), dataItem.getType());
-        item.setDate(dataItem.getDate());
-        index = dataItem.getIndex();
-        adapter.add(item);
+        if(dataItem.getIndex() != -2)
+            index = dataItem.getIndex();
+        adapter.add(new Chat(dataItem));
     }
 
     private void removeMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
         Chat dataItem = dataSnapshot.getValue(Chat.class);
-        Chat item = new Chat(dataItem.getText(), dataItem.getIndex(), dataItem.getFrom(), dataItem.getType());
-        item.setDate(dataItem.getDate());
-        adapter.remove(dataItem);
+        adapter.remove(new Chat(dataItem));
     }
 
-    private void getChatRoomMeta(String chatRoomKey){//chatRoomKey에 따른 채팅방 정보 불러옴
+    private void getChatRoomMeta() { //채팅방 정보 불러옴
         // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
-        databaseReference.child("pre_1").child("chatRooms").child("chatRoom1").child("chats").addChildEventListener(new ChildEventListener() {
+        databaseReference.child("chats").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 addMessage(dataSnapshot, dataList);
@@ -179,16 +178,13 @@ public class ChatActivity extends AppCompatActivity {
         chat_edit.setText(""); //입력창 초기화
     }
     private void sendMessageToF(){
-        //Date today=new Date();
-
-        Chat chat = new Chat( chat_edit.getText().toString(),index,"user2",Chat.Type.TEXT); //ChatDTO를 이용하여 데이터를 묶는다.
-        databaseReference.child("pre_1").child("chatRooms").child("chatRoom1").child("chats").push().setValue(chat); // 데이터 푸쉬
+        Chat chat = new Chat(chat_edit.getText().toString(), index,"user2", Chat.Type.TEXT);
+        databaseReference.child("chats").push().setValue(chat); // 데이터 푸쉬
     }
 
     private void inviteUser(){
         Intent intent = new Intent(this, ChatUserListAcitivity.class);
         startActivity(intent);
-        finish();
     }
 
     private void sendimageMessage(){

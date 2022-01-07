@@ -54,6 +54,7 @@ public class ChatActivity extends AppCompatActivity {
     //private int GALLEY_CODE = 10;
     private String chatRoomKey;
     private String userKey = "user2";
+    private String userName = "user2";
     private Chat.Type messageType = Chat.Type.TEXT;
 
     private ArrayList<String> listenerPath = new ArrayList<>();
@@ -175,8 +176,8 @@ public class ChatActivity extends AppCompatActivity {
     private void inviteUser(){
         Intent intent = new Intent(this, ChatUserListAcitivity.class);
         intent.putExtra("tag",2);
-        intent.putExtra("who","user1");  //todo : userkey를 전달해야함
-        intent.putExtra("where","chatRoom1"); //todo :  chatRoomkey를 전달해야함
+        intent.putExtra("who",userName);
+        intent.putExtra("where",chatRoomKey);
         startActivity(intent);
     }
 

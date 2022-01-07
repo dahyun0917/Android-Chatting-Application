@@ -78,7 +78,6 @@ public class ChatDB {
         class myChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
-                Log.e("LOG", "s:" + s);
                 listener.eventListener(dataSnapshot.getValue(Chat.class));
             }
 

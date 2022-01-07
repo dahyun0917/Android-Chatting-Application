@@ -46,11 +46,14 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     view = inflater.inflate(R.layout.room_left_item_list_image,parent,false);
                 return new LeftViewHolder(view);
             case ViewType.RIGHT_CONTENT:
-                view = inflater.inflate(R.layout.room_right_item_list,parent,false);
+                if(temp==0)
+                    view = inflater.inflate(R.layout.room_right_item_list_text,parent,false);
+                else
+                    view = inflater.inflate(R.layout.room_right_item_list_image,parent,false);
                 return new RightViewHolder(view);
             default:
                 Log.e("VIEW_TYPE", "ViewType must be 1 or 2 or 3");
-                view = inflater.inflate(R.layout.room_right_item_list,parent,false);
+                view = inflater.inflate(R.layout.room_right_item_list_text,parent,false);
                 return new RightViewHolder(view);
         }
     }
@@ -73,13 +76,19 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             else{
                 ((LeftViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
-                ((LeftViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
+                ((LeftViewHolder)viewHolder).textv_time.setText(str);
                 Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftViewHolder)viewHolder).imagev_msg);
             }
         }else{
-            ((RightViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
-            ((RightViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
-            ((RightViewHolder)viewHolder).textv_time.setText(str);
+            if(temp==0){
+                ((RightViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
+                ((RightViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
+                ((RightViewHolder)viewHolder).textv_time.setText(str);}
+            else{
+                ((RightViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
+                ((RightViewHolder)viewHolder).textv_time.setText(str);
+                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((RightViewHolder)viewHolder).imagev_msg);
+            }
         }
     }
     // 리사이클러뷰안에서 들어갈 뷰 홀더의 개수
@@ -92,15 +101,6 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // 이 메소드는 ViewType때문에 오버라이딩 했음(구별할려고)
     @Override
     public int getItemViewType(int position) {
-        /*int to=2;
-        try {
-            String type = myDataList.get(position).getViewType();
-            to = Integer.parseInt(type);
-        } catch (NumberFormatException e) {
-        } catch (Exception e) {
-        }
-        return to;*/
-        //return myDataList.get(position).getViewType();
         if(myDataList.get(position).getType().equals(Chat.Type.TEXT))
             temp=0;
         else if(myDataList.get(position).getType().equals(Chat.Type.IMAGE))
@@ -108,7 +108,7 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         if(myDataList.get(position).getType().equals(Chat.Type.SYSTEM))
             return 2;
-        else if((myDataList.get(position).getFrom().equals("user2"))&&myDataList.get(position).getType().equals(Chat.Type.TEXT))
+        else if((myDataList.get(position).getFrom().equals("user2")))
             return 1;
         else
             return 0;
@@ -152,12 +152,20 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView textv_msg;
         TextView textv_time;
         TextView textv_nicname;
+        ImageView imagev_msg;
 
         public RightViewHolder(@NonNull View itemView) {
             super(itemView);
-            textv_nicname = itemView.findViewById(R.id.textv_nicname);
-            textv_msg = itemView.findViewById(R.id.textv_msg);
-            textv_time = itemView.findViewById(R.id.textv_time);
+            if(temp==0) {
+                textv_nicname = itemView.findViewById(R.id.textv_nicname);
+                textv_msg = itemView.findViewById(R.id.textv_msg);
+                textv_time = itemView.findViewById(R.id.textv_time);
+            }
+            else if(temp==1){
+                textv_nicname = itemView.findViewById(R.id.textv_nicname);
+                imagev_msg = itemView.findViewById(R.id.imagev_msg);
+                textv_time = itemView.findViewById(R.id.textv_time);
+            }
         }
     }
 

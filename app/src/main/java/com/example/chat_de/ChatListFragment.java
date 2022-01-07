@@ -134,7 +134,6 @@ public class ChatListFragment extends Fragment {
         //ChatUserListActivity로 넘어간 뒤, 종료
         Intent intent = new Intent(getActivity(), ChatUserListAcitivity.class);
         getActivity().startActivity(intent);
-        getActivity().finish();
     }
 
 

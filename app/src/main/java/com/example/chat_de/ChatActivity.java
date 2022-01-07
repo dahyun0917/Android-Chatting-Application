@@ -147,8 +147,7 @@ public class ChatActivity extends AppCompatActivity {
         getChatRoomMeta();
     }
 
-    private void addMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
-        Chat dataItem = dataSnapshot.getValue(Chat.class);
+    private void addMessage(Chat dataItem, ArrayList<Chat> adapter) {
         if(dataItem.getIndex() != SYSTEM_MESSAGE)
             index = dataItem.getIndex();
         adapter.add(new Chat(dataItem));
@@ -165,7 +164,8 @@ public class ChatActivity extends AppCompatActivity {
         ref.child(ChatDB.CHAT_ROOMS).child(chatRoomKey).child(ChatDB.CHATS).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                addMessage(dataSnapshot, dataList);
+                Chat dataItem = dataSnapshot.getValue(Chat.class);
+                addMessage(dataItem, dataList);
                 recyclerView.scrollToPosition(dataList.size() - 1);
                 recyclerView.setAdapter(new Adapter(dataList));
                 Log.e("LOG", "s:"+s);
@@ -196,15 +196,10 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage(){
         if (chat_edit.getText().toString().equals(""))
             return;
-        index=index+1;
 
         // USER_NAME 나중에 userKey로 바꿔줘야함
         ChatDB.uploadMessage(chat_edit.getText().toString(), ++index, messageType, chatRoomKey, userKey);
         chat_edit.setText(""); //입력창 초기화
-    }
-    private void sendMessageToF(){
-        Chat chat = new Chat(chat_edit.getText().toString(), index,"user2", Chat.Type.TEXT);
-        databaseReference.child("chats").push().setValue(chat); // 데이터 푸쉬
     }
 
     private void inviteUser(){
@@ -260,6 +255,7 @@ public class ChatActivity extends AppCompatActivity {
 
         //1. FirebaseStorage을 관리하는 객체 얻어오기
         FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+        DatabaseReference ref = ChatDB.getReference();
 
         //2. 업로드할 파일의 node를 참조하는 객체
         //파일 명이 중복되지 않도록 날짜를 이용
@@ -312,7 +308,7 @@ public class ChatActivity extends AppCompatActivity {
                 Log.d("hihi",String.valueOf(uri));
                 index=index+1;
                 Chat chat = new Chat(uri.toString(), index,"user2", Chat.Type.IMAGE);
-                databaseReference.child("chats").push().setValue(chat); // 데이터 푸쉬
+                ref.child("chats").push().setValue(chat); // 데이터 푸쉬
             }
         });
     }

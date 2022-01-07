@@ -39,6 +39,8 @@ public class ChatActivity extends AppCompatActivity {
     private String userKey = "user2";
     private Chat.Type messageType = Chat.Type.TEXT;
 
+    private ArrayList<String> listenerPath = new ArrayList<>();
+
     private FirebaseStorage storage = FirebaseStorage.getInstance();
 
     private ArrayList<Chat> dataList;
@@ -68,13 +70,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        /*add_Button.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                inviteUser();
-            }
-        });*/
-
         //파일 이미지 버튼에 대한 클릭 리스너 지정
         file_send.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -87,8 +82,21 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        //메시지가 새로 올라올 때마다 동작하는 리스너 설정
+        listenerPath.add(ChatDB.messageAddEventListener(chatRoomKey, item -> {
+            addMessage(item, dataList);
+            recyclerView.scrollToPosition(dataList.size() - 1);
+            recyclerView.setAdapter(new Adapter(dataList));
+        }));
         getMessageList(10);
         ChatDB.readLatestMessage(chatRoomKey, userKey);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        for(String path : listenerPath)
+            ChatDB.removeEventListener(path);
     }
 
     @Override
@@ -120,54 +128,16 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(manager);
         recyclerView.scrollToPosition(dataList.size()-1);
         recyclerView.setAdapter(new Adapter(dataList));
-
-        getChatRoomMeta();
     }
 
-    private void addMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
-        Chat dataItem = dataSnapshot.getValue(Chat.class);
+    private void addMessage(Chat dataItem, ArrayList<Chat> adapter) {
         if(dataItem.getIndex() != SYSTEM_MESSAGE)
             index = dataItem.getIndex();
         adapter.add(new Chat(dataItem));
     }
 
-    private void removeMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
-        Chat dataItem = dataSnapshot.getValue(Chat.class);
-        adapter.remove(new Chat(dataItem));
-    }
-
     private void getChatRoomMeta() { //채팅방 정보 불러옴
-        // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
-        DatabaseReference ref = ChatDB.getReference();
-        ref.child(ChatDB.CHAT_ROOMS).child(chatRoomKey).child(ChatDB.CHATS).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                addMessage(dataSnapshot, dataList);
-                recyclerView.scrollToPosition(dataList.size() - 1);
-                recyclerView.setAdapter(new Adapter(dataList));
-                Log.e("LOG", "s:"+s);
-            }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                removeMessage(dataSnapshot, dataList);
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void sendMessage(){

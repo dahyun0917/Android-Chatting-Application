@@ -2,12 +2,21 @@ package com.example.chat_de;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.TreeMap;
 
 public class ChatDB {
     public static final String CHAT_ROOMS = "chatRooms";
@@ -20,8 +29,9 @@ public class ChatDB {
     public static final String USER_JOINED = "userJoined";
 
     private static DatabaseReference ref = null;
+    private static HashMap<String, ArrayList<ChildEventListener>> eventListeners = new HashMap<>();
 
-    public static void setReference(String root) { // 시작할때 딱 1번만 호출할 것
+    public static void setReference(String root) { // 앱 시작할때 딱 1번만 호출할 것
         if(ref == null) {
             ref = FirebaseDatabase.getInstance().getReference(root);
         }
@@ -61,5 +71,50 @@ public class ChatDB {
     }
     private static void readMessageIndex(int index, String chatRoomKey, String userKey) {
         ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).child(userKey).child(LAST_READ_INDEX).setValue(index);
+    }
+
+    @NonNull
+    public static String messageAddEventListener(String chatRoomKey, ChatEventListener<Chat> listener) {
+        class myChildEventListener implements ChildEventListener {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
+                Log.e("LOG", "s:" + s);
+                listener.eventListener(dataSnapshot.getValue(Chat.class));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        }
+        myChildEventListener firebaseListener = new myChildEventListener();
+        String path = CHAT_ROOMS + '/' + chatRoomKey + '/' + CHATS;
+
+        ref.child(path).addChildEventListener(firebaseListener);
+        if(!eventListeners.containsKey(path))
+            eventListeners.put(path, new ArrayList<>());
+        eventListeners.get(path).add(firebaseListener);
+        return path;
+    }
+
+    public static void removeEventListener(String path) {
+        for(ChildEventListener e : eventListeners.get(path))
+            ref.child(path).removeEventListener(e);
+        eventListeners.put(path, new ArrayList<>());
     }
 }

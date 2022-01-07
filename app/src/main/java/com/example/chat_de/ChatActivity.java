@@ -17,7 +17,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.example.chat_de.datas.Chat;
-import com.example.chat_de.datas.ChatRoomUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,12 +25,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ChatActivity extends AppCompatActivity {
     private final int GALLEY_CODE = 10;
     private final int SYSTEM_MESSAGE = -2;
-    private final String USER_NAME = "user2";
 
     //private ListView chat_view;
     private EditText chat_edit;
@@ -39,10 +36,10 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton file_send;
     private RecyclerView recyclerView;
     private String chatRoomKey;
+    private String userKey = "user2";
+    private Chat.Type messageType = Chat.Type.TEXT;
 
     private FirebaseStorage storage = FirebaseStorage.getInstance();
-    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference databaseReference;
 
     private ArrayList<Chat> dataList;
     private int index=-1;
@@ -51,7 +48,6 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
-        databaseReference = firebaseDatabase.getReference("pre_2");
         setContentView(R.layout.chat);
         recyclerView=findViewById(R.id.RecyclerView);
 
@@ -92,6 +88,7 @@ public class ChatActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         getMessageList(10);
+        ChatDB.readLatestMessage(chatRoomKey, userKey);
     }
 
     @Override
@@ -141,8 +138,8 @@ public class ChatActivity extends AppCompatActivity {
 
     private void getChatRoomMeta() { //채팅방 정보 불러옴
         // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
-        databaseReference.child("chatRooms").child(chatRoomKey).child("chats").addChildEventListener(new ChildEventListener() {
-
+        DatabaseReference ref = ChatDB.getReference();
+        ref.child(ChatDB.CHAT_ROOMS).child(chatRoomKey).child(ChatDB.CHATS).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 addMessage(dataSnapshot, dataList);
@@ -176,24 +173,10 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage(){
         if (chat_edit.getText().toString().equals(""))
             return;
-        index=index+1;
 
-        sendMessageToF();
+        // USER_NAME 나중에 userKey로 바꿔줘야함
+        ChatDB.uploadMessage(chat_edit.getText().toString(), ++index, messageType, chatRoomKey, userKey);
         chat_edit.setText(""); //입력창 초기화
-    }
-    private void sendMessageToF(){
-        // USER_NAME 나중에 실제 user primary key로 바꿔줘야 함
-        Chat chat = new Chat(chat_edit.getText().toString(), index, USER_NAME, Chat.Type.TEXT);
-        databaseReference.child("chatRooms").child(chatRoomKey).child("chats").push().setValue(chat); // 데이터 푸쉬
-        databaseReference.child("chatRoomJoined").child(chatRoomKey).child(USER_NAME).child("lastReadIndex").setValue(index);
-
-        //이 부분은 firebase function으로 구현가능하면 그걸로 구현하는 것이 더 좋을 듯
-        databaseReference.child("chatRoomJoined").child(chatRoomKey).get().addOnCompleteListener(task -> {
-            HashMap<String, ChatRoomUser> users = (HashMap<String, ChatRoomUser>)task.getResult().getValue();
-            for(String userKey: users.keySet()) {
-                databaseReference.child("userJoined").child(userKey).child(chatRoomKey).child("lastMessageIndex").setValue(index);
-            }
-        });
     }
 
     private void inviteUser(){
@@ -206,5 +189,5 @@ public class ChatActivity extends AppCompatActivity {
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
 
         startActivityForResult(intent,GALLEY_CODE);
-     }
+    }
 }

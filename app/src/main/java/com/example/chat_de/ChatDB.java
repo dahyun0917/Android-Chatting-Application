@@ -1,5 +1,7 @@
 package com.example.chat_de;
 
+import android.util.Log;
+
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.google.firebase.database.DatabaseReference;
@@ -24,18 +26,40 @@ public class ChatDB {
             ref = FirebaseDatabase.getInstance().getReference(root);
         }
     }
-    public static void uploadMessage(String message, int index, String chatRoomKey, String userKey, Chat.Type type) {
-        Chat chat = new Chat(message, index, userKey, Chat.Type.TEXT);
-        ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHATS).push().setValue(chat); // 데이터 푸쉬
+    public static DatabaseReference getReference() {
+        return ref;
+    }
+
+    public static void uploadMessage(String message, int index, Chat.Type messageType, String chatRoomKey, String userKey) {
+        Chat chat = new Chat(message, index, userKey, messageType);
+        ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHATS).push().setValue(chat); // 데이터 푸시
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).setValue(index);
-        ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).child(userKey).child(LAST_READ_INDEX).setValue(index);
+        readMessageIndex(index, chatRoomKey, userKey);
 
         //이 부분은 firebase function으로 구현가능하면 그걸로 구현하는 것이 더 좋을 듯
-        ref.child("chatRoomJoined").child(chatRoomKey).get().addOnCompleteListener(task -> {
-            HashMap<String, ChatRoomUser> users = (HashMap<String, ChatRoomUser>)task.getResult().getValue();
-            for(String key: users.keySet()) {
-                ref.child("userJoined").child(key).child(chatRoomKey).child("lastMessageIndex").setValue(index);
+        ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                HashMap<String, ChatRoomUser> users = (HashMap<String, ChatRoomUser>) task.getResult().getValue();
+                for (String key : users.keySet()) {
+                    ref.child(USER_JOINED).child(key).child(chatRoomKey).child(LAST_MESSAGE_INDEX).setValue(index);
+                }
+            } else {
+                Log.e("FDB", "Can not get users of: " + chatRoomKey);
             }
         });
+    }
+
+    public static void readLatestMessage(String chatRoomKey, String userKey) {
+        ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                readMessageIndex(task.getResult().getValue(Integer.class), chatRoomKey, userKey);
+            } else {
+                Log.e("FDB", "Can not get a lastMessageIndex of: " + chatRoomKey);
+            }
+        });
+        ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).child(userKey).child(LAST_READ_INDEX);
+    }
+    private static void readMessageIndex(int index, String chatRoomKey, String userKey) {
+        ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).child(userKey).child(LAST_READ_INDEX).setValue(index);
     }
 }

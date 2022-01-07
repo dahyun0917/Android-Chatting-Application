@@ -51,7 +51,7 @@ dependencies {
     //circleimageview 그래들 설정
     implementation 'de.hdodenhof:circleimageview:3.1.0' //Circle ImageView
 
-    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-storage-ktx'
 
     implementation 'com.github.bumptech.glide:glide:3.7.0'
 }

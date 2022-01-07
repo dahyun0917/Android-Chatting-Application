@@ -25,6 +25,7 @@ public class ChatListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ChatDB.setReference("pre_2");
         setContentView(R.layout.test_chat);
 
         mainFragment = new ChatListFragment();

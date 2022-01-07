@@ -1,6 +1,5 @@
 package com.example.chat_de;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,7 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 public class ChatListFragment extends Fragment {
-    private final String USER_NAME = "user1";
+    private final String USER_NAME = "user2";
 
     private ChatListActivity ChatActivity;
 
@@ -93,8 +92,8 @@ public class ChatListFragment extends Fragment {
         chatList.setAdapter(adapter);
 
         // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
-        // USER_NAME을 나중에 실제user의 primary key로 변경해야 함
-        databaseReference.child("pre_1").child("users").child(USER_NAME).child("joined").addChildEventListener(new ChildEventListener() {
+        // USER_NAME을 나중에 실제 user의 primary key로 변경해야 함
+        databaseReference.child("pre_2").child("userJoined").child(USER_NAME).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.e("LOG", "dataSnapshot.getKey() : " + dataSnapshot.getKey());
@@ -135,7 +134,6 @@ public class ChatListFragment extends Fragment {
         //ChatUserListActivity로 넘어간 뒤, 종료
         Intent intent = new Intent(getActivity(), ChatUserListAcitivity.class);
         getActivity().startActivity(intent);
-        getActivity().finish();
     }
 
 

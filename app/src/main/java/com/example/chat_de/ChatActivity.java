@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -43,19 +44,22 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class ChatActivity extends AppCompatActivity {
+    private final int SYSTEM_MESSAGE = -2;
+
+    //private ListView chat_view;
     private EditText chat_edit;
     private Button chat_send;
     private ImageButton file_send;
     private RecyclerView recyclerView;
     //private int GALLEY_CODE = 10;
+    private String chatRoomKey;
+    private String userKey = "user2";
+    private Chat.Type messageType = Chat.Type.TEXT;
 
-    private FirebaseStorage storage=FirebaseStorage.getInstance();;
-    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference databaseReference;
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
 
     private ArrayList<Chat> dataList;
     private int index=-1;
-    private String chatRoomKey;
 
     Uri filePath;
     ImageView ivPreview;
@@ -63,8 +67,6 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
-        databaseReference = firebaseDatabase.getReference("pre_1/chatRooms/" + chatRoomKey);
-
         setContentView(R.layout.chat);
         recyclerView=findViewById(R.id.RecyclerView);
 
@@ -109,6 +111,7 @@ public class ChatActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         getMessageList(10);
+        ChatDB.readLatestMessage(chatRoomKey, userKey);
     }
 
     @Override
@@ -146,7 +149,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void addMessage(DataSnapshot dataSnapshot, ArrayList<Chat> adapter) {
         Chat dataItem = dataSnapshot.getValue(Chat.class);
-        if(dataItem.getIndex() != -2)
+        if(dataItem.getIndex() != SYSTEM_MESSAGE)
             index = dataItem.getIndex();
         adapter.add(new Chat(dataItem));
     }
@@ -158,11 +161,12 @@ public class ChatActivity extends AppCompatActivity {
 
     private void getChatRoomMeta() { //채팅방 정보 불러옴
         // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
-        databaseReference.child("chats").addChildEventListener(new ChildEventListener() {
+        DatabaseReference ref = ChatDB.getReference();
+        ref.child(ChatDB.CHAT_ROOMS).child(chatRoomKey).child(ChatDB.CHATS).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 addMessage(dataSnapshot, dataList);
-                recyclerView.scrollToPosition(dataList.size()-1);
+                recyclerView.scrollToPosition(dataList.size() - 1);
                 recyclerView.setAdapter(new Adapter(dataList));
                 Log.e("LOG", "s:"+s);
             }
@@ -194,7 +198,8 @@ public class ChatActivity extends AppCompatActivity {
             return;
         index=index+1;
 
-        sendMessageToF();
+        // USER_NAME 나중에 userKey로 바꿔줘야함
+        ChatDB.uploadMessage(chat_edit.getText().toString(), ++index, messageType, chatRoomKey, userKey);
         chat_edit.setText(""); //입력창 초기화
     }
     private void sendMessageToF(){

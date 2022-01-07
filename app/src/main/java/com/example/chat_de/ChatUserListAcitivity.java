@@ -293,12 +293,12 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
                     Toast.makeText(ChatUserListAcitivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    if(mode==1){
+                    if(mode==NEW_CAHT){
                         //채팅방 만들기
                         inputChatRoomName();
                         createChatRoom();
                     }
-                    else if(mode==2){
+                    else if(mode==INVITE_CHAT){
                         //초대하기
                         inviteChatRoom();
                         finish();//액티비티 종료

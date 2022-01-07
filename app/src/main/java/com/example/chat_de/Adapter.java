@@ -5,23 +5,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.bumptech.glide.Glide;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ViewType;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<Chat> myDataList;
+    private int temp=0;
 
     public Adapter(ArrayList<Chat> dataList){
         myDataList = dataList;
@@ -33,12 +34,16 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         Context context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+
         switch(viewType) {
             case ViewType.CENTER_CONTENT:
                 view = inflater.inflate(R.layout.room_center_item_list,parent,false);
                 return new CenterViewHolder(view);
             case ViewType.LEFT_CONTENT:
-                view = inflater.inflate(R.layout.room_left_item_list,parent,false);
+                if(temp==0)
+                    view = inflater.inflate(R.layout.room_left_item_list_text,parent,false);
+                else
+                    view = inflater.inflate(R.layout.room_left_item_list_image,parent,false);
                 return new LeftViewHolder(view);
             case ViewType.RIGHT_CONTENT:
                 view = inflater.inflate(R.layout.room_right_item_list,parent,false);
@@ -57,12 +62,20 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
         String str= simpleDateFormat.format(myDataList.get(position).normalDate());
 
+
         if(viewHolder instanceof CenterViewHolder){
             ((CenterViewHolder)viewHolder).textv.setText(myDataList.get(position).getText());
         }else if(viewHolder instanceof LeftViewHolder){
-            ((LeftViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
-            ((LeftViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
-            ((LeftViewHolder)viewHolder).textv_time.setText(str);
+            if(temp==0){
+                ((LeftViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
+                ((LeftViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
+                ((LeftViewHolder)viewHolder).textv_time.setText(str);
+            }
+            else{
+                ((LeftViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
+                ((LeftViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
+                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftViewHolder)viewHolder).imagev_msg);
+            }
         }else{
             ((RightViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getFrom());
             ((RightViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getText());
@@ -88,6 +101,11 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         return to;*/
         //return myDataList.get(position).getViewType();
+        if(myDataList.get(position).getType().equals(Chat.Type.TEXT))
+            temp=0;
+        else if(myDataList.get(position).getType().equals(Chat.Type.IMAGE))
+            temp=1;
+
         if(myDataList.get(position).getType().equals(Chat.Type.SYSTEM))
             return 2;
         else if((myDataList.get(position).getFrom().equals("user2"))&&myDataList.get(position).getType().equals(Chat.Type.TEXT))
@@ -112,14 +130,21 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView textv_nicname;
         TextView textv_msg;
         TextView textv_time;
+        ImageView imagev_msg;
 
         public LeftViewHolder(@NonNull View itemView) {
             super(itemView);
             //imgv = (CircleImageView)itemView.findViewById(R.id.imgv);
-            textv_nicname = itemView.findViewById(R.id.textv_nicname);
-            textv_msg = itemView.findViewById(R.id.textv_msg);
-            textv_time = itemView.findViewById(R.id.textv_time);
-
+            if(temp==0) {
+                textv_nicname = itemView.findViewById(R.id.textv_nicname);
+                textv_msg = itemView.findViewById(R.id.textv_msg);
+                textv_time = itemView.findViewById(R.id.textv_time);
+            }
+            else if(temp==1){
+                textv_nicname = itemView.findViewById(R.id.textv_nicname);
+                imagev_msg = itemView.findViewById(R.id.imagev_msg);
+                textv_time = itemView.findViewById(R.id.textv_time);
+            }
         }
     }
 

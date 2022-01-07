@@ -20,12 +20,12 @@ public class UserItem {
             setChcked(false);
         }
 
-        //유저메타로 생성
-        public UserItem(User original) {
-            setName(original.getName());
-            setPictureURL(original.getPictureURL());
-            setGeneration(original.getGeneration());
-            setUserKey(original.getUserKey());
+        //유저클래스로 생성
+        public UserItem(User user) {
+            setName(user.getName());
+            setPictureURL(user.getPictureURL());
+            setGeneration(user.getGeneration());
+            setUserKey(user.getUserKey());
             setChcked(false);
         }
 

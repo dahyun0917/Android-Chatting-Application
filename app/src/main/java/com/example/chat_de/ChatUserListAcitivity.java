@@ -31,7 +31,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 public class ChatUserListAcitivity extends AppCompatActivity implements TextWatcher {
-    public static Context context;
 
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
 
@@ -51,7 +50,9 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
-    private int mode = 0;
+    private final int NEW_CAHT = 1;
+    private final int INVITE_CHAT = 2;
+    private int mode=0;
     private String callUserName;
     private String receivedKey;
     private String chatRoomName;
@@ -60,19 +61,22 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_user_list);
-        context = this;
+        setActionBar();
+        showUserList();
+    }
 
+    public void setActionBar(){
         //인텐트로 mode값 , 초대/생성하는 User 정보 받아오기기
         Intent getintent = getIntent();
         mode = getintent.getIntExtra("tag",0);
         callUserName = getintent.getStringExtra("who");
 
-        if(mode==1){
+        if(mode==NEW_CAHT){
             //채팅방 만들기
             ActionBar ab = getSupportActionBar() ;
             ab.setTitle("새 채팅방 만들기") ;
         }
-        else if(mode==2){
+        else if(mode==INVITE_CHAT){
             //초대하기
             ActionBar ab = getSupportActionBar() ;
             ab.setTitle("초대하기") ;
@@ -81,44 +85,6 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
         else{
             Log.e("ERROR MODE","Mode값은 1또는 2만 가능합니다.");
         }
-        showUserList();
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.meun_user_list,menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        //액션바의 "완료" 클릭했을 때
-        int curId = item.getItemId();
-        switch(curId){
-            case R.id.action_complete:
-                if(returnChoose().size()==0){
-                    Toast.makeText(ChatUserListAcitivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    if(mode==1){
-                        //채팅방 만들기
-                        inputChatRoomName();
-                        createChatRoom();
-                    }
-                    else if(mode==2){
-                        //초대하기
-                        inviteChatRoom();
-                        finish();//액티비티 종료
-                    }
-                }
-                break;
-            case R.id.action_cancel:
-                finish();
-                break;
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
     private void inputChatRoomName(){
         //다이얼로그(대화상자) 띄우기
@@ -313,14 +279,48 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     }
 
     @Override
-    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.meun_user_list,menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        //액션바의 "완료" 클릭했을 때
+        int curId = item.getItemId();
+        switch(curId){
+            case R.id.action_complete:
+                if(returnChoose().size()==0){
+                    Toast.makeText(ChatUserListAcitivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    if(mode==1){
+                        //채팅방 만들기
+                        inputChatRoomName();
+                        createChatRoom();
+                    }
+                    else if(mode==2){
+                        //초대하기
+                        inviteChatRoom();
+                        finish();//액티비티 종료
+                    }
+                }
+                break;
+            case R.id.action_cancel:
+                finish();
+                break;
+            default:
+                break;
+        }
 
+        return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
     @Override
     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
         /*검색 설정*/
         userListAdapter.getFilter().filter(charSequence);
     }
-
     @Override
     public void afterTextChanged(Editable editable) {  }
 }

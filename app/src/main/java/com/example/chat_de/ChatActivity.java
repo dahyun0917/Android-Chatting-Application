@@ -268,11 +268,19 @@ public class ChatActivity extends AppCompatActivity {
 
         //참조 객체를 통해 이미지 파일 업로드
         //업로드 결과를 받고 싶다면..
+
         UploadTask uploadTask = imgRef.putFile(filePath);
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(ChatActivity.this, "success upload", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(ChatActivity.this, "success upload", Toast.LENGTH_SHORT).show();
+                imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        userKey="user2";
+                        ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, userKey);
+                    }
+                });
             }
         });
         uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -281,36 +289,8 @@ public class ChatActivity extends AppCompatActivity {
                 Toast.makeText(ChatActivity.this, "failed upload", Toast.LENGTH_SHORT).show();
             }
         });
-        /*Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
 
-                // Continue with the task to get the download URL
-                return imgRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    Uri downloadUri = task.getResult();
-                } else {
-                    // Handle failures
-                    // ...
-                }
-            }
-        });*/
-        imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Log.d("hihi",String.valueOf(uri));
-                index=index+1;
-                Chat chat = new Chat(uri.toString(), index,"user2", Chat.Type.IMAGE);
-                ref.child("chats").push().setValue(chat); // 데이터 푸쉬
-            }
-        });
+
     }
 
 }

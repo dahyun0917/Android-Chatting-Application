@@ -1,14 +1,16 @@
 package com.example.chat_de;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -17,9 +19,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.chat_de.datas.Chat;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,17 +35,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class ChatActivity extends AppCompatActivity {
-    //private ListView chat_view;
     private EditText chat_edit;
     private Button chat_send;
     private ImageButton file_send;
     private RecyclerView recyclerView;
-    private int GALLEY_CODE = 10;
+    //private int GALLEY_CODE = 10;
 
     private FirebaseStorage storage=FirebaseStorage.getInstance();;
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -45,10 +55,16 @@ public class ChatActivity extends AppCompatActivity {
 
     private ArrayList<Chat> dataList;
     private int index=-1;
+    private String chatRoomKey;
 
+    Uri filePath;
+    ImageView ivPreview;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        chatRoomKey = getIntent().getStringExtra("chatRoomKey");
+        databaseReference = firebaseDatabase.getReference("pre_1/chatRooms/" + chatRoomKey);
+
         setContentView(R.layout.chat);
         recyclerView=findViewById(R.id.RecyclerView);
 
@@ -60,6 +76,9 @@ public class ChatActivity extends AppCompatActivity {
         //Intent intent = getIntent();
         //CHAT_NAME = intent.getStringExtra("chat_name");
         //USER_NAME = intent.getStringExtra("user_name");
+
+        ActionBar ab = getSupportActionBar() ;
+        ab.setTitle("채팅방") ;
 
         // 메시지 전송 버튼에 대한 클릭 리스너 지정
         chat_send.setOnClickListener(new View.OnClickListener() {
@@ -80,7 +99,8 @@ public class ChatActivity extends AppCompatActivity {
         file_send.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                sendimageMessage();
+                StorageReference rootRef = storage.getReference();
+                gallery_access();
             }
         });
     }
@@ -184,13 +204,112 @@ public class ChatActivity extends AppCompatActivity {
 
     private void inviteUser(){
         Intent intent = new Intent(this, ChatUserListAcitivity.class);
+        intent.putExtra("tag",2);
+        intent.putExtra("who","user1");  //todo : userkey를 전달해야함
+        intent.putExtra("where","chatRoom1"); //todo :  chatRoomkey를 전달해야함
         startActivity(intent);
     }
 
-    private void sendimageMessage(){
-        Intent intent = new Intent(Intent.ACTION_PICK);
+    private void gallery_access(){
+        //갤러리만
+        /*Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
 
-        startActivityForResult(intent,GALLEY_CODE);
-     }
+        startActivityForResult(intent,10);*/
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), 10);
+
+        //드롭박스, 구글드라이브, 갤러리 등 모든 파일
+        /*Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), 0);*/
+    }
+    //사진 고른 후
+    //로컬 파일에서 업로드
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+//            if(requestCode == 0 && resultCode == RESULT_OK){
+        if(requestCode == 10&&resultCode == RESULT_OK){
+            filePath = data.getData();
+            Log.d("TAG", "uri:" + String.valueOf(filePath));
+            if(filePath!=null)
+                uploadFile();
+            /*Glide.with(this).load(filePath).into(iv);
+            try {
+                //Uri 파일을 Bitmap으로 만들어서 ImageView에 집어 넣는다.
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                ivPreview.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }*/
+        }
+
+        }
+
+    public void uploadFile() {
+        //firebase storage에 업로드하기
+
+        //1. FirebaseStorage을 관리하는 객체 얻어오기
+        FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+
+        //2. 업로드할 파일의 node를 참조하는 객체
+        //파일 명이 중복되지 않도록 날짜를 이용
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+        String filename = sdf.format(new Date()) + ".jpg";//현재 시간으로 파일명 지정 20191023142634
+        //원래 확장자는 파일의 실제 확장자를 얻어와서 사용해야함. 그러려면 이미지의 절대 주소를 구해야함.
+
+        StorageReference imgRef = firebaseStorage.getReference("uploads/" + filename);
+        //uploads라는 폴더가 없으면 자동 생성
+
+        //참조 객체를 통해 이미지 파일 업로드
+        //업로드 결과를 받고 싶다면..
+        UploadTask uploadTask = imgRef.putFile(filePath);
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(ChatActivity.this, "success upload", Toast.LENGTH_SHORT).show();
+            }
+        });
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(ChatActivity.this, "failed upload", Toast.LENGTH_SHORT).show();
+            }
+        });
+        /*Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+                // Continue with the task to get the download URL
+                return imgRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                } else {
+                    // Handle failures
+                    // ...
+                }
+            }
+        });*/
+        imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Log.d("hihi",String.valueOf(uri));
+                index=index+1;
+                Chat chat = new Chat(uri.toString(), index,"user2", Chat.Type.IMAGE);
+                databaseReference.child("chats").push().setValue(chat); // 데이터 푸쉬
+            }
+        });
+    }
+
 }

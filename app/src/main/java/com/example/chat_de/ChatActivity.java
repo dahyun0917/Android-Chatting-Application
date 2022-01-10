@@ -107,25 +107,24 @@ public class ChatActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
-        listenerPath.add(ChatDB.messageAddEventListener(chatRoomKey, item -> {
+        ChatDB.messageAddEventListener(chatRoomKey, item -> {
             addMessage(item, dataList);
             recyclerView.scrollToPosition(dataList.size() - 1);
             recyclerView.setAdapter(new Adapter(dataList));
-        }));
+        });
         getMessageList(10);
-        ChatDB.readLatestMessage(chatRoomKey, userKey);
+        ChatDB.userReadLatestMessage(chatRoomKey, userKey);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        for(String path : listenerPath)
-            ChatDB.removeEventListener(path);
+        ChatDB.removeEventListenerBindOnThis();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_chatting_addfr,menu);
+        getMenuInflater().inflate(R.menu.menu_chatting_addfr, menu);
         return true;
     }
 
@@ -176,8 +175,8 @@ public class ChatActivity extends AppCompatActivity {
     private void inviteUser(){
         Intent intent = new Intent(this, ChatUserListAcitivity.class);
         intent.putExtra("tag",2);
-        intent.putExtra("who",userName);
-        intent.putExtra("where",chatRoomKey);
+        intent.putExtra("who", userName);
+        intent.putExtra("where", chatRoomKey);
         startActivity(intent);
     }
 

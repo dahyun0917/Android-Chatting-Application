@@ -58,16 +58,26 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
         holder.bind(this.filteredUsers.get(position));
     }
 
-    //외부에서 데이터 넘기기
-    public void setUserList(ArrayList<UserItem> userList){
+    //외부에서 데이터 넘기기 일부유저만
+    public void setUserList(ArrayList<UserItem> userList) {
         this.filteredUsers = userList;
         this.unFilteredUsers = userList;
         this.notifyDataSetChanged();
     }
+    //전체 유저 넘겼을때
+    public void serUserList(ArrayList<UserItem>[] userList) {
+        ArrayList<UserItem> list = new ArrayList<>();
+        for(ArrayList<UserItem> i : userList)
+            list.addAll(i);
+        setUserList(list);
+    }
     //생성자
-    public UserListAdapter(Context context, ArrayList<UserItem> list) {
+    public UserListAdapter(Context context, ArrayList<UserItem>[] userList) {
         super();
         this.context = context;
+        ArrayList<UserItem> list = new ArrayList<>();
+        for(ArrayList<UserItem> i : userList)
+            list.addAll(i);
         this.unFilteredUsers = list;
         this.filteredUsers = list;
     }

@@ -45,7 +45,7 @@ public class UserListAcitivity extends AppCompatActivity implements TextWatcher 
     private int mode=0;
     private String callUserName;
     private String receivedKey;
-    private String chatRoomName;
+    private String chatRoomName="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,12 +85,13 @@ public class UserListAcitivity extends AppCompatActivity implements TextWatcher 
         dlg.setTitle("채팅방 이름 입력"); //제목
         dlg.setMessage("새로 생성할 채팅방 이릅을 입력해주세요.");
         dlg.setView(editText);
-        dlg.setPositiveButton("입력", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                chatRoomName = editText.getText().toString();
-                finish(); //액티비티 종료
+        dlg.setPositiveButton("입력", (dialogInterface, i) -> {
+            chatRoomName = "";
+            chatRoomName = editText.getText().toString();
+            if(chatRoomName.isEmpty()){
+                chatRoomName = changeToString(returnChoose(),false);
             }
+            finish(); //액티비티 종료
         });
         dlg.setNegativeButton("취소",null);
         dlg.show();
@@ -194,19 +195,26 @@ public class UserListAcitivity extends AppCompatActivity implements TextWatcher 
         ArrayList<UserListItem> list = returnChoose();
         //초대하기 누른 유저 정보 : callUserName
         //changeToString : 유저리스트를 ~님, 형식으로 바꿔줌.
-        String message = callUserName+"님이 "+changeToString(list)+"님을 초대하셨습니다.";
+        String message = callUserName+"님이 "+changeToString(list,true)+"님을 초대하셨습니다.";
         //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
         //list의 user의 userJoined에 현재 채팅방 정보 추가->receivedKey 사용
         //초대메세지(message) 현재 채탕방에 시스템 메세지로 추가.
     }
-    private String changeToString(ArrayList<UserListItem> list){
+    private String changeToString(ArrayList<UserListItem> list, boolean formal){
         //유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.
         StringBuilder result = new StringBuilder();
-        for(UserListItem i : list){
-            result.append(i.getName() + "님, ");
+        if(formal){
+            for(UserListItem i : list){
+                result.append(i.getName() + "님, ");
+            }
+            return result.substring(0, result.length() - 3);
         }
-
-        return result.substring(0, result.length() - 3);
+        else {
+            for (UserListItem i : list) {
+                result.append(i.getName() + ", ");
+            }
+            return result.substring(0, result.length() - 2);
+        }
     }
 
     @Override

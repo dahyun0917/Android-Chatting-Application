@@ -15,7 +15,7 @@ public class UserListItem {
             setPictureURL(pictureURL);
             setGeneration(generation);
             setUserKey(userKey);
-            setChcked(false);
+            setChecked(false);
         }
 
         //유저클래스로 생성
@@ -24,7 +24,7 @@ public class UserListItem {
             setPictureURL(user.getPictureURL());
             setGeneration(user.getGeneration());
             setUserKey(user.getUserKey());
-            setChcked(false);
+            setChecked(false);
         }
 
         //Copy constructor
@@ -33,7 +33,7 @@ public class UserListItem {
             setPictureURL(original.getPictureURL());
             setGeneration(original.getGeneration());
             setUserKey(original.getUserKey());
-            setChcked(false);
+            setChecked(false);
         }
 
         public boolean getChecked()     { return checked; }
@@ -42,7 +42,7 @@ public class UserListItem {
         public int getGeneration()      { return generation; }
         public String getUserKey()      { return userKey; }
 
-        public void setChcked(boolean checked)          { this.checked = checked; }
+        public void setChecked(boolean checked)          { this.checked = checked; }
         public void setName(String name)                { this.name = name; }
         public void setPictureURL(String pictureURL)    { this.pictureURL = pictureURL; }
         public void setGeneration(int generation)       { this.generation = generation; }

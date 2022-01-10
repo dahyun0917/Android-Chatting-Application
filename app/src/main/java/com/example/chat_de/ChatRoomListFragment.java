@@ -131,7 +131,7 @@ public class ChatRoomListFragment extends Fragment {
     }
     private void selelctUser(){
         //ChatUserListActivity로 넘어간 뒤, 종료
-        Intent intent = new Intent(getActivity(), UserListAcitivity.class);
+        Intent intent = new Intent(getActivity(), UserListActivity.class);
         intent.putExtra("tag",1);
         intent.putExtra("who",userName);
         getActivity().startActivity(intent);

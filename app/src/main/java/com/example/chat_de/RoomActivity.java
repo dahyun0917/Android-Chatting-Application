@@ -180,7 +180,7 @@ public class RoomActivity extends AppCompatActivity {
     }
     //유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser(){
-        Intent intent = new Intent(this, UserListAcitivity.class);
+        Intent intent = new Intent(this, UserListActivity.class);
         intent.putExtra("tag",2);
         intent.putExtra("who", userName);
         intent.putExtra("where", chatRoomKey);

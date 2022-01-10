@@ -1,11 +1,9 @@
 package com.example.chat_de;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -17,14 +15,14 @@ import java.util.ArrayList;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> implements Filterable{
     Context context;
-    private ArrayList<UserItem> filteredUsers = new ArrayList<>(); //필터링된 리스트 -> 보여줄 리스트
-    private ArrayList<UserItem> unFilteredUsers = new ArrayList<>(); //필터링되지않은 리스트
+    private ArrayList<UserListItem> filteredUsers = new ArrayList<>(); //필터링된 리스트 -> 보여줄 리스트
+    private ArrayList<UserListItem> unFilteredUsers = new ArrayList<>(); //필터링되지않은 리스트
 
     //뷰홀더가 생성 됐을 때
     @NonNull
     @Override
     public UserListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.recycler_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_recycler_user_list, parent, false);
         return new UserListViewHolder(view);
     }
 
@@ -41,7 +39,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
     //뷰와 뷰홀더 묶기, 체크박스 컨트롤
     @Override
     public void onBindViewHolder(@NonNull UserListViewHolder holder, int position) {
-        final UserItem item = filteredUsers.get(position);
+        final UserListItem item = filteredUsers.get(position);
 
         holder.checkBox.setOnCheckedChangeListener(null);
 
@@ -59,24 +57,24 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
     }
 
     //외부에서 데이터 넘기기 일부유저만
-    public void setUserList(ArrayList<UserItem> userList) {
+    public void setUserList(ArrayList<UserListItem> userList) {
         this.filteredUsers = userList;
         this.unFilteredUsers = userList;
         this.notifyDataSetChanged();
     }
     //전체 유저 넘겼을때
-    public void serUserList(ArrayList<UserItem>[] userList) {
-        ArrayList<UserItem> list = new ArrayList<>();
-        for(ArrayList<UserItem> i : userList)
+    public void serUserList(ArrayList<UserListItem>[] userList) {
+        ArrayList<UserListItem> list = new ArrayList<>();
+        for(ArrayList<UserListItem> i : userList)
             list.addAll(i);
         setUserList(list);
     }
     //생성자
-    public UserListAdapter(Context context, ArrayList<UserItem>[] userList) {
+    public UserListAdapter(Context context, ArrayList<UserListItem>[] userList) {
         super();
         this.context = context;
-        ArrayList<UserItem> list = new ArrayList<>();
-        for(ArrayList<UserItem> i : userList)
+        ArrayList<UserListItem> list = new ArrayList<>();
+        for(ArrayList<UserListItem> i : userList)
             list.addAll(i);
         this.unFilteredUsers = list;
         this.filteredUsers = list;
@@ -92,7 +90,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
                     //비어있다면 필터링 되지 않은 리스트를 필터링 된 리스트로 사용
                     filteredUsers = unFilteredUsers;
                 }else{
-                    ArrayList<UserItem> filteringList = new ArrayList<>(); //필터링중인 리스트
+                    ArrayList<UserListItem> filteringList = new ArrayList<>(); //필터링중인 리스트
                     for(int i=0;i<unFilteredUsers.size();i++) {
                         String name = unFilteredUsers.get(i).getName();
                         if(name.toLowerCase().contains(charString.toLowerCase())){
@@ -109,7 +107,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                 //리사이클러뷰 업데이트
-                filteredUsers = (ArrayList<UserItem>)filterResults.values;
+                filteredUsers = (ArrayList<UserListItem>)filterResults.values;
                 notifyDataSetChanged();
             }
         };

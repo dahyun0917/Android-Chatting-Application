@@ -20,12 +20,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<Chat> myDataList;
     private enum MessageType { TEXT, IMAGE };
     private MessageType messageType;
 
-    public Adapter(ArrayList<Chat> dataList){
+    public RoomElementAdapter(ArrayList<Chat> dataList){
         myDataList = dataList;
     }
 
@@ -38,23 +38,23 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         switch(viewType) {
             case ViewType.CENTER_CONTENT:
-                view = inflater.inflate(R.layout.room_center_item_list,parent,false);
+                view = inflater.inflate(R.layout.item_element_center_system,parent,false);
                 return new CenterViewHolder(view);
             case ViewType.LEFT_CONTENT:
                 if(messageType == MessageType.TEXT)
-                    view = inflater.inflate(R.layout.room_left_item_list_text,parent,false);
+                    view = inflater.inflate(R.layout.item_element_left_text,parent,false);
                 else
-                    view = inflater.inflate(R.layout.room_left_item_list_image,parent,false);
+                    view = inflater.inflate(R.layout.item_element_left_image,parent,false);
                 return new LeftViewHolder(view);
             case ViewType.RIGHT_CONTENT:
                 if(messageType == MessageType.TEXT)
-                    view = inflater.inflate(R.layout.room_right_item_list_text,parent,false);
+                    view = inflater.inflate(R.layout.item_element_right_text,parent,false);
                 else
-                    view = inflater.inflate(R.layout.room_right_item_list_image,parent,false);
+                    view = inflater.inflate(R.layout.item_element_right_image,parent,false);
                 return new RightViewHolder(view);
             default:
                 Log.e("VIEW_TYPE", "ViewType must be 1 or 2 or 3");
-                view = inflater.inflate(R.layout.room_right_item_list_text,parent,false);
+                view = inflater.inflate(R.layout.item_element_right_text,parent,false);
                 return new RightViewHolder(view);
         }
     }

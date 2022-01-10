@@ -3,7 +3,6 @@ package com.example.chat_de;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,11 +24,11 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
-public class ChatListFragment extends Fragment {
+public class ChatRoomListFragment extends Fragment {
     private String userKey = "user2";
     private String userName = "user2";
 
-    private ChatListActivity ChatActivity;
+    private ChatRoomListActivity ChatActivity;
 
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
@@ -44,7 +43,7 @@ public class ChatListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        ChatActivity = (ChatListActivity)getActivity();
+        ChatActivity = (ChatRoomListActivity)getActivity();
     }
 
     @Override
@@ -56,7 +55,7 @@ public class ChatListFragment extends Fragment {
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        ViewGroup rootview = (ViewGroup)inflater.inflate(R.layout.chat_list,container,false);
+        ViewGroup rootview = (ViewGroup)inflater.inflate(R.layout.fragment_chat_room_list,container,false);
 
         Bundle bundle = getArguments();
 
@@ -126,13 +125,13 @@ public class ChatListFragment extends Fragment {
 
     }
     private void enterChatRoom(String chatRoomKey){
-        Intent intent = new Intent(getActivity(), ChatActivity.class);
+        Intent intent = new Intent(getActivity(), RoomActivity.class);
         intent.putExtra("chatRoomKey", chatRoomKey);
         getActivity().startActivity(intent);
     }
     private void selelctUser(){
         //ChatUserListActivity로 넘어간 뒤, 종료
-        Intent intent = new Intent(getActivity(), ChatUserListAcitivity.class);
+        Intent intent = new Intent(getActivity(), UserListAcitivity.class);
         intent.putExtra("tag",1);
         intent.putExtra("who",userName);
         getActivity().startActivity(intent);

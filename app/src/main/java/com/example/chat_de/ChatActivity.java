@@ -8,12 +8,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,21 +20,12 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.chat_de.datas.Chat;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,7 +38,7 @@ public class ChatActivity extends AppCompatActivity {
     private Button chat_send;
     private ImageButton file_send;
     private RecyclerView recyclerView;
-    //private int GALLEY_CODE = 10;
+    private int GALLEY_CODE = 10;
     private String chatRoomKey;
     private String userKey = "user2";
     private String userName = "user2";
@@ -59,7 +46,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private ArrayList<String> listenerPath = new ArrayList<>();
 
-    private FirebaseStorage storage = FirebaseStorage.getInstance();
+    private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
     private ArrayList<Chat> dataList;
     private int index=-1;
@@ -73,17 +60,16 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.chat);
         recyclerView=findViewById(R.id.RecyclerView);
 
+        //리사이클러뷰에 일부 데이터를 저장 후 화면에 띄우기
+        recyclerView.setItemViewCacheSize(10);
+
         chat_edit =  findViewById(R.id.chat_edit);
         chat_send =  findViewById(R.id.chat_sent);
         file_send =  findViewById(R.id.file_send);
-//        add_Button=(Button)findViewById(R.id.add_button);
 
-        //Intent intent = getIntent();
-        //CHAT_NAME = intent.getStringExtra("chat_name");
-        //USER_NAME = intent.getStringExtra("user_name");
-
+        //액션바 타이틀 바 이름 설정
         ActionBar ab = getSupportActionBar() ;
-        ab.setTitle("채팅방") ;
+        ab.setTitle(chatRoomKey.toString()) ;
 
         // 메시지 전송 버튼에 대한 클릭 리스너 지정
         chat_send.setOnClickListener(new View.OnClickListener() {
@@ -97,7 +83,7 @@ public class ChatActivity extends AppCompatActivity {
         file_send.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                StorageReference rootRef = storage.getReference();
+                StorageReference rootRef = firebaseStorage.getReference();
                 gallery_access();
             }
         });
@@ -123,6 +109,7 @@ public class ChatActivity extends AppCompatActivity {
             ChatDB.removeEventListener(path);
     }
 
+    //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_chatting_addfr,menu);
@@ -164,6 +151,7 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    //메세지를 보내고 메세지 내용 파이어베이스에 저장
     private void sendMessage(){
         if (chat_edit.getText().toString().equals(""))
             return;
@@ -172,7 +160,7 @@ public class ChatActivity extends AppCompatActivity {
         ChatDB.uploadMessage(chat_edit.getText().toString(), ++index, messageType, chatRoomKey, userKey);
         chat_edit.setText(""); //입력창 초기화
     }
-
+    //유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser(){
         Intent intent = new Intent(this, ChatUserListAcitivity.class);
         intent.putExtra("tag",2);
@@ -180,66 +168,48 @@ public class ChatActivity extends AppCompatActivity {
         intent.putExtra("where",chatRoomKey);
         startActivity(intent);
     }
-
+    //사용자 갤러리로 접근
     private void gallery_access(){
+
         //갤러리만
         /*Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
 
         startActivityForResult(intent,10);*/
+
+        //드롭박스, 구글드라이브, 갤러리 등 모든 파일
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), 10);
+        startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), GALLEY_CODE);
 
-        //드롭박스, 구글드라이브, 갤러리 등 모든 파일
-        /*Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), 0);*/
+
     }
-    //사진 고른 후
-    //로컬 파일에서 업로드
+
+    //갤러리 액티비티에서 결과값을 제대로 받았는지 확인
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//            if(requestCode == 0 && resultCode == RESULT_OK){
-        if(requestCode == 10&&resultCode == RESULT_OK){
+        if(requestCode == GALLEY_CODE &&resultCode == RESULT_OK){
             filePath = data.getData();
-            Log.d("TAG", "uri:" + String.valueOf(filePath));
+            //Log.d("TAG", "uri:" + String.valueOf(filePath));
             if(filePath!=null)
                 uploadFile();
-            /*Glide.with(this).load(filePath).into(iv);
-            try {
-                //Uri 파일을 Bitmap으로 만들어서 ImageView에 집어 넣는다.
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                ivPreview.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
         }
+    }
 
-        }
-
+    //firebase storage에 업로드하기
     public void uploadFile() {
-        //firebase storage에 업로드하기
 
-        //1. FirebaseStorage을 관리하는 객체 얻어오기
-        FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
-        DatabaseReference ref = ChatDB.getReference();
+        //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
+        String filename = sdf.format(new Date()) + "_" + userKey + ".jpg";
 
-        //2. 업로드할 파일의 node를 참조하는 객체
-        //파일 명이 중복되지 않도록 날짜를 이용
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-        String filename = sdf.format(new Date()) + ".jpg";//현재 시간으로 파일명 지정 20191023142634
-        //원래 확장자는 파일의 실제 확장자를 얻어와서 사용해야함. 그러려면 이미지의 절대 주소를 구해야함.
-
-        StorageReference imgRef = firebaseStorage.getReference("uploads/" + filename);
         //uploads라는 폴더가 없으면 자동 생성
+        //chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각
+        StorageReference imgRef = firebaseStorage.getReference("uploads/" + filename);
 
-        //참조 객체를 통해 이미지 파일 업로드
-        //업로드 결과를 받고 싶다면..
-
+        //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -248,7 +218,7 @@ public class ChatActivity extends AppCompatActivity {
                 imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
-                        userKey="user2";
+                        //userKey="user2";
                         ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, userKey);
                     }
                 });
@@ -257,7 +227,7 @@ public class ChatActivity extends AppCompatActivity {
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(ChatActivity.this, "failed upload", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
             }
         });
 

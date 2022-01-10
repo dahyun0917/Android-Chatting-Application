@@ -2,10 +2,8 @@ package com.example.chat_de;
 
 import static java.lang.String.valueOf;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -32,16 +30,16 @@ public class UserListViewHolder extends RecyclerView.ViewHolder {
     }
 
     //데이터와 뷰를 묶음
-    void bind(UserItem userItem){
+    void bind(UserListItem userListItem){
 
-        userNameTextView.setText(userItem.getName());
-        userGenerationText.setText(String.valueOf(userItem.getGeneration()));
-        checkBox.setChecked(userItem.getChecked());
+        userNameTextView.setText(userListItem.getName());
+        userGenerationText.setText(String.valueOf(userListItem.getGeneration()));
+        checkBox.setChecked(userListItem.getChecked());
 
         // 이미지뷰와 실제 이미지 데이터를 묶는다 .
         Glide
             .with(this.itemView.getContext())
-            .load(userItem.getPictureURL())
+            .load(userListItem.getPictureURL())
 //            .centerCrop()
             .placeholder(R.drawable.knu_mark)
             .into(userProfileImage);

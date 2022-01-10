@@ -30,7 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ChatActivity extends AppCompatActivity {
+public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
 
     //private ListView chat_view;
@@ -57,7 +57,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
-        setContentView(R.layout.chat);
+        setContentView(R.layout.activity_room);
         recyclerView=findViewById(R.id.RecyclerView);
 
         //리사이클러뷰에 일부 데이터를 저장 후 화면에 띄우기
@@ -96,7 +96,7 @@ public class ChatActivity extends AppCompatActivity {
         ChatDB.messageAddEventListener(chatRoomKey, item -> {
             addMessage(item, dataList);
             recyclerView.scrollToPosition(dataList.size() - 1);
-            recyclerView.setAdapter(new Adapter(dataList));
+            recyclerView.setAdapter(new RoomElementAdapter(dataList));
         });
         getMessageList(10);
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
@@ -137,7 +137,7 @@ public class ChatActivity extends AppCompatActivity {
         LinearLayoutManager manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         recyclerView.setLayoutManager(manager);
         recyclerView.scrollToPosition(dataList.size()-1);
-        recyclerView.setAdapter(new Adapter(dataList));
+        recyclerView.setAdapter(new RoomElementAdapter(dataList));
     }
 
     private void addMessage(Chat dataItem, ArrayList<Chat> adapter) {
@@ -161,7 +161,7 @@ public class ChatActivity extends AppCompatActivity {
     }
     //유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser(){
-        Intent intent = new Intent(this, ChatUserListAcitivity.class);
+        Intent intent = new Intent(this, UserListAcitivity.class);
         intent.putExtra("tag",2);
         intent.putExtra("who", userName);
         intent.putExtra("where", chatRoomKey);
@@ -213,7 +213,7 @@ public class ChatActivity extends AppCompatActivity {
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                //Toast.makeText(ChatActivity.this, "success upload", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(RoomActivity.this, "success upload", Toast.LENGTH_SHORT).show();
                 imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
@@ -226,7 +226,7 @@ public class ChatActivity extends AppCompatActivity {
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(ChatActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
             }
         });
 

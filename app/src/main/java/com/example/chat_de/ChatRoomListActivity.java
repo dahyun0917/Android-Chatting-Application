@@ -4,20 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-public class ChatListActivity extends AppCompatActivity {
-    ChatListFragment mainFragment;
+public class ChatRoomListActivity extends AppCompatActivity {
+    ChatRoomListFragment mainFragment;
 
     //private String CHAT_NAME;
     //private String USER_NAME;
@@ -26,9 +15,9 @@ public class ChatListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ChatDB.setReference("pre_2");
-        setContentView(R.layout.test_chat);
+        setContentView(R.layout.activity_chat_room_list);
 
-        mainFragment = new ChatListFragment();
+        mainFragment = new ChatRoomListFragment();
         Intent intent = getIntent();
         //CHAT_NAME = intent.getStringExtra("chatName");
         //USER_NAME = intent.getStringExtra("userName");

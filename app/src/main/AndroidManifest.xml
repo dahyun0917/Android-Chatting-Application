@@ -10,16 +10,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Chat_de">
 <!--        <activity
-            android:name=".ChatUserListAcitivity"
+            android:name=".UserListAcitivity"
             android:exported="false" />-->
         <activity
-            android:name=".ChatActivity"
+            android:name=".RoomActivity"
             android:exported="false" />
         <activity
-            android:name=".ChatUserListAcitivity"
+            android:name=".UserListAcitivity"
             android:exported="false" />
         <activity
-            android:name=".ChatListActivity"
+            android:name=".ChatRoomListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

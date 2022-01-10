@@ -2,17 +2,15 @@ package com.example.chat_de;
 
 import com.example.chat_de.datas.User;
 
-import java.util.concurrent.ScheduledExecutorService;
-
-public class UserItem {
+public class UserListItem {
         private boolean checked;
         private String name;
         private String pictureURL;
         private int generation;
         private String userKey;
 
-        public UserItem() { }
-        public UserItem(String name, String pictureURL, int generation, String userKey) {
+        public UserListItem() { }
+        public UserListItem(String name, String pictureURL, int generation, String userKey) {
             setName(name);
             setPictureURL(pictureURL);
             setGeneration(generation);
@@ -21,7 +19,7 @@ public class UserItem {
         }
 
         //유저클래스로 생성
-        public UserItem(User user) {
+        public UserListItem(User user) {
             setName(user.getName());
             setPictureURL(user.getPictureURL());
             setGeneration(user.getGeneration());
@@ -30,7 +28,7 @@ public class UserItem {
         }
 
         //Copy constructor
-        public UserItem(UserItem original) {
+        public UserListItem(UserListItem original) {
             setName(original.getName());
             setPictureURL(original.getPictureURL());
             setGeneration(original.getGeneration());

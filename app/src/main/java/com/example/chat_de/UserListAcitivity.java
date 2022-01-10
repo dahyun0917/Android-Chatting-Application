@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,10 +29,10 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
-public class ChatUserListAcitivity extends AppCompatActivity implements TextWatcher {
+public class UserListAcitivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
 
-    private ArrayList<UserItem>[] userList = new ArrayList[9];
+    private ArrayList<UserListItem>[] userList = new ArrayList[9];
 
     private UserListAdapter userListAdapter;
     private RecyclerView recyclerView;
@@ -53,7 +52,7 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
         super.onCreate(savedInstanceState);
         for(int i = 0; i < userList.length; ++i)
             userList[i] = new ArrayList<>();
-        setContentView(R.layout.chat_user_list);
+        setContentView(R.layout.activity_user_list);
         setActionBar();
         showUserList();
     }
@@ -81,8 +80,8 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     }
     private void inputChatRoomName(){
         //다이얼로그(대화상자) 띄우기
-        final EditText editText = new EditText(ChatUserListAcitivity.this);
-        AlertDialog.Builder dlg = new AlertDialog.Builder(ChatUserListAcitivity.this);
+        final EditText editText = new EditText(UserListAcitivity.this);
+        AlertDialog.Builder dlg = new AlertDialog.Builder(UserListAcitivity.this);
         dlg.setTitle("채팅방 이름 입력"); //제목
         dlg.setMessage("새로 생성할 채팅방 이릅을 입력해주세요.");
         dlg.setView(editText);
@@ -104,17 +103,17 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
         for (int i = 0; i<users.size() ;i++){
             //usermeta를 userList에 넣기
             //user클래스를 userItem 생성자에 넣으면  userItem형식으로 객체 생성가능
-            //userList.add(new UserItem(users.get(i)));
+            //userList.add(new UserListItem(users.get(i)));
         }
 
         //테스트용 데이터 - 나중에 삭제 해야됨
-        classifyAdd(new UserItem("user1","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"hje"));
-        classifyAdd(new UserItem("user2","",10,"whs"));
-        classifyAdd(new UserItem("user3","",30,"rke"));
-        classifyAdd(new UserItem("user4","https://t1.daumcdn.net/cfile/blog/2455914A56ADB1E315",20,"df"));
-        classifyAdd(new UserItem("user5","https://t1.daumcdn.net/cfile/blog/216CB83A54295C1C0E",40,"rkwere"));
+        classifyAdd(new UserListItem("user1","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"hje"));
+        classifyAdd(new UserListItem("user2","",10,"whs"));
+        classifyAdd(new UserListItem("user3","",30,"rke"));
+        classifyAdd(new UserListItem("user4","https://t1.daumcdn.net/cfile/blog/2455914A56ADB1E315",20,"df"));
+        classifyAdd(new UserListItem("user5","https://t1.daumcdn.net/cfile/blog/216CB83A54295C1C0E",40,"rkwere"));
     }
-    private void classifyAdd(UserItem item){
+    private void classifyAdd(UserListItem item){
         userList[(item.getGeneration()-1)/10].add(item);
     }
     private void showUserList() {
@@ -168,10 +167,10 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
             }
         });
     }
-    private ArrayList<UserItem> returnChoose(){
-        ArrayList<UserItem> choose = new ArrayList<>();
-        for(ArrayList<UserItem> list : userList) {
-            for (UserItem i : list) {
+    private ArrayList<UserListItem> returnChoose(){
+        ArrayList<UserListItem> choose = new ArrayList<>();
+        for(ArrayList<UserListItem> list : userList) {
+            for (UserListItem i : list) {
                 if (i.getChecked())
                     choose.add(i);
             }
@@ -181,7 +180,7 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     private void createChatRoom(){
         //TODO : 새 채팅방 생성
         //체크박스로 표시된 유저 정보를 받아옴.
-        ArrayList<UserItem> list = returnChoose();
+        ArrayList<UserListItem> list = returnChoose();
         //채팅방 만들기 누른 유저 정보 : callUserName
         String message = callUserName+"님이 채팅방"+""+"를 생성하셨습니다.";
         //새 ChatRoom 생성
@@ -192,7 +191,7 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     private void inviteChatRoom(){
         //TODO : 초대한 유저를 해당 채팅방에 추가
         //체크박스로 표시된 유저 정보를 받아옴
-        ArrayList<UserItem> list = returnChoose();
+        ArrayList<UserListItem> list = returnChoose();
         //초대하기 누른 유저 정보 : callUserName
         //changeToString : 유저리스트를 ~님, 형식으로 바꿔줌.
         String message = callUserName+"님이 "+changeToString(list)+"님을 초대하셨습니다.";
@@ -200,10 +199,10 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
         //list의 user의 userJoined에 현재 채팅방 정보 추가->receivedKey 사용
         //초대메세지(message) 현재 채탕방에 시스템 메세지로 추가.
     }
-    private String changeToString(ArrayList<UserItem> list){
+    private String changeToString(ArrayList<UserListItem> list){
         //유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.
         StringBuilder result = new StringBuilder();
-        for(UserItem i : list){
+        for(UserListItem i : list){
             result.append(i.getName() + "님, ");
         }
 
@@ -222,7 +221,7 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
         switch(curId){
             case R.id.action_complete:
                 if(returnChoose().size()==0){
-                    Toast.makeText(ChatUserListAcitivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UserListAcitivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
                 }
                 else{
                     if(mode==NEW_CAHT){

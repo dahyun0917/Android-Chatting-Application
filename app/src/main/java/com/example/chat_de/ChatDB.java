@@ -77,7 +77,7 @@ public class ChatDB {
         ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).child(userKey).child(LAST_READ_INDEX).setValue(index);
     }
 
-    public static void messageAddEventListener(String chatRoomKey, ChatEventListener<Chat> listener) {
+    public static void messageAddEventListener(String chatRoomKey, RoomElementEventListener<Chat> listener) {
         class childAddedEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
@@ -113,7 +113,7 @@ public class ChatDB {
             eventListeners.put(CLASS_NAME, new ArrayList<>());
         eventListeners.get(CLASS_NAME).add(new Pair<>(PATH, firebaseListener));
     }
-    public static void chatRoomAddEventListener(String userKey, ChatEventListener<ChatRoomMeta> listener) {
+    public static void chatRoomAddEventListener(String userKey, RoomElementEventListener<ChatRoomMeta> listener) {
         class childAddedEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {

@@ -29,6 +29,7 @@ import com.google.firebase.storage.UploadTask;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
@@ -61,7 +62,7 @@ public class RoomActivity extends AppCompatActivity {
         recyclerView=findViewById(R.id.RecyclerView);
 
         //리사이클러뷰에 일부 데이터를 저장 후 화면에 띄우기
-        recyclerView.setItemViewCacheSize(10);
+        recyclerView.setItemViewCacheSize(20);
 
         chat_edit =  findViewById(R.id.chat_edit);
         chat_send =  findViewById(R.id.chat_sent);
@@ -141,8 +142,26 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void addMessage(Chat dataItem, ArrayList<Chat> adapter) {
-        if(dataItem.getIndex() != SYSTEM_MESSAGE)
+        //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
+        ListIterator i = adapter.listIterator(adapter.size());
+        final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
+        final String DAY = SDF.format(dataItem.normalDate());
+        while(i.hasPrevious()) {
+            final Chat chat = (Chat)i.previous();
+            //시스템 메시지가 아닐때만 비교
+            if(chat.getType() != Chat.Type.SYSTEM) {
+                if (!SDF.format(chat.normalDate()).equals(DAY)) {
+                    Chat daySystemChat = new Chat(DAY, SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+                    daySystemChat.setDate(dataItem.unixTime());
+                    adapter.add(daySystemChat);
+                }
+                break;
+            }
+        }
+
+        if(dataItem.getType() != Chat.Type.SYSTEM)
             index = dataItem.getIndex();
+
         adapter.add(new Chat(dataItem));
     }
 

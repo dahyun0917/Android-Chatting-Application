@@ -10,13 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Chat_de">
 <!--        <activity
-            android:name=".UserListAcitivity"
+            android:name=".UserListActivity"
             android:exported="false" />-->
         <activity
             android:name=".RoomActivity"
             android:exported="false" />
         <activity
-            android:name=".UserListAcitivity"
+            android:name=".UserListActivity"
             android:exported="false" />
         <activity
             android:name=".ChatRoomListActivity"

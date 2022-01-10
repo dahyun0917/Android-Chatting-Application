@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -29,7 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
-public class UserListAcitivity extends AppCompatActivity implements TextWatcher {
+public class UserListActivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
 
     private ArrayList<UserListItem>[] userList = new ArrayList[9];
@@ -80,10 +79,10 @@ public class UserListAcitivity extends AppCompatActivity implements TextWatcher 
     }
     private void inputChatRoomName(){
         //다이얼로그(대화상자) 띄우기
-        final EditText editText = new EditText(UserListAcitivity.this);
-        AlertDialog.Builder dlg = new AlertDialog.Builder(UserListAcitivity.this);
+        final EditText editText = new EditText(UserListActivity.this);
+        AlertDialog.Builder dlg = new AlertDialog.Builder(UserListActivity.this);
         dlg.setTitle("채팅방 이름 입력"); //제목
-        dlg.setMessage("새로 생성할 채팅방 이릅을 입력해주세요.");
+        dlg.setMessage("새로 생성할 채팅방 이름을 입력해주세요.");
         dlg.setView(editText);
         dlg.setPositiveButton("입력", (dialogInterface, i) -> {
             chatRoomName = "";
@@ -229,7 +228,7 @@ public class UserListAcitivity extends AppCompatActivity implements TextWatcher 
         switch(curId){
             case R.id.action_complete:
                 if(returnChoose().size()==0){
-                    Toast.makeText(UserListAcitivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UserListActivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
                 }
                 else{
                     if(mode==NEW_CAHT){

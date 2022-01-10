@@ -31,18 +31,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 public class ChatUserListAcitivity extends AppCompatActivity implements TextWatcher {
-
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
 
-    private ArrayList<UserItem> userList; //전체
-    private ArrayList<UserItem> userList1; //1-10기
-    private ArrayList<UserItem> userList2; //11-20기
-    private ArrayList<UserItem> userList3; //21-30기
-    private ArrayList<UserItem> userList4; //31-40기
-    private ArrayList<UserItem> userList5; //41-50기
-    private ArrayList<UserItem> userList6; //51-60기
-    private ArrayList<UserItem> userList7; //61기-70기
-    private ArrayList<UserItem> userList8; //71기-
+    private ArrayList<UserItem>[] userList = new ArrayList[9];
 
     private UserListAdapter userListAdapter;
     private RecyclerView recyclerView;
@@ -60,6 +51,8 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        for(int i = 0; i < userList.length; ++i)
+            userList[i] = new ArrayList<>();
         setContentView(R.layout.chat_user_list);
         setActionBar();
         showUserList();
@@ -105,8 +98,7 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     }
     private void getAllUserList(){
         // TODO : 유저 리스트 받아오기
-        userList = new ArrayList<UserItem>();
-        ArrayList<User> users = new ArrayList<User>();
+        ArrayList<User> users = new ArrayList<>();
         //firebase에서 users데이터 받아오기
 
         for (int i = 0; i<users.size() ;i++){
@@ -114,54 +106,16 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
             //user클래스를 userItem 생성자에 넣으면  userItem형식으로 객체 생성가능
             //userList.add(new UserItem(users.get(i)));
         }
-        //테스트용 데이터 - 나중에 삭제 해야됨
-        userList.add(new UserItem("user1","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"hje"));
-        userList.add(new UserItem("user2","",10,"whs"));
-        userList.add(new UserItem("user3","",30,"rke"));
-        userList.add(new UserItem("user4","https://t1.daumcdn.net/cfile/blog/2455914A56ADB1E315",20,"df"));
-        userList.add(new UserItem("user5","https://t1.daumcdn.net/cfile/blog/216CB83A54295C1C0E",40,"rkwere"));
 
-        //기수별로 분리
-        categorization();
+        //테스트용 데이터 - 나중에 삭제 해야됨
+        classifyAdd(new UserItem("user1","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"hje"));
+        classifyAdd(new UserItem("user2","",10,"whs"));
+        classifyAdd(new UserItem("user3","",30,"rke"));
+        classifyAdd(new UserItem("user4","https://t1.daumcdn.net/cfile/blog/2455914A56ADB1E315",20,"df"));
+        classifyAdd(new UserItem("user5","https://t1.daumcdn.net/cfile/blog/216CB83A54295C1C0E",40,"rkwere"));
     }
-    private void categorization(){
-        //기수별로 분리
-        userList1 = new ArrayList<UserItem>();
-        userList2 = new ArrayList<UserItem>();
-        userList3 = new ArrayList<UserItem>();
-        userList4 = new ArrayList<UserItem>();
-        userList5 = new ArrayList<UserItem>();
-        userList6 = new ArrayList<UserItem>();
-        userList7 = new ArrayList<UserItem>();
-        userList8 = new ArrayList<UserItem>();
-        for(UserItem i : userList){
-            switch ((i.getGeneration()-1)/10){ //casting
-                case 0 :
-                    userList1.add(i);
-                    break;
-                case 1 :
-                    userList2.add(i);
-                    break;
-                case 2 :
-                    userList3.add(i);
-                    break;
-                case 3 :
-                    userList4.add(i);
-                    break;
-                case 4 :
-                    userList5.add(i);
-                    break;
-                case 5 :
-                    userList6.add(i);
-                    break;
-                case 6 :
-                    userList7.add(i);
-                    break;
-                default :
-                    userList8.add(i);
-                    break;
-            }
-        }
+    private void classifyAdd(UserItem item){
+        userList[(item.getGeneration()-1)/10].add(item);
     }
     private void showUserList() {
 
@@ -175,9 +129,8 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
         recyclerView.setAdapter(userListAdapter);
 
         //스피너 설정
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item,items);
+        Spinner spinner = findViewById(R.id.spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,items);
 
         //항목 선택시 보이는 별도창의 각 아이템을 위한 레이아웃 설정
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
@@ -188,49 +141,26 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 // int i : item의 순서대로 0번부터 n-1번까지
-                switch (i){
-                    case 1: //1-10기
-                        userListAdapter.setUserList(userList1);
-                        break;
-                    case 2: //11-20기
-                        userListAdapter.setUserList(userList2);
-                        break;
-                    case 3: //21-30기
-                        userListAdapter.setUserList(userList3);
-                        break;
-                    case 4: //31-40기
-                        userListAdapter.setUserList(userList4);
-                        break;
-                    case 5: //41-50기
-                        userListAdapter.setUserList(userList5);
-                        break;
-                    case 6: //51-60기
-                        userListAdapter.setUserList(userList6);
-                        break;
-                    case 7: //61기-70기
-                        userListAdapter.setUserList(userList7);
-                        break;
-                    case 8: //71기-
-                        userListAdapter.setUserList(userList8);
-                        break;
-                    default: //전체
-                        userListAdapter.setUserList(userList);
-                        break;
+                // userList[0]: 1-10기 ...
+                if(i == 0) {
+                    userListAdapter.serUserList(userList);
+                } else {
+                    userListAdapter.setUserList(userList[i-1]);
                 }
             }
             //스피너에서 아무것도 선택되지 않은 상태일때
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-                userListAdapter.setUserList(userList);
+                userListAdapter.serUserList(userList);
             }
         });
 
         /*검색 기능 추가*/
-        EditText contents = (EditText)findViewById(R.id.searchText);
+        EditText contents = findViewById(R.id.searchText);
         contents.addTextChangedListener(this);
 
         /*텍스트뷰 내용 지우기*/
-        ImageButton search = (ImageButton) findViewById(R.id.searchButton);
+        ImageButton search = findViewById(R.id.searchButton);
         search.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -240,9 +170,11 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     }
     private ArrayList<UserItem> returnChoose(){
         ArrayList<UserItem> choose = new ArrayList<>();
-        for(UserItem i : userList){
-            if(i.getChecked())
-                choose.add(i);
+        for(ArrayList<UserItem> list : userList) {
+            for (UserItem i : list) {
+                if (i.getChecked())
+                    choose.add(i);
+            }
         }
         return choose;
     }
@@ -270,12 +202,12 @@ public class ChatUserListAcitivity extends AppCompatActivity implements TextWatc
     }
     private String changeToString(ArrayList<UserItem> list){
         //유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.
-        String result="";
+        StringBuilder result = new StringBuilder();
         for(UserItem i : list){
-            result = result + i.getName()+"님, ";
+            result.append(i.getName() + "님, ");
         }
-        result=result.substring(0,result.length()-3);
-        return result;
+
+        return result.substring(0, result.length() - 3);
     }
 
     @Override

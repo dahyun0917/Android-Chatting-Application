@@ -70,7 +70,7 @@ public class RoomActivity extends AppCompatActivity {
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
 
         //리사이클러뷰에 일부 데이터를 저장 후 화면에 띄우기
-        binding.RecyclerView.setItemViewCacheSize(20);
+        binding.RecyclerView.setItemViewCacheSize(50);
 
         //액션바 타이틀 바 이름 설정
         ActionBar ab = getSupportActionBar() ;
@@ -94,11 +94,14 @@ public class RoomActivity extends AppCompatActivity {
         });
         User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
         User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
+        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
         ChatRoomUser usertest1= new ChatRoomUser(1,test1);
         ChatRoomUser usertest2= new ChatRoomUser(2,test2);
+        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
         userList= new HashMap<String,ChatRoomUser>(){{
             put("user1",usertest1);
             put("user2",usertest2);
+            put("user3",usertest3);
         }};
     }
 
@@ -109,7 +112,7 @@ public class RoomActivity extends AppCompatActivity {
         ChatDB.messageAddEventListener(chatRoomKey, item -> {
             addMessage(item, dataList);
             binding.RecyclerView.scrollToPosition(dataList.size() - 1);
-            binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList));
+            binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList,userList));
         });
         getMessageList(10);
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
@@ -163,7 +166,7 @@ public class RoomActivity extends AppCompatActivity {
         LinearLayoutManager manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         binding.RecyclerView.setLayoutManager(manager);
         binding.RecyclerView.scrollToPosition(dataList.size()-1);
-        binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList));
+        binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList,userList));
     }
 
     private void addMessage(Chat dataItem, ArrayList<Chat> adapter) {
@@ -176,7 +179,7 @@ public class RoomActivity extends AppCompatActivity {
             //시스템 메시지가 아닐때만 비교
             if(chat.getType() != Chat.Type.SYSTEM) {
                 if (!SDF.format(chat.normalDate()).equals(DAY)) {
-                    Chat daySystemChat = new Chat(DAY, SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+                    Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
                     daySystemChat.setDate(dataItem.unixTime());
                     adapter.add(daySystemChat);
                 }

@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/user_list"
+        android:icon="@drawable/user_list"
+        android:title="user_list"
+        app:showAsAction="always"
+        />
+
     <item android:id="@+id/add_fr"
         android:icon="@drawable/add_image2"
         android:title="add_fr"

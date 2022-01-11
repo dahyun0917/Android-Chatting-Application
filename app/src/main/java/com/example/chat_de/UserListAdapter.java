@@ -11,18 +11,20 @@ import android.widget.Filterable;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chat_de.databinding.ItemRecyclerUserListBinding;
+
 import java.util.ArrayList;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> implements Filterable{
     Context context;
     private ArrayList<UserListItem> filteredUsers = new ArrayList<>(); //필터링된 리스트 -> 보여줄 리스트
     private ArrayList<UserListItem> unFilteredUsers = new ArrayList<>(); //필터링되지않은 리스트
-
     //뷰홀더가 생성 됐을 때
     @NonNull
     @Override
     public UserListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_recycler_user_list, parent, false);
+        //binding = ItemRecyclerUserListBinding.inflate(LayoutInflater.from(context),parent,false);
         return new UserListViewHolder(view);
     }
 
@@ -41,12 +43,12 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
     public void onBindViewHolder(@NonNull UserListViewHolder holder, int position) {
         final UserListItem item = filteredUsers.get(position);
 
-        holder.checkBox.setOnCheckedChangeListener(null);
+        holder.itemBinding.checkBox.setOnCheckedChangeListener(null);
 
         //모델 클래스의 getter로 체크박스 상태값을 가져옴.
-        holder.checkBox.setChecked(item.getChecked());
+        holder.itemBinding.checkBox.setChecked(item.getChecked());
         //체크상태의 상태값을 알기위한 리스너
-        holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.itemBinding.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 //체크상태가 바뀌면 item의 checked값도 바뀜.

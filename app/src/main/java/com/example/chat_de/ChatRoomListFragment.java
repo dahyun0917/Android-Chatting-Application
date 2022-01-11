@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 
+import com.example.chat_de.databinding.FragmentChatRoomListBinding;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,6 +30,7 @@ public class ChatRoomListFragment extends Fragment {
     private String userName = "user2";
 
     private ChatRoomListActivity ChatActivity;
+    private FragmentChatRoomListBinding binding;
 
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
@@ -36,8 +38,6 @@ public class ChatRoomListFragment extends Fragment {
     //private String CHAT_NAME;
     //private String USER_NAME;
 
-    private ListView chatList;
-    private Button makeChat;
 
     ArrayList<String> cList = new ArrayList<>();
     @Override
@@ -54,8 +54,9 @@ public class ChatRoomListFragment extends Fragment {
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        ViewGroup rootview = (ViewGroup)inflater.inflate(R.layout.fragment_chat_room_list,container,false);
+        binding = FragmentChatRoomListBinding.inflate(inflater,container,false);
+        View view = binding.getRoot();
+        //ViewGroup rootview = (ViewGroup)inflater.inflate(R.layout.fragment_chat_room_list,container,false);
 
         Bundle bundle = getArguments();
 
@@ -65,17 +66,14 @@ public class ChatRoomListFragment extends Fragment {
         }*/
 
 
-        chatList = (ListView) rootview.findViewById(R.id.listview);
-        makeChat=(Button) rootview.findViewById(R.id.makeChat);
-
         showChatRoomList();
-        chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 enterChatRoom(cList.get(i));
             }
         });
-        makeChat.setOnClickListener(new View.OnClickListener(){
+        binding.makeChat.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 selelctUser();
@@ -84,12 +82,17 @@ public class ChatRoomListFragment extends Fragment {
 
 
 
-        return rootview;
+        return view;
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
     private void showChatRoomList() {
         // 리스트 어댑터 생성 및 세팅
         final ArrayAdapter<String> adapter= new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1);
-        chatList.setAdapter(adapter);
+        binding.listview.setAdapter(adapter);
 
         // 데이터 받아오기 및 어댑터 데이터 추가 및 삭제 등..리스너 관리
         // USER_NAME을 나중에 실제 user의 primary key로 변경해야 함

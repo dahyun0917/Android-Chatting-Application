@@ -13,6 +13,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.bumptech.glide.Glide;
+import com.example.chat_de.databinding.ItemElementCenterSystemBinding;
+import com.example.chat_de.databinding.ItemElementLeftImageBinding;
+import com.example.chat_de.databinding.ItemElementLeftTextBinding;
+import com.example.chat_de.databinding.ItemElementRightImageBinding;
+import com.example.chat_de.databinding.ItemElementRightTextBinding;
+import com.example.chat_de.databinding.ItemRecyclerUserListBinding;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ViewType;
 
@@ -68,28 +74,27 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
 
         if(viewHolder instanceof CenterViewHolder){
-            ((CenterViewHolder)viewHolder).textv.setText(myDataList.get(position).getText());
+            ((CenterViewHolder)viewHolder).centerSystemBinding.textv.setText(myDataList.get(position).getText());
         }else if(viewHolder instanceof LeftViewHolder){
             if(messageType.equals(MessageType.TEXT)){
-                ((LeftViewHolder)viewHolder).textvNicname.setText(myDataList.get(position).getFrom());
-                ((LeftViewHolder)viewHolder).textvMsg.setText(myDataList.get(position).getText());
-                ((LeftViewHolder)viewHolder).textvTime.setText(str);
+                ((LeftViewHolder)viewHolder).leftTextBinding.textvNicname.setText(myDataList.get(position).getFrom());
+                ((LeftViewHolder)viewHolder).leftTextBinding.textvMsg.setText(myDataList.get(position).getText());
+                ((LeftViewHolder)viewHolder).leftTextBinding.textvTime.setText(str);
             }
             else{
-                ((LeftViewHolder)viewHolder).textvNicname.setText(myDataList.get(position).getFrom());
-                ((LeftViewHolder)viewHolder).textvTime.setText(str);
-                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftViewHolder)viewHolder).imagevMsg);
+                ((LeftViewHolder)viewHolder).leftImageBinding.textvNicname.setText(myDataList.get(position).getFrom());
+                ((LeftViewHolder)viewHolder).leftImageBinding.textvTime.setText(str);
+                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftViewHolder)viewHolder).leftImageBinding.imagevMsg);
             }
         }else{
             if(messageType.equals(MessageType.TEXT)){
-                ((RightViewHolder)viewHolder).textvNicname.setText(myDataList.get(position).getFrom());
-                ((RightViewHolder)viewHolder).textvMsg.setText(myDataList.get(position).getText());
-                ((RightViewHolder)viewHolder).textvTime.setText(str);}
+                ((RightViewHolder)viewHolder).rightTextBinding.textvNicname.setText(myDataList.get(position).getFrom());
+                ((RightViewHolder)viewHolder).rightTextBinding.textvMsg.setText(myDataList.get(position).getText());
+                ((RightViewHolder)viewHolder).rightTextBinding.textvTime.setText(str);}
             else{
-                ((RightViewHolder)viewHolder).textvNicname.setText(myDataList.get(position).getFrom());
-                ((RightViewHolder)viewHolder).textvTime.setText(str);
-                ImageView imagevMsg= viewHolder.itemView.findViewById(R.id.imagev_msg);
-                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(imagevMsg);
+                ((RightViewHolder)viewHolder).rightTextBinding.textvNicname.setText(myDataList.get(position).getFrom());
+                ((RightViewHolder)viewHolder).rightTextBinding.textvTime.setText(str);
+                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((RightViewHolder)viewHolder).rightImageBinding.imagevMsg);
             }
         }
     }
@@ -119,57 +124,41 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     // "리사이클러뷰에 들어갈 뷰 홀더", 그리고 "그 뷰 홀더에 들어갈 아이템들을 셋팅"
     public class CenterViewHolder extends RecyclerView.ViewHolder{
-        TextView textv;
+        ItemElementCenterSystemBinding centerSystemBinding;
 
         public CenterViewHolder(@NonNull View itemView) {
             super(itemView);
-            textv = itemView.findViewById(R.id.textv);
+            centerSystemBinding = ItemElementCenterSystemBinding.bind(itemView);
         }
     }
 
     public class LeftViewHolder extends RecyclerView.ViewHolder{
         //CircleImageView imgv;
-        TextView textvMsg;
-        TextView textvTime;
-        TextView textvNicname;
-        ImageView imagevMsg;
+        ItemElementLeftImageBinding leftImageBinding;
+        ItemElementLeftTextBinding leftTextBinding;
         public LeftViewHolder(@NonNull View itemView) {
             super(itemView);
-            //imgv = (CircleImageView)itemView.findViewById(R.id.imgv);
             if(messageType == MessageType.TEXT) {
-                textvNicname = itemView.findViewById(R.id.textv_nicname);
-                textvMsg = itemView.findViewById(R.id.textv_msg);
-                textvTime = itemView.findViewById(R.id.textv_time);
+                leftTextBinding = ItemElementLeftTextBinding.bind(itemView);
             }
             else if(messageType == MessageType.IMAGE){
-                textvNicname = itemView.findViewById(R.id.textv_nicname);
-                imagevMsg = itemView.findViewById(R.id.imagev_msg);
-                textvTime = itemView.findViewById(R.id.textv_time);
+                leftImageBinding = ItemElementLeftImageBinding.bind(itemView);
             }
         }
     }
 
     public class RightViewHolder extends RecyclerView.ViewHolder{
-        TextView textvMsg;
-        TextView textvTime;
-        TextView textvNicname;
-        ImageView imagevMsg;
-
+        ItemElementRightImageBinding rightImageBinding;
+        ItemElementRightTextBinding rightTextBinding;
         public RightViewHolder(@NonNull View itemView) {
             super(itemView);
             if(messageType.equals(MessageType.TEXT)) {
-                textvNicname = itemView.findViewById(R.id.textv_nicname);
-                textvMsg = itemView.findViewById(R.id.textv_msg);
-                textvTime = itemView.findViewById(R.id.textv_time);
+                rightTextBinding = ItemElementRightTextBinding.bind(itemView);
             }
             else if(messageType.equals(MessageType.IMAGE)){
-                textvNicname = itemView.findViewById(R.id.textv_nicname);
-                imagevMsg = itemView.findViewById(R.id.imagev_msg);
-                textvTime = itemView.findViewById(R.id.textv_time);
+                rightImageBinding = ItemElementRightImageBinding.bind(itemView);
             }
         }
     }
 
 }
-
-

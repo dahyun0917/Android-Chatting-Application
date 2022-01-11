@@ -2,6 +2,8 @@ package com.example.chat_de.datas;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.HashMap;
+
 @IgnoreExtraProperties
 public class User {
     private String name;
@@ -15,6 +17,12 @@ public class User {
         setPictureURL(pictureURL);
         setGeneration(generation);
         setUserKey(userKey);
+    }
+    public User(HashMap<String, Object> user) {
+        setName((String)user.get("name"));
+        setPictureURL((String)user.get("pictureURL"));
+        setGeneration(((Long)user.get("generation")).intValue());
+        setUserKey((String)user.get("userKey"));
     }
     //Copy constructor
     public User(User original) {

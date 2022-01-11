@@ -4,47 +4,37 @@ import com.example.chat_de.datas.User;
 
 public class UserListItem {
         private boolean checked;
-        private String name;
-        private String pictureURL;
-        private int generation;
-        private String userKey;
+        private User userMeta;
 
         public UserListItem() { }
         public UserListItem(String name, String pictureURL, int generation, String userKey) {
-            setName(name);
-            setPictureURL(pictureURL);
-            setGeneration(generation);
-            setUserKey(userKey);
+            setUserMeta(new User(name, pictureURL, generation, userKey));
             setChecked(false);
         }
 
         //유저클래스로 생성
-        public UserListItem(User user) {
-            setName(user.getName());
-            setPictureURL(user.getPictureURL());
-            setGeneration(user.getGeneration());
-            setUserKey(user.getUserKey());
+        public UserListItem(User userMeta) {
+            setUserMeta(userMeta);
             setChecked(false);
         }
 
         //Copy constructor
         public UserListItem(UserListItem original) {
-            setName(original.getName());
-            setPictureURL(original.getPictureURL());
-            setGeneration(original.getGeneration());
-            setUserKey(original.getUserKey());
-            setChecked(false);
+            setUserMeta(new User(original.getUserMeta()));
+            setChecked(original.getChecked());
         }
 
+        public User getUserMeta()           { return userMeta; }
         public boolean getChecked()     { return checked; }
-        public String getName()         { return name; }
-        public String getPictureURL()   { return pictureURL; }
-        public int getGeneration()      { return generation; }
-        public String getUserKey()      { return userKey; }
+        public String getName()         { return userMeta.getName(); }
+        public String getPictureURL()   { return userMeta.getPictureURL(); }
+        public int getGeneration()      { return userMeta.getGeneration(); }
+        public String getUserKey()      { return userMeta.getUserKey(); }
 
-        public void setChecked(boolean checked)          { this.checked = checked; }
-        public void setName(String name)                { this.name = name; }
-        public void setPictureURL(String pictureURL)    { this.pictureURL = pictureURL; }
-        public void setGeneration(int generation)       { this.generation = generation; }
-        public void setUserKey(String userKey)          { this.userKey = userKey; }
+        public void setUserMeta(User userMeta)                  { this.userMeta = userMeta; }
+        public void setChecked(boolean checked)         { this.checked = checked; }
+        public void setName(String name)                { this.userMeta.setName(name); }
+        public void setPictureURL(String pictureURL)    { this.userMeta.setPictureURL(pictureURL); }
+        public void setGeneration(int generation)       { this.userMeta.setGeneration(generation); }
+        public void setUserKey(String userKey)          { this.userMeta.setUserKey(userKey); }
 }

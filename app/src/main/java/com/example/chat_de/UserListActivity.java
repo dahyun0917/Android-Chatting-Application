@@ -29,15 +29,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class UserListActivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
 
     private ArrayList<UserListItem>[] userList = new ArrayList[9];
     private UserListAdapter userListAdapter;
-
-    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
     private final int NEW_CAHT = 1;
     private final int INVITE_CHAT = 2;
@@ -117,7 +115,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         classifyAdd(new UserListItem("user4","https://t1.daumcdn.net/cfile/blog/2455914A56ADB1E315",20,"df"));
         classifyAdd(new UserListItem("user5","https://t1.daumcdn.net/cfile/blog/216CB83A54295C1C0E",40,"rkwere"));
     }
-    private void classifyAdd(UserListItem item){
+    private void classifyAdd(@NonNull UserListItem item){
         userList[(item.getGeneration()-1)/10].add(item);
     }
     private void showUserList() {
@@ -188,6 +186,9 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
         //list의 user의 userJoined에 생성된 채팅방 정보 추가
         //생성메세지(message) 현재 채팅방에 시스템 메세지로 추가
+        ChatDB.setChatRoom("noname", list, "나", chatRoomKey -> {
+            Log.d("asdfasdf", chatRoomKey);
+        });
     }
     private void inviteChatRoom(){
         //TODO : 초대한 유저를 해당 채팅방에 추가
@@ -234,7 +235,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 else{
                     if(mode==NEW_CAHT){
                         //채팅방 만들기
-                        inputChatRoomName();
+                        //TODO 현재는 비동기적이라서 inputChatRoomName()이 끝나기 전에 createChatRoom()가 실행되는 문제가 있다
+                        //inputChatRoomName();
                         createChatRoom();
                     }
                     else if(mode==INVITE_CHAT){

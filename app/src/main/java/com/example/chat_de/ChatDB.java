@@ -50,20 +50,16 @@ public class ChatDB {
         return rootPath;
     }
 
-    public static void getUsersCompleteEventListener(RoomElementEventListener<HashMap<String, User>> listener) {
-        ref.child(USERS).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                HashMap<String, User> item = snapshot.getValue(HashMap.class);
+    public static void getUsersCompleteEventListener(RoomElementEventListener<HashMap<String, HashMap<String, Object>>> listener) {
+        ref.child(USERS).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                HashMap<String, HashMap<String, Object>> item = (HashMap<String, HashMap<String, Object>>)task.getResult().getValue();
                 listener.eventListener(item);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            } else {
                 Log.e("FRD", "Can not get users");
                 listener.eventListener(new HashMap<>());
             }
-        });        
+        });
     }
     public static void setChatRoom(String chatRoomName, ArrayList<UserListItem> items, String callUserName, RoomElementEventListener<String> listener) {
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(callUserName, ChatRoomMeta.Type.BY_USER);
@@ -102,9 +98,9 @@ public class ChatDB {
             //밑 부분은 firebase function으로 구현가능하면 그걸로 구현하는 것이 더 좋을 듯
             ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    HashMap<String, ChatRoomUser> users = (HashMap<String, ChatRoomUser>) task.getResult().getValue();
-                    for (String key : users.keySet()) {
-                        ref.child(USER_JOINED).child(key).child(chatRoomKey).child(LAST_MESSAGE_INDEX).setValue(index);
+                    HashMap<String, HashMap<String, Object>> users = (HashMap<String, HashMap<String, Object>>)task.getResult().getValue();
+                    for (String key: users.keySet()) {
+                        ref.child(USER_JOINED).child(key).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).setValue(index);
                     }
                 } else {
                     Log.e("FRD", "Can not get users of: " + chatRoomKey);

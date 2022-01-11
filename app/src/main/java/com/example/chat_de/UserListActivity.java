@@ -22,6 +22,8 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.chat_de.databinding.ActivityMainBinding;
+import com.example.chat_de.databinding.ActivityUserListBinding;
 import com.example.chat_de.datas.User;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -32,9 +34,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
 
     private ArrayList<UserListItem>[] userList = new ArrayList[9];
-
     private UserListAdapter userListAdapter;
-    private RecyclerView recyclerView;
 
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
@@ -46,12 +46,16 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private String receivedKey;
     private String chatRoomName="";
 
+    private ActivityUserListBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = ActivityUserListBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
+
         for(int i = 0; i < userList.length; ++i)
             userList[i] = new ArrayList<>();
-        setContentView(R.layout.activity_user_list);
         setActionBar();
         showUserList();
     }
@@ -122,20 +126,19 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         getAllUserList();
 
         //리사이클러뷰 설정
-        recyclerView = findViewById(R.id.recyclerUserList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
+        binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
         userListAdapter = new UserListAdapter(getApplicationContext(),userList);
-        recyclerView.setAdapter(userListAdapter);
+        binding.recyclerUserList.setAdapter(userListAdapter);
+
 
         //스피너 설정
-        Spinner spinner = findViewById(R.id.spinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,items);
 
         //항목 선택시 보이는 별도창의 각 아이템을 위한 레이아웃 설정
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-        spinner.setAdapter(adapter);
+        binding.spinner.setAdapter(adapter);
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             //아이템이 선택되면
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -155,15 +158,13 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         });
 
         /*검색 기능 추가*/
-        EditText contents = findViewById(R.id.searchText);
-        contents.addTextChangedListener(this);
+        binding.searchText.addTextChangedListener(this);
 
         /*텍스트뷰 내용 지우기*/
-        ImageButton search = findViewById(R.id.searchButton);
-        search.setOnClickListener(new View.OnClickListener(){
+        binding.searchButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                contents.setText(null);
+                binding.searchText.setText(null);
             }
         });
     }

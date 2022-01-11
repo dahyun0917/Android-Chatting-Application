@@ -5,29 +5,42 @@
       <map>
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/drawable/chat_box_left.xml" value="0.25092592592592594" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/drawable/round_box.xml" value="0.25092592592592594" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/activity_chat_room_list.xml" value="0.259375" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/activity_main.xml" value="0.1852355072463768" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/activity_room.xml" value="0.2234375" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/activity_user_list.xml" value="0.259375" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/chat.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/chat_image.xml" value="0.2210144927536232" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/chat_list.xml" value="0.1852355072463768" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/fragment_chat_room_list.xml" value="0.259375" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/item_element_left_image.xml" value="0.23143115942028986" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/item_element_left_text.xml" value="0.23143115942028986" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/recycler_item.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_center_item.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_center_item_list.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_left_item_list.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_left_item_list_image.xml" value="0.2210144927536232" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_left_item_list_text.xml" value="0.22192028985507245" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_right_item_list.xml" value="0.1852355072463768" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_right_item_list_image.xml" value="0.221875" />
-        <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/room_right_item_list_text.xml" value="0.10790273556231003" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/layout/test_chat.xml" value="0.1852355072463768" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/menu/menu.xml" value="0.24114583333333334" />
         <entry key="..\:/Users/kim/AndroidStudioProjects/chat_de/app/src/main/res/menu/menu_chatting_addfr.xml" value="0.1953125" />
-        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat_user_list.xml" value="0.20104166666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2640625" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/activity_chat_room_list.xml" value="0.24791666666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/activity_room.xml" value="0.24791666666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/activity_user_list.xml" value="0.25" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/activity_user_list2.xml" value="0.1" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat.xml" value="0.35052083333333334" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat_list.xml" value="0.33" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/chat_user_list.xml" value="0.33" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/fragment_chat_room_list.xml" value="0.2359375" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_element_center_system.xml" value="0.24791666666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_element_left_image.xml" value="0.24791666666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_element_left_text.xml" value="0.24791666666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_element_right_image.xml" value="0.24791666666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_element_right_text.xml" value="0.24791666666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/recycler_item.xml" value="0.33" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/room_center_item_list.xml" value="0.35052083333333334" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/room_left_item_list_image.xml" value="0.35052083333333334" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/room_left_item_list_text.xml" value="0.35052083333333334" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/room_right_item_list_image.xml" value="0.35052083333333334" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/room_right_item_list_text.xml" value="0.35052083333333334" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/test_chat.xml" value="0.35052083333333334" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/menu/meun_user_list.xml" value="0.25" />
       </map>
     </option>
   </component>

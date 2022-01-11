@@ -113,7 +113,6 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         classifyAdd(new UserListItem("user2","",10,"whs"));
         classifyAdd(new UserListItem("user3","",30,"rke"));
         classifyAdd(new UserListItem("user4","https://t1.daumcdn.net/cfile/blog/2455914A56ADB1E315",20,"df"));
-        classifyAdd(new UserListItem("user5","https://t1.daumcdn.net/cfile/blog/216CB83A54295C1C0E",40,"rkwere"));
     }
     private void classifyAdd(@NonNull UserListItem item){
         userList[(item.getGeneration()-1)/10].add(item);

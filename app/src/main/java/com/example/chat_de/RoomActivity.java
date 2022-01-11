@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -33,12 +34,9 @@ import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
-
+    private ActivityRoomBinding binding;
     //private ListView chat_view;
-    private EditText chat_edit;
-    private Button chat_send;
-    private ImageButton file_send;
-    private RecyclerView recyclerView;
+
     private int GALLEY_CODE = 10;
     private String chatRoomKey;
     private String userKey = "user2";
@@ -53,27 +51,24 @@ public class RoomActivity extends AppCompatActivity {
     private int index=-1;
 
     Uri filePath;
-    ImageView ivPreview;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = ActivityRoomBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
-        setContentView(R.layout.activity_room);
-        recyclerView=findViewById(R.id.RecyclerView);
 
         //리사이클러뷰에 일부 데이터를 저장 후 화면에 띄우기
-        recyclerView.setItemViewCacheSize(20);
-
-        chat_edit =  findViewById(R.id.chat_edit);
-        chat_send =  findViewById(R.id.chat_sent);
-        file_send =  findViewById(R.id.file_send);
+        binding.RecyclerView.setItemViewCacheSize(20);
 
         //액션바 타이틀 바 이름 설정
         ActionBar ab = getSupportActionBar() ;
         ab.setTitle(chatRoomKey.toString()) ;
 
         // 메시지 전송 버튼에 대한 클릭 리스너 지정
-        chat_send.setOnClickListener(new View.OnClickListener() {
+        binding.chatSent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sendMessage();
@@ -81,7 +76,7 @@ public class RoomActivity extends AppCompatActivity {
         });
 
         //파일 이미지 버튼에 대한 클릭 리스너 지정
-        file_send.setOnClickListener(new View.OnClickListener(){
+        binding.fileSend.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
                 StorageReference rootRef = firebaseStorage.getReference();
@@ -96,8 +91,8 @@ public class RoomActivity extends AppCompatActivity {
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
         ChatDB.messageAddEventListener(chatRoomKey, item -> {
             addMessage(item, dataList);
-            recyclerView.scrollToPosition(dataList.size() - 1);
-            recyclerView.setAdapter(new RoomElementAdapter(dataList));
+            binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+            binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList));
         });
         getMessageList(10);
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
@@ -134,11 +129,11 @@ public class RoomActivity extends AppCompatActivity {
 
     //max에 지정된 개수까지 메세지 내용을 불러옴
     private void getMessageList(int max){
-        dataList = new ArrayList<>();
+        dataList = new ArrayList<Chat>();
         LinearLayoutManager manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
-        recyclerView.setLayoutManager(manager);
-        recyclerView.scrollToPosition(dataList.size()-1);
-        recyclerView.setAdapter(new RoomElementAdapter(dataList));
+        binding.RecyclerView.setLayoutManager(manager);
+        binding.RecyclerView.scrollToPosition(dataList.size()-1);
+        binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList));
     }
 
     private void addMessage(Chat dataItem, ArrayList<Chat> adapter) {
@@ -171,12 +166,12 @@ public class RoomActivity extends AppCompatActivity {
 
     //메세지를 보내고 메세지 내용 파이어베이스에 저장
     private void sendMessage(){
-        if (chat_edit.getText().toString().equals(""))
+        if (binding.chatEdit.getText().toString().equals(""))
             return;
 
         // USER_NAME 나중에 userKey로 바꿔줘야함
-        ChatDB.uploadMessage(chat_edit.getText().toString(), ++index, messageType, chatRoomKey, userKey);
-        chat_edit.setText(""); //입력창 초기화
+        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, userKey);
+        binding.chatEdit.setText(""); //입력창 초기화
     }
     //유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser(){

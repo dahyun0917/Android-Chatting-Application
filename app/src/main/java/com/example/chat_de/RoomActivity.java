@@ -15,17 +15,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
-import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomUser;
-import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -55,7 +49,7 @@ public class RoomActivity extends AppCompatActivity {
 
     private ArrayList<Chat> dataList;
 
-    private HashMap<String, ChatRoomUser> userList;
+    private HashMap<String, ChatRoomUser> userList  = new HashMap<>();
 
     private int index=-1;
 
@@ -92,27 +86,30 @@ public class RoomActivity extends AppCompatActivity {
                 gallery_access();
             }
         });
-        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
-        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
-        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
-        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
-        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
-        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
-        userList= new HashMap<String,ChatRoomUser>(){{
-            put("user1",usertest1);
-            put("user2",usertest2);
-            put("user3",usertest3);
-        }};
+//        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
+//        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
+//        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
+//        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
+//        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
+//        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
+//        userList= new HashMap<String,ChatRoomUser>(){{
+//            put("user1",usertest1);
+//            put("user2",usertest2);
+//            put("user3",usertest3);
+//        }};
     }
 
     @Override
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
-        ChatDB.messageAddEventListener(chatRoomKey, item -> {
+        ChatDB.userListChangedEventListener(chatRoomKey, item -> {
+            userList.put(item.first, item.second);
+        });
+        ChatDB.messageAddedEventListener(chatRoomKey, item -> {
             addMessage(item, dataList);
             binding.RecyclerView.scrollToPosition(dataList.size() - 1);
-            binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList,userList));
+            binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList, userList));
         });
         getMessageList(10);
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
@@ -140,7 +137,7 @@ public class RoomActivity extends AppCompatActivity {
                 inviteUser();
                 break;
             case R.id.user_list:
-                showjoinuserlist();
+                showJoinedUserList();
                 break;
             default:
                 break;
@@ -149,8 +146,8 @@ public class RoomActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void showjoinuserlist(){
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
+    private void showJoinedUserList(){
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("참가자"); //제목
         for(String i : userList.keySet()){

@@ -7,12 +7,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,6 +23,9 @@ import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
+import com.example.chat_de.datas.ChatRoom;
+import com.example.chat_de.datas.ChatRoomUser;
+import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -30,6 +35,7 @@ import com.google.firebase.storage.UploadTask;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {
@@ -48,6 +54,9 @@ public class RoomActivity extends AppCompatActivity {
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
     private ArrayList<Chat> dataList;
+
+    private HashMap<String, ChatRoomUser> userList;
+
     private int index=-1;
 
     Uri filePath;
@@ -83,6 +92,14 @@ public class RoomActivity extends AppCompatActivity {
                 gallery_access();
             }
         });
+        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
+        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
+        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
+        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
+        userList= new HashMap<String,ChatRoomUser>(){{
+            put("user1",usertest1);
+            put("user2",usertest2);
+        }};
     }
 
     @Override
@@ -119,6 +136,9 @@ public class RoomActivity extends AppCompatActivity {
             case R.id.add_fr:
                 inviteUser();
                 break;
+            case R.id.user_list:
+                showjoinuserlist();
+                break;
             default:
                 break;
         }
@@ -126,7 +146,17 @@ public class RoomActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    private void showjoinuserlist(){
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
+        AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
+        dlg.setTitle("참가자"); //제목
+        for(String i : userList.keySet()){
+            adapter.add(userList.get(i).getUserMeta().getName());
+        }
+        dlg.setAdapter(adapter,null);
+        dlg.setPositiveButton("확인", null);
+        dlg.show();
+    }
     //max에 지정된 개수까지 메세지 내용을 불러옴
     private void getMessageList(int max){
         dataList = new ArrayList<Chat>();

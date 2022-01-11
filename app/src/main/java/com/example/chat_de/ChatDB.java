@@ -6,13 +6,17 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 
 import com.example.chat_de.datas.Chat;
+import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
+import com.example.chat_de.datas.User;
+import com.example.chat_de.datas.UserChatRoom;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,23 +49,71 @@ public class ChatDB {
         return rootPath;
     }
 
+    public static void getUsersCompleteEventListener(RoomElementEventListener<HashMap<String, User>> listener) {
+        ref.child(USERS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                HashMap<String, User> item = snapshot.getValue(HashMap.class);
+                listener.eventListener(item);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FRD", "Can not get users");
+                listener.eventListener(new HashMap<>());
+            }
+        });        
+    }
+    public static void setChatRoom(String chatRoomName, ArrayList<UserListItem> items, String callUserName, RoomElementEventListener<String> listener) {
+        final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(callUserName, ChatRoomMeta.Type.BY_USER);
+        ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
+        ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
+            final String chatRoomKey = rf.getKey();
+            final String U_J_PATH = "/" + USER_JOINED + "/";
+            final String C_J_PATH = "/" + CHAT_ROOM_JOINED + "/";
+            HashMap<String, Object> result = new HashMap<>();
+            // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
+            for(UserListItem item: items) {
+                result.put(C_J_PATH + chatRoomKey + "/" + item.getUserKey(), new ChatRoomUser(item.getUserMeta()));
+            }
+            // userJoined의 userKey들에 새로운 chatRoom 추가
+            for(UserListItem item: items) {
+                result.put(U_J_PATH + item.getUserKey() + "/" + chatRoomKey, new UserChatRoom(chatRoomMeta));
+            }
+            // 종합한 값들을 최종적으로 update
+            ref.updateChildren(result).addOnCompleteListener(task -> {
+                //TODO upload system message
+                String message = callUserName+"님이 새 채팅방을 생성하셨습니다.";
+                uploadMessage(message, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM");
+            });
+
+            listener.eventListener(chatRoomKey);
+        });
+    }
+
+    public static void userListChangeEventListener(RoomElementEventListener<HashMap<String, ChatRoomUser>> listener) {
+
+    }
+
     public static void uploadMessage(String message, int index, Chat.Type messageType, String chatRoomKey, String userKey) {
         Chat chat = new Chat(message, index, userKey, messageType);
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHATS).push().setValue(chat); // 데이터 푸시
-        ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_TIME).setValue(chat.getDate()); // 완전히 정확할 필요는 없으니 서버와 통신 줄이고자 이렇게 처리
-        ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).setValue(index);
-        userReadMessageIndex(index, chatRoomKey, userKey);
-        //밑 부분은 firebase function으로 구현가능하면 그걸로 구현하는 것이 더 좋을 듯
-        ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()) {
-                HashMap<String, ChatRoomUser> users = (HashMap<String, ChatRoomUser>) task.getResult().getValue();
-                for (String key: users.keySet()) {
-                    ref.child(USER_JOINED).child(key).child(chatRoomKey).child(LAST_MESSAGE_INDEX).setValue(index);
+        if(messageType != Chat.Type.SYSTEM) {
+            ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_TIME).setValue(chat.getDate()); // 완전히 정확할 필요는 없으니 서버와 통신 줄이고자 이렇게 처리
+            ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).setValue(index);
+            userReadMessageIndex(index, chatRoomKey, userKey);
+            //밑 부분은 firebase function으로 구현가능하면 그걸로 구현하는 것이 더 좋을 듯
+            ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    HashMap<String, ChatRoomUser> users = (HashMap<String, ChatRoomUser>) task.getResult().getValue();
+                    for (String key : users.keySet()) {
+                        ref.child(USER_JOINED).child(key).child(chatRoomKey).child(LAST_MESSAGE_INDEX).setValue(index);
+                    }
+                } else {
+                    Log.e("FRD", "Can not get users of: " + chatRoomKey);
                 }
-            } else {
-                Log.e("FDB", "Can not get users of: " + chatRoomKey);
-            }
-        });
+            });
+        }
     }
 
     public static void userReadLatestMessage(String chatRoomKey, String userKey) {
@@ -69,7 +121,7 @@ public class ChatDB {
             if(task.isSuccessful()) {
                 userReadMessageIndex(task.getResult().getValue(Integer.class), chatRoomKey, userKey);
             } else {
-                Log.e("FDB", "Can not get a lastMessageIndex of: " + chatRoomKey);
+                Log.e("FRD", "Can not get a lastMessageIndex of: " + chatRoomKey);
             }
         });
     }
@@ -113,7 +165,7 @@ public class ChatDB {
             eventListeners.put(CLASS_NAME, new ArrayList<>());
         eventListeners.get(CLASS_NAME).add(new Pair<>(PATH, firebaseListener));
     }
-    public static void chatRoomAddEventListener(String userKey, RoomElementEventListener<ChatRoomMeta> listener) {
+    public static void chatRoomListChangeEventListener(String userKey, RoomElementEventListener<ChatRoomMeta> listener) {
         class childAddedEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {

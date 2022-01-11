@@ -4,6 +4,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoom;
@@ -91,10 +92,6 @@ public class ChatDB {
         });
     }
 
-    public static void userListChangeEventListener(RoomElementEventListener<HashMap<String, ChatRoomUser>> listener) {
-
-    }
-
     public static void uploadMessage(String message, int index, Chat.Type messageType, String chatRoomKey, String userKey) {
         Chat chat = new Chat(message, index, userKey, messageType);
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHATS).push().setValue(chat); // 데이터 푸시
@@ -129,77 +126,84 @@ public class ChatDB {
         ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).child(userKey).child(LAST_READ_INDEX).setValue(index);
     }
 
-    public static void messageAddEventListener(String chatRoomKey, RoomElementEventListener<Chat> listener) {
-        class childAddedEventListener implements ChildEventListener {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
-                listener.eventListener(dataSnapshot.getValue(Chat.class));
-            }
+    public static void messageAddedEventListener(String chatRoomKey, RoomElementEventListener<Chat> listener) {
+        addEventListener(CHAT_ROOMS + '/' + chatRoomKey + '/' + CHATS,
+                Thread.currentThread().getStackTrace()[3].getClassName(),
+                new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
+                        listener.eventListener(dataSnapshot.getValue(Chat.class));
+                    }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-            }
+                    }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-            }
+                    }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-            }
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-            }
-        }
-        childAddedEventListener firebaseListener = new childAddedEventListener();
-        final String CLASS_NAME = Thread.currentThread().getStackTrace()[3].getClassName();
-        final String PATH = CHAT_ROOMS + '/' + chatRoomKey + '/' + CHATS;
-
-        ref.child(PATH).addChildEventListener(firebaseListener);
-        if(!eventListeners.containsKey(CLASS_NAME))
-            eventListeners.put(CLASS_NAME, new ArrayList<>());
-        eventListeners.get(CLASS_NAME).add(new Pair<>(PATH, firebaseListener));
+                    }
+                });
     }
-    public static void chatRoomListChangeEventListener(String userKey, RoomElementEventListener<ChatRoomMeta> listener) {
-        class childAddedEventListener implements ChildEventListener {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
-                listener.eventListener(dataSnapshot.getValue(ChatRoomMeta.class));
-            }
+    public static void userListChangedEventListener(String chatRoomKey, RoomElementEventListener<Pair<String, ChatRoomUser>> listener) {
+        addEventListener(CHAT_ROOM_JOINED + '/' + chatRoomKey,
+                Thread.currentThread().getStackTrace()[3].getClassName(),
+                new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                        listener.eventListener(new Pair<>(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class)));
+                    }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                //TODO 작업해야함
-            }
+                    @Override
+                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                        listener.eventListener(new Pair<>(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class)));
+                    }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                //TODO 작업해야함
-            }
+                    @Override
+                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    }
 
-            }
+                    @Override
+                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                    }
 
-            }
-        }
-        //       setChildEventListener(CHAT_ROOMS + '/' + chatRoomKey + '/' + CHATS, listener, ChatRoomMeta.class);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
+    public static void chatRoomListChangedEventListener(String userKey, RoomElementEventListener<ChatRoomMeta> listener) {
+        //TODO
+    }
+    private static void addEventListener(String path, String className, ChildEventListener eventListener) {
+        ref.child(path).addChildEventListener(eventListener);
+        if(!eventListeners.containsKey(className)) {
+            eventListeners.put(className, new ArrayList<>());
+        }
+        eventListeners.get(className).add(new Pair<>(path, eventListener));
+    }
+
+
 
     public static void removeEventListenerBindOnThis() {
         final String CLASS_NAME = Thread.currentThread().getStackTrace()[3].getClassName();
 
         if(eventListeners.containsKey(CLASS_NAME)) {
-            for(Pair<String, ChildEventListener> i : eventListeners.get(CLASS_NAME)) {
+            for(Pair<String, ChildEventListener> i: eventListeners.get(CLASS_NAME)) {
                 ref.child(i.first).removeEventListener(i.second);
             }
             eventListeners.get(CLASS_NAME).clear();

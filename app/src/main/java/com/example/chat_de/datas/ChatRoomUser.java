@@ -8,26 +8,33 @@ import com.google.firebase.database.IgnoreExtraProperties;
 public class ChatRoomUser {
     private int lastReadIndex;
     private User userMeta;
-    private String userKey;
 
     public ChatRoomUser() { }
-    public ChatRoomUser(int lastReadIndex, String userKey, User userMeta) {
+    public ChatRoomUser(int lastReadIndex, User userMeta) {
         setLastReadIndex(lastReadIndex);
-        setUserKey(userKey);
+        setUserMeta(userMeta);
+    }
+    public ChatRoomUser(User userMeta) {
+        setLastReadIndex(-1);
         setUserMeta(userMeta);
     }
     //Copy constructor
     public ChatRoomUser(@NonNull ChatRoomUser original) {
         setLastReadIndex(original.getLastReadIndex());
-        setUserKey(original.getUserKey());
         setUserMeta(new User(original.getUserMeta()));
     }
 
     public int getLastReadIndex()   { return lastReadIndex; }
-    public String getUserKey()      { return userKey; }
     public User getUserMeta()       { return userMeta; }
+    public String takeName()        { return userMeta.getName(); }
+    public String takePictureURL()  { return userMeta.getPictureURL(); }
+    public int takeGeneration()     { return userMeta.getGeneration(); }
+    public String takeUserKey()     { return userMeta.getUserKey(); }
 
     public void setLastReadIndex(int lastReadIndex) { this.lastReadIndex = lastReadIndex; }
-    public void setUserKey(String userKey)          { this.userKey = userKey; }
-    public void setUserMeta(User userMeta)        { this.userMeta = userMeta; }
+    public void setUserMeta(User userMeta)          { this.userMeta = userMeta; }
+    public void setName(String name)                { this.userMeta.setName(name); }
+    public void setPictureURL(String pictureURL)    { this.userMeta.setPictureURL(pictureURL); }
+    public void setGeneration(int generation)       { this.userMeta.setGeneration(generation); }
+    public void setUserKey(String userKey)          { this.userMeta.setUserKey(userKey); }
 }

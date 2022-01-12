@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
+    <!--<TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20sp"
@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/makeChat"
-        android:text="채팅방 만들기"/>
+        android:text="채팅방 만들기"/>-->
     <ListView
         android:id="@+id/listview"
         android:transcriptMode="alwaysScroll"

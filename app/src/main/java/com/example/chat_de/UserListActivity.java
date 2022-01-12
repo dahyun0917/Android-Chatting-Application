@@ -235,6 +235,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                         //TODO 현재는 비동기적이라서 inputChatRoomName()이 끝나기 전에 createChatRoom()가 실행되는 문제가 있다
                         //inputChatRoomName();
                         createChatRoom();
+                        finish();//액티비티 종료
                     }
                     else if(mode==INVITE_CHAT){
                         //초대하기

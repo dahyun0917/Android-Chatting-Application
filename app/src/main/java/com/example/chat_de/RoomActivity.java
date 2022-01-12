@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomUser;
+import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -35,6 +36,8 @@ import java.util.ListIterator;
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
     private ActivityRoomBinding binding;
+    private RoomElementAdapter roomElementAdapter;
+    private LinearLayoutManager manager;
     //private ListView chat_view;
 
     private int GALLEY_CODE = 10;
@@ -47,24 +50,45 @@ public class RoomActivity extends AppCompatActivity {
 
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
-    private ArrayList<Chat> dataList;
+    private ArrayList<Chat> dataList = new ArrayList<>();
 
     private HashMap<String, ChatRoomUser> userList  = new HashMap<>();
 
     private int index=-1;
-
+    private boolean isLoading = false;
     Uri filePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //바인딩 설정
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-        chatRoomKey = getIntent().getStringExtra("chatRoomKey");
 
-        //리사이클러뷰에 일부 데이터를 저장 후 화면에 띄우기
-        binding.RecyclerView.setItemViewCacheSize(50);
+        //화면 기본 설정
+        setUpRoomActivity();
+
+        //test용 데이터
+        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
+        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
+        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
+        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
+        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
+        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
+        userList= new HashMap<String,ChatRoomUser>(){{
+            put("user1",usertest1);
+            put("user2",usertest2);
+            put("user3",usertest3);
+        }};
+    }
+    public void setUpRoomActivity(){
+        //리사이클러뷰 설정
+        initRecyclerView();
+        //populateData();
+        //initScrollListener();
+
+        chatRoomKey = getIntent().getStringExtra("chatRoomKey");
 
         //액션바 타이틀 바 이름 설정
         ActionBar ab = getSupportActionBar() ;
@@ -83,38 +107,74 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 StorageReference rootRef = firebaseStorage.getReference();
-                gallery_access();
+                galleryAccess();
             }
         });
-//        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
-//        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
-//        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
-//        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
-//        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
-//        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
-//        userList= new HashMap<String,ChatRoomUser>(){{
-//            put("user1",usertest1);
-//            put("user2",usertest2);
-//            put("user3",usertest3);
-//        }};
     }
+    /*private void populateData() {
+        int i = 0;
+        while (i < 10) {
+
+        }
+    }*/
+    /*private void initScrollListener() {
+        binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (isLoading) {
+                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == rowsArrayList.size() - 1) {
+                        //bottom of list!
+                        //loadMore();
+                        isLoading = true;
+                    }
+                }
+            }
+        });
+    }*/
+    /*private void loadMore() {
+        dataList.add(null);
+        recyclerViewAdapter.notifyItemInserted(rowsArrayList.size() - 1);
+
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dataList.remove(dataList.size() - 1);
+                int scrollPosition = dataList.size();
+                recyclerViewAdapter.notifyItemRemoved(scrollPosition);
+                int currentSize = scrollPosition;
+                int nextLimit = currentSize + 10;
+
+                while (currentSize - 1 < nextLimit) {
+                    //dataList.add("Item " + currentSize);
+                    currentSize++;
+                }
+
+                recyclerViewAdapter.notifyDataSetChanged();
+                isLoading = false;
+            }
+        }, 2000);
+    }*/
 
     @Override
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
-        ChatDB.userListChangedEventListener(chatRoomKey, item -> {
-            userList.put(item.first, item.second);
-        });
         ChatDB.messageAddedEventListener(chatRoomKey, item -> {
-            addMessage(item, dataList);
-            binding.RecyclerView.scrollToPosition(dataList.size() - 1);
-            binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList, userList));
+            floatMessage(item);
         });
-        getMessageList(10);
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
     }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -146,8 +206,16 @@ public class RoomActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void initRecyclerView(){
+        binding.RecyclerView.setItemViewCacheSize(50);
+        manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
+        binding.RecyclerView.setLayoutManager(manager);
+        roomElementAdapter = new RoomElementAdapter(dataList,userList);
+        binding.RecyclerView.setAdapter(roomElementAdapter);
+    }
+
     private void showJoinedUserList(){
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("참가자"); //제목
         for(String i : userList.keySet()){
@@ -157,18 +225,11 @@ public class RoomActivity extends AppCompatActivity {
         dlg.setPositiveButton("확인", null);
         dlg.show();
     }
-    //max에 지정된 개수까지 메세지 내용을 불러옴
-    private void getMessageList(int max){
-        dataList = new ArrayList<Chat>();
-        LinearLayoutManager manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
-        binding.RecyclerView.setLayoutManager(manager);
-        binding.RecyclerView.scrollToPosition(dataList.size()-1);
-        binding.RecyclerView.setAdapter(new RoomElementAdapter(dataList,userList));
-    }
 
-    private void addMessage(Chat dataItem, ArrayList<Chat> adapter) {
+    //파이어베이스에 메세지가 추가되었을때, 메세지를 화면에 띄워줌.(기존 addMessage)
+    private void floatMessage(Chat dataItem) {
         //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
-        ListIterator i = adapter.listIterator(adapter.size());
+        ListIterator i = dataList.listIterator(dataList.size());
         final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
         final String DAY = SDF.format(dataItem.normalDate());
         while(i.hasPrevious()) {
@@ -178,23 +239,26 @@ public class RoomActivity extends AppCompatActivity {
                 if (!SDF.format(chat.normalDate()).equals(DAY)) {
                     Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
                     daySystemChat.setDate(dataItem.unixTime());
-                    adapter.add(daySystemChat);
+                    dataList.add(daySystemChat);
                 }
                 break;
             }
         }
 
+        //TODO: 수정필요
         if(dataItem.getType() != Chat.Type.SYSTEM)
             index = dataItem.getIndex();
 
-        adapter.add(new Chat(dataItem));
+        dataList.add(new Chat(dataItem));
+        roomElementAdapter.setUserList(dataList, userList);
+        binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+    }
+    //채팅방 정보 불러옴
+    private void getChatRoomMeta() {
+        //TODO : 채팅방 정보 불러오기
     }
 
-    private void getChatRoomMeta() { //채팅방 정보 불러옴
-
-    }
-
-    //메세지를 보내고 메세지 내용 파이어베이스에 저장
+    //사용자가 send 버튼 눌렀을때, 메세지를 보내고 메세지 내용 파이어베이스에 저장
     private void sendMessage(){
         if (binding.chatEdit.getText().toString().equals(""))
             return;
@@ -203,7 +267,7 @@ public class RoomActivity extends AppCompatActivity {
         ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, userKey);
         binding.chatEdit.setText(""); //입력창 초기화
     }
-    //유저추가 액티비티로 보낼 데이터 저장 후 intent
+    //초대하기->유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser(){
         Intent intent = new Intent(this, UserListActivity.class);
         intent.putExtra("tag",2);
@@ -211,8 +275,9 @@ public class RoomActivity extends AppCompatActivity {
         intent.putExtra("where", chatRoomKey);
         startActivity(intent);
     }
+
     //사용자 갤러리로 접근
-    private void gallery_access(){
+    private void galleryAccess(){
 
         //갤러리만
         /*Intent intent = new Intent(Intent.ACTION_PICK);
@@ -228,19 +293,16 @@ public class RoomActivity extends AppCompatActivity {
 
 
     }
-
     //갤러리 액티비티에서 결과값을 제대로 받았는지 확인
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == GALLEY_CODE &&resultCode == RESULT_OK){
             filePath = data.getData();
-            //Log.d("TAG", "uri:" + String.valueOf(filePath));
             if(filePath!=null)
                 uploadFile();
         }
     }
-
     //firebase storage에 업로드하기
     public void uploadFile() {
 
@@ -249,7 +311,7 @@ public class RoomActivity extends AppCompatActivity {
         String filename = sdf.format(new Date()) + "_" + userKey + ".jpg";
 
         //uploads라는 폴더가 없으면 자동 생성
-        //chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각
+        //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각
         StorageReference imgRef = firebaseStorage.getReference("uploads/" + filename);
 
         //이미지 파일 업로드

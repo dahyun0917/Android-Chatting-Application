@@ -12,11 +12,14 @@ import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.User;
 import com.example.chat_de.datas.UserChatRoom;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -32,6 +35,7 @@ public class ChatDB {
     public static final String USERS = "users";
     public static final String CHAT_ROOM_JOINED = "chatRoomJoined";
     public static final String USER_JOINED = "userJoined";
+    public static final String DATE = "date";
 
     private static DatabaseReference ref = null;
     private static final HashMap<String, ArrayList<Pair<String, ChildEventListener>>> eventListeners = new HashMap<>();
@@ -65,48 +69,62 @@ public class ChatDB {
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(callUserName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
-            final String chatRoomKey = rf.getKey();
-            final String U_J_PATH = "/" + USER_JOINED + "/";
-            final String C_J_PATH = "/" + CHAT_ROOM_JOINED + "/";
-            HashMap<String, Object> result = new HashMap<>();
-            // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
-            for(UserListItem item: items) {
-                result.put(C_J_PATH + chatRoomKey + "/" + item.getUserKey(), new ChatRoomUser(item.getUserMeta()));
-            }
-            // userJoined의 userKey들에 새로운 chatRoom 추가
-            for(UserListItem item: items) {
-                result.put(U_J_PATH + item.getUserKey() + "/" + chatRoomKey, new UserChatRoom(chatRoomMeta));
-            }
-            // 종합한 값들을 최종적으로 update
-            ref.updateChildren(result).addOnCompleteListener(task -> {
-                //TODO upload system message
-                String message = callUserName+"님이 새 채팅방을 생성하셨습니다.";
-                uploadMessage(message, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM");
-            });
+            if(error == null) {
+                final String chatRoomKey = rf.getKey();
+                HashMap<String, Object> result = new HashMap<>();
+                for (UserListItem item : items) {
+                    // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
+                    result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, item.getUserKey()), new ChatRoomUser(item.getUserMeta()));
+                    // userJoined의 userKey들에 새로운 chatRoom 추가
+                    result.put(makePath(USER_JOINED, item.getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
+                }
+                // 종합한 값들을 최종적으로 update
+                ref.updateChildren(result).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        String message = callUserName + "님이 새 채팅방을 생성하셨습니다.";
+                        uploadMessage(message, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM", new HashMap<>());
+                    } else {
+                        Log.e("FRD", "Can not update data of users and the new chat room");
+                    }
+                });
 
-            listener.eventListener(chatRoomKey);
+                listener.eventListener(chatRoomKey);
+            } else {
+                Log.e("FDB", "Make chat room error: " + error.toString());
+            }
         });
     }
 
-    public static void uploadMessage(String message, int index, Chat.Type messageType, String chatRoomKey, String userKey) {
-        Chat chat = new Chat(message, index, userKey, messageType);
-        ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHATS).push().setValue(chat); // 데이터 푸시
-        if(messageType != Chat.Type.SYSTEM) {
-            ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_TIME).setValue(chat.getDate()); // 완전히 정확할 필요는 없으니 서버와 통신 줄이고자 이렇게 처리
-            ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).setValue(index);
-            userReadMessageIndex(index, chatRoomKey, userKey);
-            //밑 부분은 firebase function으로 구현가능하면 그걸로 구현하는 것이 더 좋을 듯
-            ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    HashMap<String, HashMap<String, Object>> users = (HashMap<String, HashMap<String, Object>>)task.getResult().getValue();
-                    for (String key: users.keySet()) {
-                        ref.child(USER_JOINED).child(key).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).setValue(index);
+    public static void uploadMessage(String message, int index, Chat.Type messageType, String chatRoomKey, String userKey, HashMap<String, ChatRoomUser> chatRoomUserList) {
+        // upload message
+        ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHATS).push().setValue(new Chat(message, index, userKey, messageType), (error, rf) -> {
+            if(error == null && messageType != Chat.Type.SYSTEM) {
+                rf.child(DATE).get().addOnCompleteListener(task -> {
+                    Object serverTime;
+                    if(task.isSuccessful()) {
+                        serverTime = task.getResult().getValue();
+                    } else {
+                        serverTime = ServerValue.TIMESTAMP;
+                        Log.e("FRD", "Can not get a server time");
                     }
-                } else {
-                    Log.e("FRD", "Can not get users of: " + chatRoomKey);
-                }
-            });
-        }
+                    HashMap<String, Object> result = new HashMap<>();
+                    // update user read last message
+                    result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userKey, LAST_READ_INDEX), index);
+                    // update chat room's last message index and time
+                    result.put(makePath(CHAT_ROOMS, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_INDEX), index);
+                    result.put(makePath(CHAT_ROOMS, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_TIME), serverTime);
+                    // update last message index and time of all users in the chat room
+                    for(String key: chatRoomUserList.keySet()) {
+                        result.put(makePath(USER_JOINED, key, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_INDEX), index);
+                        result.put(makePath(USER_JOINED, key, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_TIME), serverTime);
+                    }
+                    // update
+                    ref.updateChildren(result);
+                });
+            } else if(error != null) {
+                Log.e("FRD", "Upload message error:" + error.toString());
+            }
+        });
     }
 
     public static void userReadLatestMessage(String chatRoomKey, String userKey) {
@@ -193,7 +211,15 @@ public class ChatDB {
         eventListeners.get(className).add(new Pair<>(path, eventListener));
     }
 
+    @NonNull
+    private static String makePath(String... strings) {
+        StringBuilder ret = new StringBuilder();
+        for(String str: strings) {
+            ret.append("/" + str);
+        }
 
+        return ret.toString();
+    }
 
     public static void removeEventListenerBindOnThis() {
         final String CLASS_NAME = Thread.currentThread().getStackTrace()[3].getClassName();

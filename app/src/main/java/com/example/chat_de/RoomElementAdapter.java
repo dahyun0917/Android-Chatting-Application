@@ -20,8 +20,9 @@ import com.example.chat_de.databinding.ItemElementLeftTextBinding;
 import com.example.chat_de.databinding.ItemElementLoadingBinding;
 import com.example.chat_de.databinding.ItemElementRightImageBinding;
 import com.example.chat_de.databinding.ItemElementRightTextBinding;
-import com.example.chat_de.databinding.ItemRecyclerUserListBinding;
 import com.example.chat_de.datas.Chat;
+import com.example.chat_de.datas.ChatRoom;
+import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.ViewType;
 
@@ -30,21 +31,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<Chat> myDataList;
     private enum MessageType { TEXT, IMAGE };
     private MessageType messageType;
     private HashMap<String, ChatRoomUser> myUserList;
-    private ChatRoomUser UserList;
+    private ChatRoomUser userList;
+    private int indexDifferent=0;
 
     public RoomElementAdapter(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> userList){
         myDataList = dataList;
         myUserList = userList;
     }
 
-    public void setUserList(ArrayList<Chat> dataList, HashMap<String, ChatRoomUser> userList){
+    public void setUserList(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> userList){
         myDataList = dataList;
         myUserList = userList;
         this.notifyDataSetChanged();
@@ -87,38 +87,47 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         //DateFormat df = new SimpleDateFormat("a HH:mm");
         //String str=df.format(myDataList.get(position).normalDate());
+        final Chat item= myDataList.get(position);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
-        String str= simpleDateFormat.format(myDataList.get(position).normalDate());
+        String str= simpleDateFormat.format(item.normalDate());
 
 
         if(viewHolder instanceof CenterViewHolder){
-            ((CenterViewHolder)viewHolder).centerSystemBinding.textv.setText(myDataList.get(position).getText());
+            ((CenterViewHolder)viewHolder).centerSystemBinding.textv.setText(item.getText());
         }else if(viewHolder instanceof LoadingViewHolder){
             showLoadingView((LoadingViewHolder)viewHolder,position);
         }
         else if(viewHolder instanceof LeftViewHolder){
             if(messageType.equals(MessageType.TEXT)) {
-                ((LeftViewHolder) viewHolder).leftTextBinding.textvMsg.setText(myDataList.get(position).getText());
-                ((LeftViewHolder) viewHolder).leftTextBinding.textvNicname.setText(UserList.getUserMeta().getName());
+                ((LeftViewHolder) viewHolder).leftTextBinding.textvMsg.setText(item.getText());
+                ((LeftViewHolder) viewHolder).leftTextBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((LeftViewHolder) viewHolder).leftTextBinding.textvTime.setText(str);
-                Glide.with(viewHolder.itemView.getContext()).load(UserList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftTextBinding.imgv);
+                if(indexDifferent!=0)
+                    ((LeftViewHolder) viewHolder).leftTextBinding.readnum.setText(String.valueOf(indexDifferent));
+                Glide.with(viewHolder.itemView.getContext()).load(userList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftTextBinding.imgv);
             }
             else{
                 Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftViewHolder)viewHolder).leftImageBinding.imagevMsg);
-                ((LeftViewHolder)viewHolder).leftImageBinding.textvNicname.setText(UserList.getUserMeta().getName());
+                ((LeftViewHolder)viewHolder).leftImageBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((LeftViewHolder)viewHolder).leftImageBinding.textvTime.setText(str);
-                Glide.with(viewHolder.itemView.getContext()).load(UserList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftImageBinding.imgv);
+                if(indexDifferent!=0)
+                    ((LeftViewHolder) viewHolder).leftImageBinding.readnum.setText(String.valueOf(indexDifferent));
+                Glide.with(viewHolder.itemView.getContext()).load(userList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftImageBinding.imgv);
             }
         }else{
             if(messageType.equals(MessageType.TEXT)){
-                ((RightViewHolder)viewHolder).rightTextBinding.textvMsg.setText(myDataList.get(position).getText());
-                ((RightViewHolder)viewHolder).rightTextBinding.textvNicname.setText(UserList.getUserMeta().getName());
+                ((RightViewHolder)viewHolder).rightTextBinding.textvMsg.setText(item.getText());
+                ((RightViewHolder)viewHolder).rightTextBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((RightViewHolder)viewHolder).rightTextBinding.textvTime.setText(str);
+                if(indexDifferent!=0)
+                    ((RightViewHolder) viewHolder).rightTextBinding.readnum.setText(String.valueOf(indexDifferent));
             }
             else{
                 Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((RightViewHolder)viewHolder).rightImageBinding.imagevMsg);
-                ((RightViewHolder)viewHolder).rightImageBinding.textvNicname.setText(UserList.getUserMeta().getName());
+                ((RightViewHolder)viewHolder).rightImageBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((RightViewHolder)viewHolder).rightImageBinding.textvTime.setText(str);
+                if(indexDifferent!=0)
+                    ((RightViewHolder) viewHolder).rightImageBinding.readnum.setText(String.valueOf(indexDifferent));
             }
         }
     }
@@ -137,23 +146,51 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     // 이 메소드는 ViewType때문에 오버라이딩 했음(구별할려고)
     @Override
     public int getItemViewType(int position) {
-        if(myDataList.get(position) == null)
-            return ViewType.LOADING;
+        /*//객체 생성
+        chatRoomMeta = new ChatRoomMeta();
+        chats = new HashMap<String,Chat>();
+        myDataList = new ArrayList<Chat>();
 
-        UserList = new ChatRoomUser();
+        //데이터 분리
+        chatRoomMeta=myChatRoom.getChatRoomMeta();
+        chats = myChatRoom.getChats();
+
+        //chat 값 들고오기
+        for(String i : chats.keySet()){
+            myDataList.add(chats.get(i));
+        }*/
+        final Chat item= myDataList.get(position);
+
+        Log.d("position", String.valueOf(position));
+        indexDifferent=0;    //하나의 메세지를 나타낼 때마다 초기화
+        userList = new ChatRoomUser();
+        if(item == null)
+            return ViewType.LOADING;
+        //hashmap에서 데이터 뽑아내기 : 같은 userkey일 때 value값 userList에 저장
         for(String i : myUserList.keySet()){
-            if(myDataList.get(position).getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())){
-                UserList=myUserList.get(i);
+            //indexDifferent++;  //참가자 총 명수
+            //Log.d("indexDifferent", String.valueOf(indexDifferent));
+
+            if(item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())){
+                userList =myUserList.get(i);
             }
+            if(item.getType().equals(Chat.Type.TEXT))
+                if(item.getIndex() > myUserList.get(i).getLastReadIndex())
+                    indexDifferent++;
         }
-        if(myDataList.get(position).getType().equals(Chat.Type.TEXT))
+        Log.d("indexDifferent_finish", String.valueOf(indexDifferent));
+
+
+        //채팅 타입(이미지, 텍스트) 정하기
+        if(item.getType().equals(Chat.Type.TEXT))
             messageType = MessageType.TEXT;
-        else if(myDataList.get(position).getType().equals(Chat.Type.IMAGE))
+        else if(item.getType().equals(Chat.Type.IMAGE))
             messageType = MessageType.IMAGE;
 
-        if(myDataList.get(position).getType().equals(Chat.Type.SYSTEM))
+        //채팅 위치 타입 (왼, 중간, 오) 정하기
+        if(item.getType().equals(Chat.Type.SYSTEM))
             return ViewType.CENTER_CONTENT;
-        else if((myDataList.get(position).getFrom().equals("user2")))
+        else if((item.getFrom().equals("user2"))) //사용자 key로 대체
             return ViewType.RIGHT_CONTENT;
         else
             return ViewType.LEFT_CONTENT;
@@ -181,7 +218,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     public class LeftViewHolder extends RecyclerView.ViewHolder{
-        //CircleImageView imgv;
         ItemElementLeftImageBinding leftImageBinding;
         ItemElementLeftTextBinding leftTextBinding;
 

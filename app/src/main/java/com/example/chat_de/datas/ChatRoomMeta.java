@@ -15,6 +15,7 @@ public class ChatRoomMeta {
     public ChatRoomMeta() { }
     public ChatRoomMeta(String name, Type type) {
         setName(name);
+        //setLastMessageIndex(-1);
         setLastMessageIndex(-1);
         setType(type);
         setLastMessageTime(0L);

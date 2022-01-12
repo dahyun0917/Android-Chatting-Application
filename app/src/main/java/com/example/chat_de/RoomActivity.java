@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
+import com.example.chat_de.datas.ChatRoom;
+import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -52,7 +54,10 @@ public class RoomActivity extends AppCompatActivity {
 
     private ArrayList<Chat> dataList = new ArrayList<>();
 
-    private HashMap<String, ChatRoomUser> userList;
+    private HashMap<String, ChatRoomUser> userList  = new HashMap<>(); //
+
+    //private HashMap<String,ChatRoomUser> chatRoomUserList;
+    private ChatRoom chatRoomUserList;
 
     private int index=-1;
     private boolean isLoading = false;
@@ -82,6 +87,17 @@ public class RoomActivity extends AppCompatActivity {
 //            put("user2",usertest2);
 //            put("user3",usertest3);
 //        }};
+        Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
+        Chat chat2 = new Chat("ho", 1,"user2", Chat.Type.TEXT);
+        Chat chat3 = new Chat("ha", 2,"user3", Chat.Type.TEXT);
+        HashMap<String,Chat> chats1 = new HashMap<String,Chat>(){{
+            put("111",chat1);
+            put("112",chat2);
+            put("113",chat3);
+        }};
+        ChatRoomMeta chatRoomMeta1 = new ChatRoomMeta("chatRoomTest", ChatRoomMeta.Type.BY_USER);
+        chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);
+
     }
     public void setUpRoomActivity(){
         //리사이클러뷰 설정

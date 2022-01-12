@@ -20,8 +20,8 @@ import com.example.chat_de.databinding.ItemElementLeftTextBinding;
 import com.example.chat_de.databinding.ItemElementLoadingBinding;
 import com.example.chat_de.databinding.ItemElementRightImageBinding;
 import com.example.chat_de.databinding.ItemElementRightTextBinding;
-import com.example.chat_de.databinding.ItemRecyclerUserListBinding;
 import com.example.chat_de.datas.Chat;
+import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.ViewType;
 
@@ -30,22 +30,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private ArrayList<Chat> myDataList;
+    //private ArrayList<Chat> myDataList;
+    private ChatRoom myChatRoom;
     private enum MessageType { TEXT, IMAGE };
     private MessageType messageType;
     private HashMap<String, ChatRoomUser> myUserList;
-    private ChatRoomUser UserList;
+    private ChatRoomUser userList;
 
-    public RoomElementAdapter(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> userList){
+    /*public RoomElementAdapter(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> userList){
         myDataList = dataList;
+        myUserList = userList;
+    }*/
+    public RoomElementAdapter(ChatRoom chatRoom,HashMap<String, ChatRoomUser> userList){
+        myChatRoom = chatRoom;
         myUserList = userList;
     }
 
-    public void setUserList(ArrayList<Chat> dataList, HashMap<String, ChatRoomUser> userList){
-        myDataList = dataList;
+    public void setUserList(ChatRoom chatRoom,HashMap<String, ChatRoomUser> userList){
+        myChatRoom = chatRoom;
         myUserList = userList;
         this.notifyDataSetChanged();
     }
@@ -99,26 +102,30 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         else if(viewHolder instanceof LeftViewHolder){
             if(messageType.equals(MessageType.TEXT)) {
                 ((LeftViewHolder) viewHolder).leftTextBinding.textvMsg.setText(myDataList.get(position).getText());
-                ((LeftViewHolder) viewHolder).leftTextBinding.textvNicname.setText(UserList.getUserMeta().getName());
+                ((LeftViewHolder) viewHolder).leftTextBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((LeftViewHolder) viewHolder).leftTextBinding.textvTime.setText(str);
-                Glide.with(viewHolder.itemView.getContext()).load(UserList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftTextBinding.imgv);
+                ((LeftViewHolder) viewHolder).leftTextBinding.readnum.setText("1");
+                Glide.with(viewHolder.itemView.getContext()).load(userList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftTextBinding.imgv);
             }
             else{
                 Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftViewHolder)viewHolder).leftImageBinding.imagevMsg);
-                ((LeftViewHolder)viewHolder).leftImageBinding.textvNicname.setText(UserList.getUserMeta().getName());
+                ((LeftViewHolder)viewHolder).leftImageBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((LeftViewHolder)viewHolder).leftImageBinding.textvTime.setText(str);
-                Glide.with(viewHolder.itemView.getContext()).load(UserList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftImageBinding.imgv);
+                ((LeftViewHolder)viewHolder).leftImageBinding.readnum.setText("1");
+                Glide.with(viewHolder.itemView.getContext()).load(userList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftImageBinding.imgv);
             }
         }else{
             if(messageType.equals(MessageType.TEXT)){
                 ((RightViewHolder)viewHolder).rightTextBinding.textvMsg.setText(myDataList.get(position).getText());
-                ((RightViewHolder)viewHolder).rightTextBinding.textvNicname.setText(UserList.getUserMeta().getName());
+                ((RightViewHolder)viewHolder).rightTextBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((RightViewHolder)viewHolder).rightTextBinding.textvTime.setText(str);
+                ((RightViewHolder)viewHolder).rightTextBinding.readnum.setText("1");
             }
             else{
                 Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((RightViewHolder)viewHolder).rightImageBinding.imagevMsg);
-                ((RightViewHolder)viewHolder).rightImageBinding.textvNicname.setText(UserList.getUserMeta().getName());
+                ((RightViewHolder)viewHolder).rightImageBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((RightViewHolder)viewHolder).rightImageBinding.textvTime.setText(str);
+                ((RightViewHolder)viewHolder).rightImageBinding.readnum.setText("1");
             }
         }
     }
@@ -137,13 +144,12 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     // 이 메소드는 ViewType때문에 오버라이딩 했음(구별할려고)
     @Override
     public int getItemViewType(int position) {
+        userList = new ChatRoomUser();
         if(myDataList.get(position) == null)
             return ViewType.LOADING;
-
-        UserList = new ChatRoomUser();
         for(String i : myUserList.keySet()){
             if(myDataList.get(position).getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())){
-                UserList=myUserList.get(i);
+                userList =myUserList.get(i);
             }
         }
         if(myDataList.get(position).getType().equals(Chat.Type.TEXT))
@@ -153,7 +159,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         if(myDataList.get(position).getType().equals(Chat.Type.SYSTEM))
             return ViewType.CENTER_CONTENT;
-        else if((myDataList.get(position).getFrom().equals("user2")))
+        else if((myDataList.get(position).getFrom().equals("user2"))) //사용자 key로 대체
             return ViewType.RIGHT_CONTENT;
         else
             return ViewType.LEFT_CONTENT;

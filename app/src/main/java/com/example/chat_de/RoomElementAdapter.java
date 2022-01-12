@@ -33,23 +33,16 @@ import java.util.Locale;
 
 public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<Chat> myDataList;
-    //private ChatRoom myChatRoom;
     private enum MessageType { TEXT, IMAGE };
     private MessageType messageType;
     private HashMap<String, ChatRoomUser> myUserList;
     private ChatRoomUser userList;
-    //private ChatRoomMeta chatRoomMeta;
-    //private HashMap<String,Chat> chats;
     private int indexDifferent=0;
 
     public RoomElementAdapter(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> userList){
         myDataList = dataList;
         myUserList = userList;
     }
-    /*public RoomElementAdapter(ChatRoom chatRoom,HashMap<String, ChatRoomUser> userList){
-        myChatRoom = chatRoom;
-        myUserList = userList;
-    }*/
 
     public void setUserList(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> userList){
         myDataList = dataList;
@@ -94,18 +87,19 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         //DateFormat df = new SimpleDateFormat("a HH:mm");
         //String str=df.format(myDataList.get(position).normalDate());
+        final Chat item= myDataList.get(position);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
-        String str= simpleDateFormat.format(myDataList.get(position).normalDate());
+        String str= simpleDateFormat.format(item.normalDate());
 
 
         if(viewHolder instanceof CenterViewHolder){
-            ((CenterViewHolder)viewHolder).centerSystemBinding.textv.setText(myDataList.get(position).getText());
+            ((CenterViewHolder)viewHolder).centerSystemBinding.textv.setText(item.getText());
         }else if(viewHolder instanceof LoadingViewHolder){
             showLoadingView((LoadingViewHolder)viewHolder,position);
         }
         else if(viewHolder instanceof LeftViewHolder){
             if(messageType.equals(MessageType.TEXT)) {
-                ((LeftViewHolder) viewHolder).leftTextBinding.textvMsg.setText(myDataList.get(position).getText());
+                ((LeftViewHolder) viewHolder).leftTextBinding.textvMsg.setText(item.getText());
                 ((LeftViewHolder) viewHolder).leftTextBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((LeftViewHolder) viewHolder).leftTextBinding.textvTime.setText(str);
                 if(indexDifferent!=0)
@@ -122,7 +116,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
         }else{
             if(messageType.equals(MessageType.TEXT)){
-                ((RightViewHolder)viewHolder).rightTextBinding.textvMsg.setText(myDataList.get(position).getText());
+                ((RightViewHolder)viewHolder).rightTextBinding.textvMsg.setText(item.getText());
                 ((RightViewHolder)viewHolder).rightTextBinding.textvNicname.setText(userList.getUserMeta().getName());
                 ((RightViewHolder)viewHolder).rightTextBinding.textvTime.setText(str);
                 if(indexDifferent!=0)
@@ -165,37 +159,38 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         for(String i : chats.keySet()){
             myDataList.add(chats.get(i));
         }*/
+        final Chat item= myDataList.get(position);
+
         Log.d("position", String.valueOf(position));
         indexDifferent=0;    //하나의 메세지를 나타낼 때마다 초기화
         userList = new ChatRoomUser();
-        if(myDataList.get(position) == null)
+        if(item == null)
             return ViewType.LOADING;
         //hashmap에서 데이터 뽑아내기 : 같은 userkey일 때 value값 userList에 저장
         for(String i : myUserList.keySet()){
             //indexDifferent++;  //참가자 총 명수
             //Log.d("indexDifferent", String.valueOf(indexDifferent));
 
-            if(myDataList.get(position).getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())){
+            if(item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())){
                 userList =myUserList.get(i);
             }
-            if(myDataList.get(position).getType().equals(Chat.Type.TEXT))
-                if(myDataList.get(position).getIndex() > myUserList.get(i).getLastReadIndex())
+            if(item.getType().equals(Chat.Type.TEXT))
+                if(item.getIndex() > myUserList.get(i).getLastReadIndex())
                     indexDifferent++;
         }
         Log.d("indexDifferent_finish", String.valueOf(indexDifferent));
 
-        //Todo: 총 명수를 구할 수 있는 효율적인 방법 생각해보기  ,,생각해보니까 이렇게 하는거 맞는거 같음!!
 
         //채팅 타입(이미지, 텍스트) 정하기
-        if(myDataList.get(position).getType().equals(Chat.Type.TEXT))
+        if(item.getType().equals(Chat.Type.TEXT))
             messageType = MessageType.TEXT;
-        else if(myDataList.get(position).getType().equals(Chat.Type.IMAGE))
+        else if(item.getType().equals(Chat.Type.IMAGE))
             messageType = MessageType.IMAGE;
 
         //채팅 위치 타입 (왼, 중간, 오) 정하기
-        if(myDataList.get(position).getType().equals(Chat.Type.SYSTEM))
+        if(item.getType().equals(Chat.Type.SYSTEM))
             return ViewType.CENTER_CONTENT;
-        else if((myDataList.get(position).getFrom().equals("user2"))) //사용자 key로 대체
+        else if((item.getFrom().equals("user2"))) //사용자 key로 대체
             return ViewType.RIGHT_CONTENT;
         else
             return ViewType.LEFT_CONTENT;
@@ -223,7 +218,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     public class LeftViewHolder extends RecyclerView.ViewHolder{
-        //CircleImageView imgv;
         ItemElementLeftImageBinding leftImageBinding;
         ItemElementLeftTextBinding leftTextBinding;
 

@@ -74,19 +74,18 @@ public class RoomActivity extends AppCompatActivity {
         //화면 기본 설정
         setUpRoomActivity();
 
-
-        //test용 데이터
-//        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
-//        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
-//        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
-//        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
-//        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
-//        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
-//        userList= new HashMap<String,ChatRoomUser>(){{
-//            put("user1",usertest1);
-//            put("user2",usertest2);
-//            put("user3",usertest3);
-//        }};
+/*        //test용 데이터
+        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
+        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
+        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
+        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
+        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
+        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
+        userList= new HashMap<String,ChatRoomUser>(){{
+            put("user1",usertest1);
+            put("user2",usertest2);
+            put("user3",usertest3);
+        }};*/
         Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
         Chat chat2 = new Chat("ho", 1,"user2", Chat.Type.TEXT);
         Chat chat3 = new Chat("ha", 2,"user3", Chat.Type.TEXT);
@@ -127,7 +126,7 @@ public class RoomActivity extends AppCompatActivity {
                 galleryAccess();
             }
         });
-    }
+ }
     /*private void populateData() {
         int i = 0;
         while (i < 10) {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -26,8 +27,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 public class ChatRoomListFragment extends Fragment {
-    private String userKey = "user2";
-    private String userName = "user2";
+    //private String userKey = "user2";
+    //private String userName = "user2";
 
     private ChatRoomListActivity ChatActivity;
     private FragmentChatRoomListBinding binding;
@@ -37,6 +38,8 @@ public class ChatRoomListFragment extends Fragment {
 
     //private String CHAT_NAME;
     //private String USER_NAME;
+
+    private String userKey;
 
 
     ArrayList<String> cList = new ArrayList<>();
@@ -64,7 +67,9 @@ public class ChatRoomListFragment extends Fragment {
             CHAT_NAME = bundle.getString("chat_name");
             USER_NAME = bundle.getString("user_name");
         }*/
-
+        if (bundle != null) {
+            userKey=bundle.getString("userKey");
+        }
 
         showChatRoomList();
         binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -73,17 +78,20 @@ public class ChatRoomListFragment extends Fragment {
                 enterChatRoom(cList.get(i));
             }
         });
-        binding.makeChat.setOnClickListener(new View.OnClickListener(){
+        /*binding.makeChat.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 selelctUser();
             }
-        });
+        });*/
 
 
 
         return view;
     }
+
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -132,13 +140,13 @@ public class ChatRoomListFragment extends Fragment {
         intent.putExtra("chatRoomKey", chatRoomKey);
         getActivity().startActivity(intent);
     }
-    private void selelctUser(){
+    /*private void selelctUser(){
         //ChatUserListActivity로 넘어간 뒤, 종료
         Intent intent = new Intent(getActivity(), UserListActivity.class);
         intent.putExtra("tag",1);
         intent.putExtra("who",userName);
         getActivity().startActivity(intent);
-    }
+    }*/
 
 
 

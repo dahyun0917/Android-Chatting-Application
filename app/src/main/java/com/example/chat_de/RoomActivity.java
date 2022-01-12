@@ -52,7 +52,7 @@ public class RoomActivity extends AppCompatActivity {
 
     private ArrayList<Chat> dataList = new ArrayList<>();
 
-    private HashMap<String, ChatRoomUser> userList  = new HashMap<>();
+    private HashMap<String, ChatRoomUser> userList;
 
     private int index=-1;
     private boolean isLoading = false;
@@ -69,18 +69,19 @@ public class RoomActivity extends AppCompatActivity {
         //화면 기본 설정
         setUpRoomActivity();
 
+
         //test용 데이터
-        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
-        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
-        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
-        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
-        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
-        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
-        userList= new HashMap<String,ChatRoomUser>(){{
-            put("user1",usertest1);
-            put("user2",usertest2);
-            put("user3",usertest3);
-        }};
+//        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
+//        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
+//        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
+//        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
+//        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
+//        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
+//        userList= new HashMap<String,ChatRoomUser>(){{
+//            put("user1",usertest1);
+//            put("user2",usertest2);
+//            put("user3",usertest3);
+//        }};
     }
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
@@ -170,10 +171,12 @@ public class RoomActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
-        ChatDB.messageAddedEventListener(chatRoomKey, item -> {
-            floatMessage(item);
-        });
+        userList = new HashMap<>();
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
+        ChatDB.userListChangedEventListener(chatRoomKey, item -> {
+            userList.put(item.first, item.second);
+            ChatDB.messageAddedEventListener(chatRoomKey, this::floatMessage);
+        });
     }
     @Override
     public void onPause() {

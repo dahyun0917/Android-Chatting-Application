@@ -11,7 +11,6 @@ public class UserListItem {
             setUserMeta(new User(name, pictureURL, generation, userKey));
             setChecked(false);
         }
-
         //유저클래스로 생성
         public UserListItem(User userMeta) {
             setUserMeta(userMeta);

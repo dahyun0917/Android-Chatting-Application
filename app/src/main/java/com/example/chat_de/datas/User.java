@@ -18,12 +18,6 @@ public class User {
         setGeneration(generation);
         setUserKey(userKey);
     }
-    public User(HashMap<String, Object> user) {
-        setName((String)user.get("name"));
-        setPictureURL((String)user.get("pictureURL"));
-        setGeneration(((Long)user.get("generation")).intValue());
-        setUserKey((String)user.get("userKey"));
-    }
     //Copy constructor
     public User(User original) {
         setName(original.getName());

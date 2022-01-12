@@ -118,42 +118,40 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         userList[(item.getGeneration()-1)/10].add(item);
     }
     private void showUserList() {
-
         //초기화 및 데이터 불러오기
-        getAllUserList();
-
+//        getAllUserList();
         //리사이클러뷰 설정
-        binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
-        userListAdapter = new UserListAdapter(getApplicationContext(),userList);
-        binding.recyclerUserList.setAdapter(userListAdapter);
-
-
-        //스피너 설정
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,items);
-
-        //항목 선택시 보이는 별도창의 각 아이템을 위한 레이아웃 설정
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-        binding.spinner.setAdapter(adapter);
-
-        binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            //아이템이 선택되면
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                // int i : item의 순서대로 0번부터 n-1번까지
-                // userList[0]: 1-10기 ...
-                if(i == 0) {
-                    userListAdapter.serUserList(userList);
-                } else {
-                    userListAdapter.setUserList(userList[i-1]);
+        ChatDB.getUsersCompleteEventListener(item -> {
+            for(HashMap<String, Object> user: item.values()) {
+                classifyAdd(new UserListItem(new User(user)));
+            }
+            userListAdapter = new UserListAdapter(getApplicationContext(),userList);
+            binding.recyclerUserList.setAdapter(userListAdapter);
+            binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
+            //스피너 설정
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,items);
+            //항목 선택시 보이는 별도창의 각 아이템을 위한 레이아웃 설정
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+            binding.spinner.setAdapter(adapter);
+            binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                //아이템이 선택되면
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    // int i : item의 순서대로 0번부터 n-1번까지
+                    // userList[0]: 1-10기 ...
+                    if(i == 0) {
+                        userListAdapter.serUserList(userList);
+                    } else {
+                        userListAdapter.setUserList(userList[i-1]);
+                    }
                 }
-            }
-            //스피너에서 아무것도 선택되지 않은 상태일때
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                userListAdapter.serUserList(userList);
-            }
+                //스피너에서 아무것도 선택되지 않은 상태일때
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                    userListAdapter.serUserList(userList);
+                }
+            });
         });
-
         /*검색 기능 추가*/
         binding.searchText.addTextChangedListener(this);
 

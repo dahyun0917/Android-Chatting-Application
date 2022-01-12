@@ -54,10 +54,13 @@ public class ChatDB {
         return rootPath;
     }
 
-    public static void getUsersCompleteEventListener(RoomElementEventListener<HashMap<String, HashMap<String, Object>>> listener) {
+    public static void getUsersCompleteEventListener(RoomElementEventListener<HashMap<String, User>> listener) {
         ref.child(USERS).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()) {
-                HashMap<String, HashMap<String, Object>> item = (HashMap<String, HashMap<String, Object>>)task.getResult().getValue();
+                HashMap<String, User> item = new HashMap<>();
+                for(DataSnapshot userSnapshot: task.getResult().getChildren()) {
+                    item.put(userSnapshot.getKey(), userSnapshot.getValue(User.class));
+                }
                 listener.eventListener(item);
             } else {
                 Log.e("FRD", "Can not get users");

@@ -122,8 +122,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
 //        getAllUserList();
         //리사이클러뷰 설정
         ChatDB.getUsersCompleteEventListener(item -> {
-            for(HashMap<String, Object> user: item.values()) {
-                classifyAdd(new UserListItem(new User(user)));
+            for(User user: item.values()) {
+                classifyAdd(new UserListItem(user));
             }
             userListAdapter = new UserListAdapter(getApplicationContext(),userList);
             binding.recyclerUserList.setAdapter(userListAdapter);

@@ -200,7 +200,7 @@ public class RoomActivity extends AppCompatActivity {
             return;
 
         // USER_NAME 나중에 userKey로 바꿔줘야함
-        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, userKey);
+        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, userKey, userList);
         binding.chatEdit.setText(""); //입력창 초기화
     }
     //유저추가 액티비티로 보낼 데이터 저장 후 intent
@@ -262,7 +262,7 @@ public class RoomActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Uri uri) {
                         //userKey="user2";
-                        ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, userKey);
+                        ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, userKey, userList);
                     }
                 });
             }

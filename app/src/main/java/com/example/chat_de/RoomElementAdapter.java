@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ItemElementCenterSystemBinding;
 import com.example.chat_de.databinding.ItemElementLeftImageBinding;
 import com.example.chat_de.databinding.ItemElementLeftTextBinding;
+import com.example.chat_de.databinding.ItemElementLoadingBinding;
 import com.example.chat_de.databinding.ItemElementRightImageBinding;
 import com.example.chat_de.databinding.ItemElementRightTextBinding;
 import com.example.chat_de.databinding.ItemRecyclerUserListBinding;
@@ -42,6 +44,12 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         myUserList = userList;
     }
 
+    public void setUserList(ArrayList<Chat> dataList, HashMap<String, ChatRoomUser> userList){
+        myDataList = dataList;
+        myUserList = userList;
+        this.notifyDataSetChanged();
+    }
+
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
@@ -50,6 +58,9 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
 
         switch(viewType) {
+            case ViewType.LOADING:
+                view = inflater.inflate(R.layout.item_element_loading,parent,false);
+                return new LoadingViewHolder(view);
             case ViewType.CENTER_CONTENT:
                 view = inflater.inflate(R.layout.item_element_center_system,parent,false);
                 return new CenterViewHolder(view);
@@ -82,7 +93,10 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         if(viewHolder instanceof CenterViewHolder){
             ((CenterViewHolder)viewHolder).centerSystemBinding.textv.setText(myDataList.get(position).getText());
-        }else if(viewHolder instanceof LeftViewHolder){
+        }else if(viewHolder instanceof LoadingViewHolder){
+            showLoadingView((LoadingViewHolder)viewHolder,position);
+        }
+        else if(viewHolder instanceof LeftViewHolder){
             if(messageType.equals(MessageType.TEXT)) {
                 ((LeftViewHolder) viewHolder).leftTextBinding.textvMsg.setText(myDataList.get(position).getText());
                 ((LeftViewHolder) viewHolder).leftTextBinding.textvNicname.setText(UserList.getUserMeta().getName());
@@ -108,6 +122,11 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
         }
     }
+
+    public void showLoadingView(LoadingViewHolder holder, int position) {
+
+    }
+
     // 리사이클러뷰안에서 들어갈 뷰 홀더의 개수
     @Override
     public int getItemCount() {
@@ -118,6 +137,9 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     // 이 메소드는 ViewType때문에 오버라이딩 했음(구별할려고)
     @Override
     public int getItemViewType(int position) {
+        if(myDataList.get(position) == null)
+            return ViewType.LOADING;
+
         UserList = new ChatRoomUser();
         for(String i : myUserList.keySet()){
             if(myDataList.get(position).getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())){
@@ -139,6 +161,16 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     // "리사이클러뷰에 들어갈 뷰 홀더", 그리고 "그 뷰 홀더에 들어갈 아이템들을 셋팅"
+    public class LoadingViewHolder extends RecyclerView.ViewHolder {
+        ItemElementLoadingBinding itemElementLoadingBinding;
+
+        public LoadingViewHolder(@NonNull View itemView) {
+            super(itemView);
+            itemElementLoadingBinding = ItemElementLoadingBinding.bind(itemView);
+        }
+    }
+
+
     public class CenterViewHolder extends RecyclerView.ViewHolder{
         ItemElementCenterSystemBinding centerSystemBinding;
 

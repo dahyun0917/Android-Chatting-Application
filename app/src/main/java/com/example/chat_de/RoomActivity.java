@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -61,6 +62,7 @@ public class RoomActivity extends AppCompatActivity {
 
     private int index=-1;
     private boolean isLoading = false;
+    private boolean autoScroll = true;
     Uri filePath;
 
     @Override
@@ -127,13 +129,7 @@ public class RoomActivity extends AppCompatActivity {
             }
         });
  }
-    /*private void populateData() {
-        int i = 0;
-        while (i < 10) {
-
-        }
-    }*/
-    /*private void initScrollListener() {
+    private void initScrollListener() {
         binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -144,44 +140,57 @@ public class RoomActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
 
-                if (isLoading) {
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == rowsArrayList.size() - 1) {
-                        //bottom of list!
-                        //loadMore();
+                if (!isLoading) {
+                    if(!recyclerView.canScrollVertically(-1)){
+                        loadMore();
                         isLoading = true;
+                        autoScroll = false;
                     }
                 }
+                if(!recyclerView.canScrollVertically(1)){
+                    autoScroll = true;
+                }
+                /*if (!isLoading) {
+                    if (layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() == dataList.size() - 1) {
+                        //리스트 마지막
+                        loadMore();
+                        //isLoading = true;
+                    }
+                }*/
             }
         });
-    }*/
-    /*private void loadMore() {
-        dataList.add(null);
-        recyclerViewAdapter.notifyItemInserted(rowsArrayList.size() - 1);
+    }
 
-
+    private void loadMore() {
+        binding.RecyclerView.post(new Runnable() {
+            public void run() {
+                dataList.add(null);
+                roomElementAdapter.notifyItemInserted(dataList.size() - 1);
+            }
+        });
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 dataList.remove(dataList.size() - 1);
                 int scrollPosition = dataList.size();
-                recyclerViewAdapter.notifyItemRemoved(scrollPosition);
+                roomElementAdapter.notifyItemRemoved(scrollPosition);
                 int currentSize = scrollPosition;
                 int nextLimit = currentSize + 10;
 
                 while (currentSize - 1 < nextLimit) {
-                    //dataList.add("Item " + currentSize);
+                    dataList.add(new Chat("ww",0L, currentSize,"user1", Chat.Type.TEXT));
                     currentSize++;
                 }
 
-                recyclerViewAdapter.notifyDataSetChanged();
+                roomElementAdapter.notifyDataSetChanged();
                 isLoading = false;
+                autoScroll = false;
             }
-        }, 2000);
-    }*/
-
+        }, 1000);
+    }
     @Override
     public void onResume() {
         super.onResume();

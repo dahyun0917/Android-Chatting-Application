@@ -22,6 +22,13 @@ public class IndexDeque<T> implements Cloneable {
     public void addLast(T data) {
         next.add(data);
     }
+    public void add(T data) {
+        next.add(data);
+    }
+    //안전하지 않으니 사용에 주의
+    public void popFront() {
+        prev.remove(prev.size() - 1);
+    }
 
     public T get(int position) {
         if (position < prev.size())
@@ -35,7 +42,7 @@ public class IndexDeque<T> implements Cloneable {
     public T getLast() {
         return next.get(next.size() - 1);
     }
-    public int getSize() {
+    public int size() {
         return prev.size() + next.size();
     }
     

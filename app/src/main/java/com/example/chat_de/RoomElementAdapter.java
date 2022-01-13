@@ -5,9 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,8 +18,6 @@ import com.example.chat_de.databinding.ItemElementLoadingBinding;
 import com.example.chat_de.databinding.ItemElementRightImageBinding;
 import com.example.chat_de.databinding.ItemElementRightTextBinding;
 import com.example.chat_de.datas.Chat;
-import com.example.chat_de.datas.ChatRoom;
-import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.ViewType;
 
@@ -33,20 +28,18 @@ import java.util.Locale;
 
 public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<Chat> myDataList;
-    private enum MessageType { TEXT, IMAGE };
-    private MessageType messageType;
     private HashMap<String, ChatRoomUser> myUserList;
-    private ChatRoomUser userList;
-    private int indexDifferent=0;
+    private ChatRoomUser chatRoomUser;
+    private int indexDifferent;
 
-    public RoomElementAdapter(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> userList){
+    public RoomElementAdapter(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> chatRoomUser){
+        myUserList = chatRoomUser;
         myDataList = dataList;
-        myUserList = userList;
     }
-
+    //TODO : fix
     public void setUserList(ArrayList<Chat> dataList,HashMap<String, ChatRoomUser> userList){
-        myDataList = dataList;
         myUserList = userList;
+        myDataList = dataList;
         this.notifyDataSetChanged();
     }
 
@@ -56,7 +49,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         Context context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-
         switch(viewType) {
             case ViewType.LOADING:
                 view = inflater.inflate(R.layout.item_element_loading,parent,false);
@@ -64,71 +56,72 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             case ViewType.CENTER_CONTENT:
                 view = inflater.inflate(R.layout.item_element_center_system,parent,false);
                 return new CenterViewHolder(view);
-            case ViewType.LEFT_CONTENT:
-                if(messageType == MessageType.TEXT)
-                    view = inflater.inflate(R.layout.item_element_left_text,parent,false);
-                else
-                    view = inflater.inflate(R.layout.item_element_left_image,parent,false);
-                return new LeftViewHolder(view);
-            case ViewType.RIGHT_CONTENT:
-                if(messageType == MessageType.TEXT)
-                    view = inflater.inflate(R.layout.item_element_right_text,parent,false);
-                else
-                    view = inflater.inflate(R.layout.item_element_right_image,parent,false);
-                return new RightViewHolder(view);
+            case ViewType.LEFT_CONTENT_TEXT:
+                view = inflater.inflate(R.layout.item_element_left_text,parent,false);
+                return new LeftTextViewHolder(view);
+            case ViewType.LEFT_CONTENT_IMAGE:
+                view = inflater.inflate(R.layout.item_element_left_image,parent,false);
+                return new LeftImageViewHolder(view);
+            case ViewType.RIGHT_CONTENT_TEXT:
+                view = inflater.inflate(R.layout.item_element_right_text,parent,false);
+                return new RightTextViewHolder(view);
+            case ViewType.RIGHT_CONTENT_IMAGE:
+                view = inflater.inflate(R.layout.item_element_right_image,parent,false);
+                return new RightImageViewHolder(view);
             default:
                 Log.e("VIEW_TYPE", "ViewType must be 1 or 2 or 3");
                 view = inflater.inflate(R.layout.item_element_right_text,parent,false);
-                return new RightViewHolder(view);
+                return new RightTextViewHolder(view);
         }
+
+
     }
     // 실제 각 뷰 홀더에 데이터를 연결해주는 함수
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-        //DateFormat df = new SimpleDateFormat("a HH:mm");
-        //String str=df.format(myDataList.get(position).normalDate());
-        final Chat item= myDataList.get(position);
+
+        Chat item = myDataList.get(position);
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
         String str= simpleDateFormat.format(item.normalDate());
 
-
+        //각 xml의 데이터 set
         if(viewHolder instanceof CenterViewHolder){
             ((CenterViewHolder)viewHolder).centerSystemBinding.textv.setText(item.getText());
         }else if(viewHolder instanceof LoadingViewHolder){
             showLoadingView((LoadingViewHolder)viewHolder,position);
         }
-        else if(viewHolder instanceof LeftViewHolder){
-            if(messageType.equals(MessageType.TEXT)) {
-                ((LeftViewHolder) viewHolder).leftTextBinding.textvMsg.setText(item.getText());
-                ((LeftViewHolder) viewHolder).leftTextBinding.textvNicname.setText(userList.getUserMeta().getName());
-                ((LeftViewHolder) viewHolder).leftTextBinding.textvTime.setText(str);
+        else if(viewHolder instanceof LeftTextViewHolder){
+            ((LeftTextViewHolder) viewHolder).leftTextBinding.textvMsg.setText(item.getText());
+            ((LeftTextViewHolder) viewHolder).leftTextBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            ((LeftTextViewHolder) viewHolder).leftTextBinding.textvTime.setText(str);
+            if(indexDifferent!=0)
+                ((LeftTextViewHolder) viewHolder).leftTextBinding.readnum.setText(String.valueOf(indexDifferent));
+            Glide.with(viewHolder.itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(((LeftTextViewHolder)viewHolder).leftTextBinding.imgv);
+        }else if(viewHolder instanceof LeftImageViewHolder){
+                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftImageViewHolder)viewHolder).leftImageBinding.imagevMsg);
+                ((LeftImageViewHolder)viewHolder).leftImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+                ((LeftImageViewHolder)viewHolder).leftImageBinding.textvTime.setText(str);
                 if(indexDifferent!=0)
-                    ((LeftViewHolder) viewHolder).leftTextBinding.readnum.setText(String.valueOf(indexDifferent));
-                Glide.with(viewHolder.itemView.getContext()).load(userList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftTextBinding.imgv);
-            }
-            else{
-                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftViewHolder)viewHolder).leftImageBinding.imagevMsg);
-                ((LeftViewHolder)viewHolder).leftImageBinding.textvNicname.setText(userList.getUserMeta().getName());
-                ((LeftViewHolder)viewHolder).leftImageBinding.textvTime.setText(str);
+                    ((LeftImageViewHolder) viewHolder).leftImageBinding.readnum.setText(String.valueOf(indexDifferent));
+                Glide.with(viewHolder.itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(((LeftImageViewHolder)viewHolder).leftImageBinding.imgv);
+        }
+        else if(viewHolder instanceof RightTextViewHolder){
+            if(item.getType().equals(Chat.Type.TEXT)){
+                ((RightTextViewHolder)viewHolder).rightTextBinding.textvMsg.setText(item.getText());
+                ((RightTextViewHolder)viewHolder).rightTextBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+                ((RightTextViewHolder)viewHolder).rightTextBinding.textvTime.setText(str);
                 if(indexDifferent!=0)
-                    ((LeftViewHolder) viewHolder).leftImageBinding.readnum.setText(String.valueOf(indexDifferent));
-                Glide.with(viewHolder.itemView.getContext()).load(userList.getUserMeta().getPictureURL()).into(((LeftViewHolder)viewHolder).leftImageBinding.imgv);
+                    ((RightTextViewHolder) viewHolder).rightTextBinding.readnum.setText(String.valueOf(indexDifferent));
             }
-        }else{
-            if(messageType.equals(MessageType.TEXT)){
-                ((RightViewHolder)viewHolder).rightTextBinding.textvMsg.setText(item.getText());
-                ((RightViewHolder)viewHolder).rightTextBinding.textvNicname.setText(userList.getUserMeta().getName());
-                ((RightViewHolder)viewHolder).rightTextBinding.textvTime.setText(str);
-                if(indexDifferent!=0)
-                    ((RightViewHolder) viewHolder).rightTextBinding.readnum.setText(String.valueOf(indexDifferent));
-            }
-            else{
-                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((RightViewHolder)viewHolder).rightImageBinding.imagevMsg);
-                ((RightViewHolder)viewHolder).rightImageBinding.textvNicname.setText(userList.getUserMeta().getName());
-                ((RightViewHolder)viewHolder).rightImageBinding.textvTime.setText(str);
-                if(indexDifferent!=0)
-                    ((RightViewHolder) viewHolder).rightImageBinding.readnum.setText(String.valueOf(indexDifferent));
-            }
+        }
+        else if(viewHolder instanceof RightImageViewHolder){
+            Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((RightImageViewHolder)viewHolder).rightImageBinding.imagevMsg);
+            ((RightImageViewHolder)viewHolder).rightImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            ((RightImageViewHolder)viewHolder).rightImageBinding.textvTime.setText(str);
+            if(indexDifferent!=0)
+                ((RightImageViewHolder) viewHolder).rightImageBinding.readnum.setText(String.valueOf(indexDifferent));
+
         }
     }
 
@@ -159,48 +152,52 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         for(String i : chats.keySet()){
             myDataList.add(chats.get(i));
         }*/
-        final Chat item= myDataList.get(position);
+        //final Chat data= myDataList.get(position);
+
+        Chat item = myDataList.get(position);
 
         Log.d("position", String.valueOf(position));
-        indexDifferent=0;    //하나의 메세지를 나타낼 때마다 초기화
-        userList = new ChatRoomUser();
-        if(item == null)
-            return ViewType.LOADING;
+        indexDifferent = 0;    //하나의 메세지를 나타낼 때마다 초기화
+
+
         //hashmap에서 데이터 뽑아내기 : 같은 userkey일 때 value값 userList에 저장
-        for(String i : myUserList.keySet()){
+        for (String i : myUserList.keySet()) {
             //indexDifferent++;  //참가자 총 명수
             //Log.d("indexDifferent", String.valueOf(indexDifferent));
 
-            if(item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())){
-                userList =myUserList.get(i);
+            if (item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())) {
+                chatRoomUser = myUserList.get(i);
             }
-            if(item.getType().equals(Chat.Type.TEXT))
-                if(item.getIndex() > myUserList.get(i).getLastReadIndex())
+            if (item.getType().equals(Chat.Type.TEXT))
+                if (item.getIndex() > myUserList.get(i).getLastReadIndex())
                     indexDifferent++;
         }
         Log.d("indexDifferent_finish", String.valueOf(indexDifferent));
 
 
-        //채팅 타입(이미지, 텍스트) 정하기
-        if(item.getType().equals(Chat.Type.TEXT))
-            messageType = MessageType.TEXT;
-        else if(item.getType().equals(Chat.Type.IMAGE))
-            messageType = MessageType.IMAGE;
+        if (item == null)
+            return ViewType.LOADING;
 
-        //채팅 위치 타입 (왼, 중간, 오) 정하기
-        if(item.getType().equals(Chat.Type.SYSTEM))
+        //채팅 위치 타입 (왼, 중간, 오) 과 메세지 타입(이미지, 텍스트) 정하기
+        else if (item.getType().equals(Chat.Type.SYSTEM)) {
             return ViewType.CENTER_CONTENT;
-        else if((item.getFrom().equals("user2"))) //사용자 key로 대체
-            return ViewType.RIGHT_CONTENT;
-        else
-            return ViewType.LEFT_CONTENT;
-
+        } else if ((item.getFrom().equals("user2"))) { //사용자 key로 대체
+            if ((item.getType().equals(Chat.Type.TEXT)))
+                return ViewType.RIGHT_CONTENT_TEXT;
+            else if ((item.getType().equals(Chat.Type.IMAGE)))
+                return ViewType.RIGHT_CONTENT_IMAGE;
+        } else {
+            if ((item.getType().equals(Chat.Type.TEXT)))
+                return ViewType.LEFT_CONTENT_TEXT;
+            else if ((item.getType().equals(Chat.Type.IMAGE)))
+                return ViewType.LEFT_CONTENT_IMAGE;
+        }
+        return ViewType.RIGHT_CONTENT_TEXT;
     }
 
     // "리사이클러뷰에 들어갈 뷰 홀더", 그리고 "그 뷰 홀더에 들어갈 아이템들을 셋팅"
     public class LoadingViewHolder extends RecyclerView.ViewHolder {
         ItemElementLoadingBinding itemElementLoadingBinding;
-
         public LoadingViewHolder(@NonNull View itemView) {
             super(itemView);
             itemElementLoadingBinding = ItemElementLoadingBinding.bind(itemView);
@@ -210,39 +207,47 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public class CenterViewHolder extends RecyclerView.ViewHolder{
         ItemElementCenterSystemBinding centerSystemBinding;
-
         public CenterViewHolder(@NonNull View itemView) {
             super(itemView);
             centerSystemBinding = ItemElementCenterSystemBinding.bind(itemView);
         }
     }
 
-    public class LeftViewHolder extends RecyclerView.ViewHolder{
+    public class LeftImageViewHolder extends RecyclerView.ViewHolder{
         ItemElementLeftImageBinding leftImageBinding;
-        ItemElementLeftTextBinding leftTextBinding;
 
-        public LeftViewHolder(@NonNull View itemView) {
+        public LeftImageViewHolder(@NonNull View itemView) {
             super(itemView);
-            if(messageType == MessageType.TEXT) {
-                leftTextBinding = ItemElementLeftTextBinding.bind(itemView);
-            }
-            else if(messageType == MessageType.IMAGE){
-                leftImageBinding = ItemElementLeftImageBinding.bind(itemView);
-            }
+            leftImageBinding = ItemElementLeftImageBinding.bind(itemView);
+            leftImageBinding.imgv.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
         }
     }
 
-    public class RightViewHolder extends RecyclerView.ViewHolder{
-        ItemElementRightImageBinding rightImageBinding;
-        ItemElementRightTextBinding rightTextBinding;
-        public RightViewHolder(@NonNull View itemView) {
+    public class LeftTextViewHolder extends RecyclerView.ViewHolder{
+        ItemElementLeftTextBinding leftTextBinding;
+        public LeftTextViewHolder(@NonNull View itemView) {
             super(itemView);
-            if(messageType.equals(MessageType.TEXT)) {
-                rightTextBinding = ItemElementRightTextBinding.bind(itemView);
-            }
-            else if(messageType.equals(MessageType.IMAGE)){
-                rightImageBinding = ItemElementRightImageBinding.bind(itemView);
-            }
+            leftTextBinding = ItemElementLeftTextBinding.bind(itemView);
+        }
+    }
+    public class RightImageViewHolder extends RecyclerView.ViewHolder{
+        ItemElementRightImageBinding rightImageBinding;
+        public RightImageViewHolder(@NonNull View itemView) {
+            super(itemView);
+            rightImageBinding = ItemElementRightImageBinding.bind(itemView);
+
+        }
+    }
+    public class RightTextViewHolder extends RecyclerView.ViewHolder{
+        ItemElementRightTextBinding rightTextBinding;
+        public RightTextViewHolder(@NonNull View itemView) {
+            super(itemView);
+            rightTextBinding = ItemElementRightTextBinding.bind(itemView);
         }
     }
 

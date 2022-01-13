@@ -187,18 +187,16 @@ public class RoomActivity extends AppCompatActivity {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
 
-        //get(com
-        //
-
-        // )
-        //
-
+        dataList = new ArrayList<>();
         userList = new HashMap<>();
-        ChatDB.userReadLatestMessage(chatRoomKey, userKey);
-        ChatDB.userListChangedEventListener(chatRoomKey, item -> {
-            userList.put(item.first, item.second);
+        ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
+            userList = item;
             ChatDB.messageAddedEventListener(chatRoomKey, this::floatMessage);
+            ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
+                userList.put(userPair.first, userPair.second);
+            });
         });
+        ChatDB.userReadLatestMessage(chatRoomKey, userKey);
     }
     @Override
     public void onPause() {

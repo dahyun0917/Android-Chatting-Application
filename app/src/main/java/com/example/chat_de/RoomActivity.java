@@ -23,6 +23,7 @@ import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
+import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -53,7 +54,7 @@ public class RoomActivity extends AppCompatActivity {
 
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
-    private ArrayList<Chat> dataList = new ArrayList<>();
+    private IndexDeque<Chat> dataList = new IndexDeque<>();
 
     private HashMap<String, ChatRoomUser> userList  = new HashMap<>(); //
 
@@ -103,7 +104,6 @@ public class RoomActivity extends AppCompatActivity {
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
-        //populateData();
         //initScrollListener();
 
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
@@ -152,13 +152,6 @@ public class RoomActivity extends AppCompatActivity {
                 if(!recyclerView.canScrollVertically(1)){
                     autoScroll = true;
                 }
-                /*if (!isLoading) {
-                    if (layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() == dataList.size() - 1) {
-                        //리스트 마지막
-                        loadMore();
-                        //isLoading = true;
-                    }
-                }*/
             }
         });
     }
@@ -174,7 +167,7 @@ public class RoomActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                dataList.remove(dataList.size() - 1);
+                dataList.popFront();
                 int scrollPosition = dataList.size();
                 roomElementAdapter.notifyItemRemoved(scrollPosition);
                 int currentSize = scrollPosition;
@@ -261,13 +254,11 @@ public class RoomActivity extends AppCompatActivity {
     //파이어베이스에 메세지가 추가되었을때, 메세지를 화면에 띄워줌.(기존 addMessage)
     private void floatMessage(Chat dataItem) {
         //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
-        ListIterator i = dataList.listIterator(dataList.size());
         final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
         final String DAY = SDF.format(dataItem.normalDate());
-        while(i.hasPrevious()) {
-            final Chat chat = (Chat)i.previous();
-            //시스템 메시지가 아닐때만 비교
-            if(chat.getType() != Chat.Type.SYSTEM) {
+        for(int i = dataList.size() - 1; i >= 0; i--) {
+            final Chat chat = dataList.get(i);
+            if(dataList.get(i).getType() != Chat.Type.SYSTEM) {
                 if (!SDF.format(chat.normalDate()).equals(DAY)) {
                     Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
                     daySystemChat.setDate(dataItem.unixTime());

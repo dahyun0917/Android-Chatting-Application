@@ -133,18 +133,28 @@ public class ChatDB {
     public static void userReadLatestMessage(String chatRoomKey, String userKey) {
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()) {
-                userReadMessageIndex(task.getResult().getValue(Integer.class), chatRoomKey, userKey);
+                ref.child(makePath(CHAT_ROOM_JOINED, chatRoomKey, userKey, LAST_READ_INDEX)).setValue(task.getResult().getValue(Integer.class));
             } else {
                 Log.e("FRD", "Can not get a lastMessageIndex of: " + chatRoomKey);
             }
         });
     }
-    private static void userReadMessageIndex(int index, String chatRoomKey, String userKey) {
-        ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).child(userKey).child(LAST_READ_INDEX).setValue(index);
-    }
 
+    public static void getChatRoomUserListCompleteListener(String chatRoomKey, RoomElementEventListener<HashMap<String, ChatRoomUser>> listener) {
+        ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                HashMap<String, ChatRoomUser> chatRoomUserList = new HashMap<>();
+                for(DataSnapshot snapshot: task.getResult().getChildren()) {
+                    chatRoomUserList.put(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class));
+                }
+                listener.eventListener(chatRoomUserList);
+            } else {
+                Log.e("FRD", "Can not get " + chatRoomKey + "'s user list");
+            }
+        });
+    }
     public static void messageAddedEventListener(String chatRoomKey, RoomElementEventListener<Chat> listener) {
-        addEventListener(CHAT_ROOMS + '/' + chatRoomKey + '/' + CHATS,
+        addEventListener(makePath(CHAT_ROOMS, chatRoomKey, CHATS),
                 Thread.currentThread().getStackTrace()[3].getClassName(),
                 new ChildEventListener() {
                     @Override
@@ -174,7 +184,7 @@ public class ChatDB {
                 });
     }
     public static void userListChangedEventListener(String chatRoomKey, RoomElementEventListener<Pair<String, ChatRoomUser>> listener) {
-        addEventListener(CHAT_ROOM_JOINED + '/' + chatRoomKey,
+        addEventListener(makePath(CHAT_ROOM_JOINED, chatRoomKey),
                 Thread.currentThread().getStackTrace()[3].getClassName(),
                 new ChildEventListener() {
                     @Override

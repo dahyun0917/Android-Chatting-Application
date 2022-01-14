@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
+import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -52,7 +54,7 @@ public class RoomActivity extends AppCompatActivity {
 
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
-    private ArrayList<Chat> dataList = new ArrayList<>();
+    private IndexDeque<Chat> dataList = new IndexDeque<>();
 
     private HashMap<String, ChatRoomUser> userList  = new HashMap<>(); //
 
@@ -61,6 +63,7 @@ public class RoomActivity extends AppCompatActivity {
 
     private int index=-1;
     private boolean isLoading = false;
+    private boolean autoScroll = true;
     Uri filePath;
 
     @Override
@@ -86,7 +89,7 @@ public class RoomActivity extends AppCompatActivity {
             put("user2",usertest2);
             put("user3",usertest3);
         }};*/
-        Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
+        /*Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
         Chat chat2 = new Chat("ho", 1,"user2", Chat.Type.TEXT);
         Chat chat3 = new Chat("ha", 2,"user3", Chat.Type.TEXT);
         HashMap<String,Chat> chats1 = new HashMap<String,Chat>(){{
@@ -95,14 +98,13 @@ public class RoomActivity extends AppCompatActivity {
             put("113",chat3);
         }};
         ChatRoomMeta chatRoomMeta1 = new ChatRoomMeta("chatRoomTest", ChatRoomMeta.Type.BY_USER);
-        chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);
+        chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);*/
 
     }
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
-        //populateData();
-        //initScrollListener();
+        initScrollListener();
 
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
 
@@ -127,13 +129,7 @@ public class RoomActivity extends AppCompatActivity {
             }
         });
  }
-    /*private void populateData() {
-        int i = 0;
-        while (i < 10) {
-
-        }
-    }*/
-    /*private void initScrollListener() {
+    private void initScrollListener() {
         binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -144,50 +140,52 @@ public class RoomActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-
-                if (isLoading) {
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == rowsArrayList.size() - 1) {
-                        //bottom of list!
-                        //loadMore();
+                if (!isLoading) { //최상단에 닿았을 때
+                    if(!recyclerView.canScrollVertically(-1)){
+                        loadMore();
                         isLoading = true;
+                        autoScroll = false;
                     }
+                }
+                else if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
+                    autoScroll = true;
+                }
+                else{
+                    autoScroll = false;
                 }
             }
         });
-    }*/
-    /*private void loadMore() {
-        dataList.add(null);
-        recyclerViewAdapter.notifyItemInserted(rowsArrayList.size() - 1);
+    }
 
-
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+    private void loadMore() {
+        binding.RecyclerView.post(new Runnable() {
+            public void run() {
+                dataList.addFirst(null);
+                roomElementAdapter.notifyItemInserted(0);
+            }
+        });
+        binding.RecyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
-                dataList.remove(dataList.size() - 1);
-                int scrollPosition = dataList.size();
-                recyclerViewAdapter.notifyItemRemoved(scrollPosition);
-                int currentSize = scrollPosition;
-                int nextLimit = currentSize + 10;
-
-                while (currentSize - 1 < nextLimit) {
-                    //dataList.add("Item " + currentSize);
-                    currentSize++;
+                dataList.popFront();
+                roomElementAdapter.notifyItemRemoved(0);
+                //TODO : 데이터 불러와서 넣기
+                for(int i = 0;i<10;i++){
+                    dataList.addFirst(new Chat("성공! "+String.valueOf(i),0L, i,"user1", Chat.Type.TEXT));
                 }
 
-                recyclerViewAdapter.notifyDataSetChanged();
+                roomElementAdapter.notifyItemRangeInserted(0,10);
                 isLoading = false;
+                autoScroll = false;
             }
-        }, 2000);
-    }*/
-
+        }, 1000);
+    }
     @Override
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
 
-        dataList = new ArrayList<>();
+        dataList = new IndexDeque<>();
         userList = new HashMap<>();
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
@@ -202,6 +200,7 @@ public class RoomActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         ChatDB.removeEventListenerBindOnThis();
+        binding.RecyclerView.clearOnScrollListeners();
     }
 
     //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
@@ -252,13 +251,11 @@ public class RoomActivity extends AppCompatActivity {
     //파이어베이스에 메세지가 추가되었을때, 메세지를 화면에 띄워줌.(기존 addMessage)
     private void floatMessage(Chat dataItem) {
         //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
-        ListIterator i = dataList.listIterator(dataList.size());
         final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
         final String DAY = SDF.format(dataItem.normalDate());
-        while(i.hasPrevious()) {
-            final Chat chat = (Chat)i.previous();
-            //시스템 메시지가 아닐때만 비교
-            if(chat.getType() != Chat.Type.SYSTEM) {
+        for(int i = dataList.size() - 1; i >= 0; i--) {
+            final Chat chat = dataList.get(i);
+            if(dataList.get(i).getType() != Chat.Type.SYSTEM) {
                 if (!SDF.format(chat.normalDate()).equals(DAY)) {
                     Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
                     daySystemChat.setDate(dataItem.unixTime());
@@ -274,7 +271,8 @@ public class RoomActivity extends AppCompatActivity {
 
         dataList.add(new Chat(dataItem));
         roomElementAdapter.setUserList(dataList, userList);
-        binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+        if(autoScroll)
+            binding.RecyclerView.scrollToPosition(dataList.size() - 1);
     }
     //채팅방 정보 불러옴
     private void getChatRoomMeta() {

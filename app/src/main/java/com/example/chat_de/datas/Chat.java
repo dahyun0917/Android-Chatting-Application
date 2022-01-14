@@ -25,6 +25,13 @@ public class Chat {
         setFrom(from);
         setType(type);
     }
+    public Chat(String text, Long date, int index, String from, Type type) {
+        setText(text);
+        setIndex(index);
+        setDate(date);
+        setFrom(from);
+        setType(type);
+    }
     //Copy constructor
     public Chat(@NonNull Chat original) {
         setText(original.getText());
@@ -47,5 +54,7 @@ public class Chat {
     public void setFrom(String from)    { this.from = from; }
 
     public long unixTime()      { return (long)date; }
-    public Date normalDate()    { return new Date((long)date); }
+    public Date normalDate()    {
+        return new Date((long)date);
+    }
 }

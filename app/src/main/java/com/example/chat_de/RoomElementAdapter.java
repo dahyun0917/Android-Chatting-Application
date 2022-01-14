@@ -1,6 +1,9 @@
 package com.example.chat_de;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +27,7 @@ import com.example.chat_de.datas.ViewType;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -31,7 +35,10 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private IndexDeque<Chat> myDataList;
     private HashMap<String, ChatRoomUser> myUserList;
     private ChatRoomUser chatRoomUser;
-    private int indexDifferent;
+    private int currentReadStates;
+    private String passDate;
+    private Chat passChat ;  //TODO : 수정해야함
+
 
     public RoomElementAdapter(IndexDeque<Chat> dataList,HashMap<String, ChatRoomUser> chatRoomUser){
         myUserList = chatRoomUser;
@@ -90,36 +97,78 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String str= simpleDateFormat.format(item.normalDate());
 
-            if (viewHolder instanceof CenterViewHolder) {
-                ((CenterViewHolder) viewHolder).centerSystemBinding.textv.setText(item.getText());
-            } else if (viewHolder instanceof LeftTextViewHolder) {
-                ((LeftTextViewHolder) viewHolder).leftTextBinding.textvMsg.setText(item.getText());
-                ((LeftTextViewHolder) viewHolder).leftTextBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
-                ((LeftTextViewHolder) viewHolder).leftTextBinding.textvTime.setText(str);
-                if (indexDifferent != 0)
-                    ((LeftTextViewHolder) viewHolder).leftTextBinding.readnum.setText(String.valueOf(indexDifferent));
-                Glide.with(viewHolder.itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(((LeftTextViewHolder) viewHolder).leftTextBinding.imgv);
-            } else if (viewHolder instanceof LeftImageViewHolder) {
-                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((LeftImageViewHolder) viewHolder).leftImageBinding.imagevMsg);
-                ((LeftImageViewHolder) viewHolder).leftImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
-                ((LeftImageViewHolder) viewHolder).leftImageBinding.textvTime.setText(str);
-                if (indexDifferent != 0)
-                    ((LeftImageViewHolder) viewHolder).leftImageBinding.readnum.setText(String.valueOf(indexDifferent));
-                Glide.with(viewHolder.itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(((LeftImageViewHolder) viewHolder).leftImageBinding.imgv);
-            } else if (viewHolder instanceof RightTextViewHolder) {
-                if (item.getType().equals(Chat.Type.TEXT)) {
-                    ((RightTextViewHolder) viewHolder).rightTextBinding.textvMsg.setText(item.getText());
-                    ((RightTextViewHolder) viewHolder).rightTextBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
-                    ((RightTextViewHolder) viewHolder).rightTextBinding.textvTime.setText(str);
-                    if (indexDifferent != 0)
-                        ((RightTextViewHolder) viewHolder).rightTextBinding.readnum.setText(String.valueOf(indexDifferent));
+        //각 xml의 데이터 set
+        if(viewHolder instanceof CenterViewHolder){
+            ((CenterViewHolder)viewHolder).centerSystemBinding.textv.setText(item.getText());
+        }else if(viewHolder instanceof LoadingViewHolder){
+            showLoadingView((LoadingViewHolder)viewHolder,position);
+        }
+        else if(viewHolder instanceof LeftTextViewHolder){
+            ((LeftTextViewHolder) viewHolder).leftTextBinding.textvMsg.setText(item.getText());
+            ((LeftTextViewHolder) viewHolder).leftTextBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            ((LeftTextViewHolder) viewHolder).leftTextBinding.textvTime.setText(str);
+            if(currentReadStates !=0)
+                ((LeftTextViewHolder) viewHolder).leftTextBinding.readnum.setText(String.valueOf(currentReadStates));
+            Glide.with(viewHolder.itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(((LeftTextViewHolder)viewHolder).leftTextBinding.imgv);
+        }else if(viewHolder instanceof LeftImageViewHolder){
+                Glide.with(viewHolder.itemView.getContext()).load(item.getText()).override(200,200).into(((LeftImageViewHolder)viewHolder).leftImageBinding.imagevMsg);
+                ((LeftImageViewHolder)viewHolder).leftImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+                ((LeftImageViewHolder)viewHolder).leftImageBinding.textvTime.setText(str);
+                if(currentReadStates !=0)
+                    ((LeftImageViewHolder) viewHolder).leftImageBinding.readnum.setText(String.valueOf(currentReadStates));
+                Glide.with(viewHolder.itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(((LeftImageViewHolder)viewHolder).leftImageBinding.imgv);
+            ((LeftImageViewHolder)viewHolder).leftImageBinding.imagevMsg.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+                    passDate= passDateFormat.format(item.normalDate());  //TODO : 수정해야함
+
+                    Intent intent = new Intent(viewHolder.itemView.getContext(),ImageFrameActivity.class);
+                    intent.putExtra("fromName",chatRoomUser.getUserMeta().getName());
+                    intent.putExtra("passDate",passDate);
+                    intent.putExtra("imageView",item.getText());
+                    view.getContext().startActivity(intent);
                 }
-            } else if (viewHolder instanceof RightImageViewHolder) {
-                Glide.with(viewHolder.itemView.getContext()).load(myDataList.get(position).getText()).into(((RightImageViewHolder) viewHolder).rightImageBinding.imagevMsg);
-                ((RightImageViewHolder) viewHolder).rightImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
-                ((RightImageViewHolder) viewHolder).rightImageBinding.textvTime.setText(str);
-                if (indexDifferent != 0)
-                    ((RightImageViewHolder) viewHolder).rightImageBinding.readnum.setText(String.valueOf(indexDifferent));
+            });
+        }
+        else if(viewHolder instanceof RightTextViewHolder){
+            if(item.getType().equals(Chat.Type.TEXT)){
+                ((RightTextViewHolder)viewHolder).rightTextBinding.textvMsg.setText(item.getText());
+                ((RightTextViewHolder)viewHolder).rightTextBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+                ((RightTextViewHolder)viewHolder).rightTextBinding.textvTime.setText(str);
+                if(currentReadStates !=0)
+                    ((RightTextViewHolder) viewHolder).rightTextBinding.readnum.setText(String.valueOf(currentReadStates));
+            }
+        }
+        else if(viewHolder instanceof RightImageViewHolder){
+            if(item.getType().equals(Chat.Type.IMAGE))
+                Glide.with(viewHolder.itemView.getContext()).load(item.getText()).into(((RightImageViewHolder)viewHolder).rightImageBinding.imagevMsg);
+            else
+                Glide.with(viewHolder.itemView.getContext()).load("https://firebasestorage.googleapis.com/v0/b/ftest-2abe4.appspot.com/o/uploads%2F202201140341565500_user2.jpg?alt=media&token=acc6057a-796a-4f97-b809-1920dbcb988f").into(((RightImageViewHolder)viewHolder).rightImageBinding.imagevMsg);
+            ((RightImageViewHolder)viewHolder).rightImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            ((RightImageViewHolder)viewHolder).rightImageBinding.textvTime.setText(str);
+            if(currentReadStates !=0)
+                ((RightImageViewHolder) viewHolder).rightImageBinding.readnum.setText(String.valueOf(currentReadStates));
+            ((RightImageViewHolder)viewHolder).rightImageBinding.imagevMsg.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+                    passDate= passDateFormat.format(item.normalDate());  //TODO : 수정해야함
+
+                    if(item.getType().equals(Chat.Type.IMAGE)){
+                    Intent intent = new Intent(viewHolder.itemView.getContext(),ImageFrameActivity.class);
+                    intent.putExtra("fromName",chatRoomUser.getUserMeta().getName());
+                    intent.putExtra("passDate",passDate);
+                    intent.putExtra("imageView",item.getText());
+                    view.getContext().startActivity(intent);}
+                    else if(item.getType().equals(Chat.Type.VIDEO)){
+                        Intent intent = new Intent(viewHolder.itemView.getContext(),VideoFrameActivity.class);
+                        intent.putExtra("fromName",chatRoomUser.getUserMeta().getName());
+                        intent.putExtra("passDate",passDate);
+                        intent.putExtra("imageView",item.getText());
+                        view.getContext().startActivity(intent);}
+                }
+            });
 
             }
         }
@@ -142,7 +191,8 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         Chat item = myDataList.get(position);
 
-        indexDifferent = 0;    //하나의 메세지를 나타낼 때마다 초기화
+
+        currentReadStates = 0;    //하나의 메세지를 나타낼 때마다 초기화
 
         if (item == null)
             return ViewType.LOADING;
@@ -157,8 +207,12 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
             if (item.getType().equals(Chat.Type.TEXT))
                 if (item.getIndex() > myUserList.get(i).getLastReadIndex())
-                    indexDifferent++;
+                    currentReadStates++;
         }
+        //Log.d("indexDifferent_finish", String.valueOf(currentReadStates));
+
+
+
 
         //채팅 위치 타입 (왼, 중간, 오) 과 메세지 타입(이미지, 텍스트) 정하기
         if (item.getType().equals(Chat.Type.SYSTEM)) {
@@ -201,12 +255,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public LeftImageViewHolder(@NonNull View itemView) {
             super(itemView);
             leftImageBinding = ItemElementLeftImageBinding.bind(itemView);
-            leftImageBinding.imgv.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View view) {
-
-                }
-            });
         }
     }
 

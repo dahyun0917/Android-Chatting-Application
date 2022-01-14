@@ -15,6 +15,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -70,6 +72,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean autoScroll = true;
     Uri filePath;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,7 +80,6 @@ public class RoomActivity extends AppCompatActivity {
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-
         //화면 기본 설정
         setUpRoomActivity();
     }
@@ -108,6 +110,14 @@ public class RoomActivity extends AppCompatActivity {
                 galleryAccess();
             }
         });
+
+        //floating 버튼에 대한 클릭 리스너 지정
+        binding.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+            }
+        });
  }
     private void initScrollListener() {
         binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -119,21 +129,22 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
-                if (!isLoading) { //최상단에 닿았을 때
-                    if(!recyclerView.canScrollVertically(-1)){
-                        if(frontChatKey != null) {
-                            loadMore();
-                            isLoading = true;
-                        }
+                if(!recyclerView.canScrollVertically(-1)){ //최상단에 닿았을 때
+                    if (!isLoading){
+                        loadMore();
+                        isLoading = true;
                         autoScroll = false;
+                        binding.fab.show();
                     }
                 }
                 else if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
+                    Log.d("TAG",String.valueOf(autoScroll));
                     autoScroll = true;
+                    binding.fab.hide();
                 }
                 else{
                     autoScroll = false;
+                    binding.fab.show();
                 }
             }
         });
@@ -168,9 +179,6 @@ public class RoomActivity extends AppCompatActivity {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
 
-        dataList = new IndexDeque<>();
-        userList = new HashMap<>();
-        frontChatKey = null;
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
             ChatDB.getLastChatKey(chatRoomKey, key -> {
@@ -233,6 +241,7 @@ public class RoomActivity extends AppCompatActivity {
         binding.RecyclerView.setLayoutManager(manager);
         roomElementAdapter = new RoomElementAdapter(dataList, userList);
         binding.RecyclerView.setAdapter(roomElementAdapter);
+        roomElementAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.ALLOW);
     }
 
     private void showJoinedUserList(){

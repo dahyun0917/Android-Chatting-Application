@@ -10,6 +10,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
 
+// push:  O(1)
+// pop:   Amortized O(1)
+// get: O(1)
+//
+
 public class IndexDeque<T> implements Cloneable {
     @SuppressWarnings("unchecked")
     final private ArrayList<T>[] list = (ArrayList<T>[]) Array.newInstance(ArrayList.class, 2);
@@ -41,9 +46,9 @@ public class IndexDeque<T> implements Cloneable {
                 return;
             }
             divide((where + 1) % 2);
-            pop(where);
+            list[where].remove(list[where].size() - 1);
         } else {
-            list[where].remove(0);
+            list[where].remove(list[where].size() - 1);
         }
     }
     private void divide(int where) {

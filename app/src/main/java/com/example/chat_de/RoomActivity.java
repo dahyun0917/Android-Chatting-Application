@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,7 @@ import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -73,6 +75,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean autoScroll = true;
     Uri filePath;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +83,6 @@ public class RoomActivity extends AppCompatActivity {
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-
         //화면 기본 설정
         setUpRoomActivity();
 
@@ -108,6 +110,20 @@ public class RoomActivity extends AppCompatActivity {
         chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);*/
 
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+
+    }
+
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
@@ -135,6 +151,14 @@ public class RoomActivity extends AppCompatActivity {
                 galleryAccess();
             }
         });
+
+        //floating 버튼에 대한 클릭 리스너 지정
+        binding.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+            }
+        });
  }
     private void initScrollListener() {
         binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -146,19 +170,23 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
-                if (!isLoading) { //최상단에 닿았을 때
-                    if(!recyclerView.canScrollVertically(-1)){
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if(!recyclerView.canScrollVertically(-1)){ //최상단에 닿았을 때
+                    if (!isLoading){
                         loadMore();
                         isLoading = true;
                         autoScroll = false;
+                        binding.fab.show();
                     }
                 }
                 else if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
+                    Log.d("TAG",String.valueOf(autoScroll));
                     autoScroll = true;
+                    binding.fab.hide();
                 }
                 else{
                     autoScroll = false;
+                    binding.fab.show();
                 }
             }
         });
@@ -193,8 +221,6 @@ public class RoomActivity extends AppCompatActivity {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
 
-        dataList = new IndexDeque<>();
-        userList = new HashMap<>();
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
             ChatDB.messageAddedEventListener(chatRoomKey, this::floatMessage);
@@ -247,6 +273,7 @@ public class RoomActivity extends AppCompatActivity {
         binding.RecyclerView.setLayoutManager(manager);
         roomElementAdapter = new RoomElementAdapter(dataList,userList);
         binding.RecyclerView.setAdapter(roomElementAdapter);
+        roomElementAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.ALLOW);
     }
 
     private void showJoinedUserList(){

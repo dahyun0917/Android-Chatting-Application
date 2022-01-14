@@ -15,17 +15,22 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoom;
+import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
+import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -38,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
@@ -77,7 +83,6 @@ public class RoomActivity extends AppCompatActivity {
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-
         //화면 기본 설정
         setUpRoomActivity();
     }
@@ -108,6 +113,14 @@ public class RoomActivity extends AppCompatActivity {
                 galleryAccess();
             }
         });
+
+        //floating 버튼에 대한 클릭 리스너 지정
+        binding.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+            }
+        });
  }
     private void initScrollListener() {
         binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -119,21 +132,21 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
-                if (!isLoading) { //최상단에 닿았을 때
-                    if(!recyclerView.canScrollVertically(-1)){
-                        if(frontChatKey != null) {
-                            loadMore();
-                            isLoading = true;
-                        }
+                if(!recyclerView.canScrollVertically(-1)){ //최상단에 닿았을 때
+                    if (!isLoading){
+                        loadMore();
+                        isLoading = true;
                         autoScroll = false;
+                        binding.fab.show();
                     }
                 }
                 else if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
                     autoScroll = true;
+                    binding.fab.hide();
                 }
                 else{
                     autoScroll = false;
+                    binding.fab.show();
                 }
             }
         });
@@ -167,9 +180,6 @@ public class RoomActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
-
-        dataList = new IndexDeque<>();
-        userList = new HashMap<>();
         frontChatKey = null;
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
@@ -178,15 +188,19 @@ public class RoomActivity extends AppCompatActivity {
                     frontChatKey = dataItem.first;
                     for(Chat i: dataItem.second) {
                         floatMessage(i);
+                        roomElementAdapter.notifyDataSetChanged();
                     }
                     ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
                         floatMessage(dataPair.second);
+                        roomElementAdapter.notifyDataSetChanged();
                     });
                 });
             });
             ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
                 userList.put(userPair.first, userPair.second);
+                roomElementAdapter.notifyDataSetChanged();
             });
+            roomElementAdapter.notifyDataSetChanged();
         });
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
         initScrollListener();
@@ -231,7 +245,7 @@ public class RoomActivity extends AppCompatActivity {
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         binding.RecyclerView.setLayoutManager(manager);
-        roomElementAdapter = new RoomElementAdapter(dataList, userList);
+        roomElementAdapter = new RoomElementAdapter(dataList,userList);
         binding.RecyclerView.setAdapter(roomElementAdapter);
     }
 
@@ -269,7 +283,7 @@ public class RoomActivity extends AppCompatActivity {
             index = dataItem.getIndex();
 
         dataList.add(new Chat(dataItem));
-        roomElementAdapter.setUserList(dataList, userList);
+        roomElementAdapter.notifyDataSetChanged();
         if(autoScroll)
             binding.RecyclerView.scrollToPosition(dataList.size() - 1);
     }

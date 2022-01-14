@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -22,10 +22,24 @@
                 android:id="@+id/RecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/linearLayout"
                 android:background="@android:color/white"
                 android:paddingHorizontal="16dp" />
-        </LinearLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab"
+                app:fabSize="auto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:src="@drawable/below_image"
+                app:maxImageSize="70dp"
+                app:borderWidth="0dp"
+                android:scaleType="fitCenter"
+                android:backgroundTint="@color/colorKNU"
+                app:tint = "@null"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"/>
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

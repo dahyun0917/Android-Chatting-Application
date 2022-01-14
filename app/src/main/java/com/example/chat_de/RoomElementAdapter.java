@@ -214,7 +214,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         //채팅 위치 타입 (왼, 중간, 오) 과 메세지 타입(이미지, 텍스트) 정하기
         if (item.getType().equals(Chat.Type.SYSTEM)) {
             return ViewType.CENTER_CONTENT;
-        } else if ((item.getFrom().equals("user2"))) { //사용자 key로 대체
+        } else if ((item.getFrom().equals("user2"))) { //TODO : 로그인된 사용자 key로 대체
             if ((item.getType().equals(Chat.Type.TEXT)))
                 return ViewType.RIGHT_CONTENT_TEXT;
             else if ((item.getType().equals(Chat.Type.IMAGE)))
@@ -273,8 +273,11 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onClick(View view) {
                     //1대1 채팅방 만들기
                     Intent intent = new Intent(itemView.getContext(), UserProfileActivity.class);
+                    //선택한 사용자 정보 전송 //TODO : 사용자 객체 전달해줘야됨,,
                     intent.putExtra("image",chatRoomUser.takePictureURL());
                     intent.putExtra("name",leftTextBinding.textvNicname.getText());
+                    intent.putExtra("me","이다현");
+                    //로그인된 사용자 정보 전송 //TODO : 실제 로그인된 사용자로 대체
                     view.getContext().startActivity(intent);
                 }
             });

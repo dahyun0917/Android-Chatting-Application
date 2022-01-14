@@ -39,7 +39,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
     //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.chat_list_add, menu);
+        getMenuInflater().inflate(R.menu.menu_chat_list_add, menu);
         return true;
     }
     //유저 추가 메뉴바 설정

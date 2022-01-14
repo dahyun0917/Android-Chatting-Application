@@ -2,6 +2,8 @@ package com.example.chat_de;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -115,6 +117,19 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 if(currentReadStates !=0)
                     ((LeftImageViewHolder) viewHolder).leftImageBinding.readnum.setText(String.valueOf(currentReadStates));
                 Glide.with(viewHolder.itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(((LeftImageViewHolder)viewHolder).leftImageBinding.imgv);
+            ((LeftImageViewHolder)viewHolder).leftImageBinding.imagevMsg.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+                    passDate= passDateFormat.format(item.normalDate());  //TODO : 수정해야함
+
+                    Intent intent = new Intent(viewHolder.itemView.getContext(),ImageFrameActivity.class);
+                    intent.putExtra("fromName",chatRoomUser.getUserMeta().getName());
+                    intent.putExtra("passDate",passDate);
+                    intent.putExtra("imageView",item.getText());
+                    view.getContext().startActivity(intent);
+                }
+            });
         }
         else if(viewHolder instanceof RightTextViewHolder){
             if(item.getType().equals(Chat.Type.TEXT)){
@@ -126,7 +141,10 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
         }
         else if(viewHolder instanceof RightImageViewHolder){
-            Glide.with(viewHolder.itemView.getContext()).load(item.getText()).into(((RightImageViewHolder)viewHolder).rightImageBinding.imagevMsg);
+            if(item.getType().equals(Chat.Type.IMAGE))
+                Glide.with(viewHolder.itemView.getContext()).load(item.getText()).into(((RightImageViewHolder)viewHolder).rightImageBinding.imagevMsg);
+            else
+                Glide.with(viewHolder.itemView.getContext()).load("https://firebasestorage.googleapis.com/v0/b/ftest-2abe4.appspot.com/o/uploads%2F202201140341565500_user2.jpg?alt=media&token=acc6057a-796a-4f97-b809-1920dbcb988f").into(((RightImageViewHolder)viewHolder).rightImageBinding.imagevMsg);
             ((RightImageViewHolder)viewHolder).rightImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
             ((RightImageViewHolder)viewHolder).rightImageBinding.textvTime.setText(str);
             if(currentReadStates !=0)
@@ -137,11 +155,18 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
                     passDate= passDateFormat.format(item.normalDate());  //TODO : 수정해야함
 
+                    if(item.getType().equals(Chat.Type.IMAGE)){
                     Intent intent = new Intent(viewHolder.itemView.getContext(),ImageFrameActivity.class);
                     intent.putExtra("fromName",chatRoomUser.getUserMeta().getName());
                     intent.putExtra("passDate",passDate);
                     intent.putExtra("imageView",item.getText());
-                    view.getContext().startActivity(intent);
+                    view.getContext().startActivity(intent);}
+                    else if(item.getType().equals(Chat.Type.VIDEO)){
+                        Intent intent = new Intent(viewHolder.itemView.getContext(),VideoFrameActivity.class);
+                        intent.putExtra("fromName",chatRoomUser.getUserMeta().getName());
+                        intent.putExtra("passDate",passDate);
+                        intent.putExtra("imageView",item.getText());
+                        view.getContext().startActivity(intent);}
                 }
             });
 

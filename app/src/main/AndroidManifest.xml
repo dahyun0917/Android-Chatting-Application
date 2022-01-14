@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.chat_de">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,6 +19,9 @@
             android:exported="false" />
         <activity
             android:name=".ImageFrameActivity"
+            android:exported="false" />
+        <activity
+            android:name=".VideoFrameActivity"
             android:exported="false" />
         <activity
             android:name=".ChatRoomListActivity"

@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +33,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -322,6 +325,14 @@ public class RoomActivity extends AppCompatActivity {
             filePath = data.getData();
             if(filePath!=null)
                 uploadFile();
+            try{
+                InputStream in = getContentResolver().openInputStream(filePath);
+                Bitmap img = BitmapFactory.decodeStream(in);
+                in.close();
+
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
     //firebase storage에 업로드하기

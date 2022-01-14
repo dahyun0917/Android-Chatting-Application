@@ -79,7 +79,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             Log.e("ERROR MODE","Mode값은 1또는 2만 가능합니다.");
         }
     }
-    private void inputChatRoomName(){
+    private void showNewChatDialog(){
         //다이얼로그(대화상자) 띄우기
         final EditText editText = new EditText(UserListActivity.this);
         AlertDialog.Builder dlg = new AlertDialog.Builder(UserListActivity.this);
@@ -184,7 +184,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         //list의 user의 userJoined에 생성된 채팅방 정보 추가
         //생성메세지(message) 현재 채팅방에 시스템 메세지로 추가
         ChatDB.setChatRoom("noname", list, "나", chatRoomKey -> {
-            Log.d("asdfasdf", chatRoomKey);
+            //TODO SUNA : 새 채팅방 인텐트
         });
     }
     private void inviteChatRoom(){
@@ -232,8 +232,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 else{
                     if(mode==NEW_CAHT){
                         //채팅방 만들기
-                        //TODO 현재는 비동기적이라서 inputChatRoomName()이 끝나기 전에 createChatRoom()가 실행되는 문제가 있다
-                        //inputChatRoomName();
+                        //TODO 현재는 비동기적이라서 showNewChatDialog()이 끝나기 전에 createChatRoom()가 실행되는 문제가 있다
+                        //showNewChatDialog();
                         createChatRoom();
                         finish();//액티비티 종료
                     }

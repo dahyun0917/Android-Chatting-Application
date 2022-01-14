@@ -2,6 +2,7 @@ package com.example.chat_de;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -32,9 +33,10 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    Context context;
     private IndexDeque<Chat> myDataList;
     private HashMap<String, ChatRoomUser> myUserList;
-    private ChatRoomUser chatRoomUser;
+    private ChatRoomUser chatRoomUser; //TODO : 오류날 예정
     private int currentReadStates;
     private String passDate;
     private Chat passChat ;  //TODO : 수정해야함
@@ -54,7 +56,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
-        Context context = parent.getContext();
+        context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         switch(viewType) {
@@ -191,7 +193,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         Chat item = myDataList.get(position);
 
-
         currentReadStates = 0;    //하나의 메세지를 나타낼 때마다 초기화
 
         if (item == null)
@@ -209,10 +210,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 if (item.getIndex() > myUserList.get(i).getLastReadIndex())
                     currentReadStates++;
         }
-        //Log.d("indexDifferent_finish", String.valueOf(currentReadStates));
-
-
-
 
         //채팅 위치 타입 (왼, 중간, 오) 과 메세지 타입(이미지, 텍스트) 정하기
         if (item.getType().equals(Chat.Type.SYSTEM)) {
@@ -255,6 +252,14 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public LeftImageViewHolder(@NonNull View itemView) {
             super(itemView);
             leftImageBinding = ItemElementLeftImageBinding.bind(itemView);
+            leftImageBinding.imgv.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    //1대1 채팅방 만들기
+                    Intent intent = new Intent(itemView.getContext(), UserProfileActivity.class);
+                    view.getContext().startActivity(intent);
+                }
+            });
         }
     }
 
@@ -263,6 +268,16 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public LeftTextViewHolder(@NonNull View itemView) {
             super(itemView);
             leftTextBinding = ItemElementLeftTextBinding.bind(itemView);
+            leftTextBinding.imgv.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    //1대1 채팅방 만들기
+                    Intent intent = new Intent(itemView.getContext(), UserProfileActivity.class);
+                    intent.putExtra("image",chatRoomUser.takePictureURL());
+                    intent.putExtra("name",leftTextBinding.textvNicname.getText());
+                    view.getContext().startActivity(intent);
+                }
+            });
         }
     }
     public class RightImageViewHolder extends RecyclerView.ViewHolder{

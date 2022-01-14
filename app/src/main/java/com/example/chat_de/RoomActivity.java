@@ -147,8 +147,11 @@ public class RoomActivity extends AppCompatActivity {
                         autoScroll = false;
                     }
                 }
-                if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
+                else if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
                     autoScroll = true;
+                }
+                else{
+                    autoScroll = false;
                 }
             }
         });
@@ -268,7 +271,8 @@ public class RoomActivity extends AppCompatActivity {
 
         dataList.add(new Chat(dataItem));
         roomElementAdapter.setUserList(dataList, userList);
-        binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+        if(autoScroll)
+            binding.RecyclerView.scrollToPosition(dataList.size() - 1);
     }
     //채팅방 정보 불러옴
     private void getChatRoomMeta() {

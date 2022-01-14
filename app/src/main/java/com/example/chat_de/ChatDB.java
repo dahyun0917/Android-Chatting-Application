@@ -68,14 +68,14 @@ public class ChatDB {
             }
         });
     }
-    public static void setChatRoom(String chatRoomName, ArrayList<UserListItem> items, String callUserName, RoomElementEventListener<String> listener) {
+    public static void setChatRoom(String chatRoomName, ArrayList<UserListItem> userList, String callUserName, RoomElementEventListener<String> listener) {
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(callUserName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
             if(error == null) {
                 final String chatRoomKey = rf.getKey();
                 HashMap<String, Object> result = new HashMap<>();
-                for (UserListItem item : items) {
+                for (UserListItem item : userList) {
                     // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
                     result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, item.getUserKey()), new ChatRoomUser(item.getUserMeta()));
                     // userJoined의 userKey들에 새로운 chatRoom 추가

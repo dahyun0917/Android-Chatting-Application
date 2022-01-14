@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <TextView
+        android:id="@+id/fromName"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="보낸사람"
@@ -12,6 +13,7 @@
         android:textColor="@color/white"
         android:background="@color/black"></TextView>
     <TextView
+        android:id="@+id/passDate"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:text="2022.01.12"
@@ -19,9 +21,11 @@
         android:textColor="@color/white"
         android:textSize="10sp"
         android:background="@color/black"></TextView>
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <com.github.chrisbanes.photoview.PhotoView
+        android:background="@color/black"
+        android:id="@+id/photo_view"
         android:src="@drawable/knu_mark"
-        ></ImageView>
+        android:scaleType="fitXY"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </LinearLayout>

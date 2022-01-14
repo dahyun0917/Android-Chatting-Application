@@ -21,7 +21,6 @@ public class UserListViewHolder extends RecyclerView.ViewHolder {
     public UserListViewHolder(@NonNull View itemView) {
         super(itemView);
         itemBinding = ItemRecyclerUserListBinding.bind(itemView);
-
     }
 
     //데이터와 뷰를 묶음

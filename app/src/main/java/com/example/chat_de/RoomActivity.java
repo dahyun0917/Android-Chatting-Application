@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -18,6 +19,7 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -185,6 +187,7 @@ public class RoomActivity extends AppCompatActivity {
             }
         }, 1000);
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -200,6 +203,7 @@ public class RoomActivity extends AppCompatActivity {
             });
         });
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
+        initScrollListener();
     }
     @Override
     public void onPause() {
@@ -207,7 +211,11 @@ public class RoomActivity extends AppCompatActivity {
         ChatDB.removeEventListenerBindOnThis();
         binding.RecyclerView.clearOnScrollListeners();
     }
-
+    @Override
+    public void onStop() {
+        super.onStop();
+        binding.RecyclerView.clearOnScrollListeners();
+    }
     //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
     @Override
     public boolean onCreateOptionsMenu(Menu menu){

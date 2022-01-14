@@ -89,7 +89,7 @@ public class RoomActivity extends AppCompatActivity {
             put("user2",usertest2);
             put("user3",usertest3);
         }};*/
-        Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
+        /*Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
         Chat chat2 = new Chat("ho", 1,"user2", Chat.Type.TEXT);
         Chat chat3 = new Chat("ha", 2,"user3", Chat.Type.TEXT);
         HashMap<String,Chat> chats1 = new HashMap<String,Chat>(){{
@@ -98,13 +98,13 @@ public class RoomActivity extends AppCompatActivity {
             put("113",chat3);
         }};
         ChatRoomMeta chatRoomMeta1 = new ChatRoomMeta("chatRoomTest", ChatRoomMeta.Type.BY_USER);
-        chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);
+        chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);*/
 
     }
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
-        //initScrollListener();
+        initScrollListener();
 
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
 
@@ -140,16 +140,14 @@ public class RoomActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-
-                if (!isLoading) {
+                if (!isLoading) { //최상단에 닿았을 때
                     if(!recyclerView.canScrollVertically(-1)){
                         loadMore();
                         isLoading = true;
                         autoScroll = false;
                     }
                 }
-                if(!recyclerView.canScrollVertically(1)){
+                if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
                     autoScroll = true;
                 }
             }
@@ -159,26 +157,21 @@ public class RoomActivity extends AppCompatActivity {
     private void loadMore() {
         binding.RecyclerView.post(new Runnable() {
             public void run() {
-                dataList.add(null);
-                roomElementAdapter.notifyItemInserted(dataList.size() - 1);
+                dataList.addFirst(null);
+                roomElementAdapter.notifyItemInserted(0);
             }
         });
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+        binding.RecyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 dataList.popFront();
-                int scrollPosition = dataList.size();
-                roomElementAdapter.notifyItemRemoved(scrollPosition);
-                int currentSize = scrollPosition;
-                int nextLimit = currentSize + 10;
-
-                while (currentSize - 1 < nextLimit) {
-                    dataList.add(new Chat("ww",0L, currentSize,"user1", Chat.Type.TEXT));
-                    currentSize++;
+                roomElementAdapter.notifyItemRemoved(0);
+                //TODO : 데이터 불러와서 넣기
+                for(int i = 0;i<10;i++){
+                    dataList.addFirst(new Chat("성공! "+String.valueOf(i),0L, i,"user1", Chat.Type.TEXT));
                 }
 
-                roomElementAdapter.notifyDataSetChanged();
+                roomElementAdapter.notifyItemRangeInserted(0,10);
                 isLoading = false;
                 autoScroll = false;
             }
@@ -189,7 +182,7 @@ public class RoomActivity extends AppCompatActivity {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
 
-        dataList = new ArrayList<>();
+        dataList = new IndexDeque<>();
         userList = new HashMap<>();
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
@@ -204,6 +197,7 @@ public class RoomActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         ChatDB.removeEventListenerBindOnThis();
+        binding.RecyclerView.clearOnScrollListeners();
     }
 
     //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기

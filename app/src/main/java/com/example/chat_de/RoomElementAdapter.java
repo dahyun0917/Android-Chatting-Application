@@ -144,6 +144,8 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         indexDifferent = 0;    //하나의 메세지를 나타낼 때마다 초기화
 
+        if (item == null)
+            return ViewType.LOADING;
 
         //hashmap에서 데이터 뽑아내기 : 같은 userkey일 때 value값 userList에 저장
         for (String i : myUserList.keySet()) {
@@ -158,11 +160,8 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     indexDifferent++;
         }
 
-        if (item == null)
-            return ViewType.LOADING;
-
         //채팅 위치 타입 (왼, 중간, 오) 과 메세지 타입(이미지, 텍스트) 정하기
-        else if (item.getType().equals(Chat.Type.SYSTEM)) {
+        if (item.getType().equals(Chat.Type.SYSTEM)) {
             return ViewType.CENTER_CONTENT;
         } else if ((item.getFrom().equals("user2"))) { //사용자 key로 대체
             if ((item.getType().equals(Chat.Type.TEXT)))

@@ -214,7 +214,32 @@ public class ChatDB {
                 });
     }
     public static void chatRoomListChangedEventListener(String userKey, RoomElementEventListener<ChatRoomMeta> listener) {
-        //TODO
+        ref.child(makePath(USER_JOINED, userKey)).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                snapshot.child(CHAT_ROOM_META).getValue(ChatRoomMeta.class);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
     private static void addEventListener(String path, String className, ChildEventListener eventListener) {
         ref.child(path).addChildEventListener(eventListener);

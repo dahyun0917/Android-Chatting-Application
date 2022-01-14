@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -86,7 +87,7 @@ public class RoomActivity extends AppCompatActivity {
             put("user2",usertest2);
             put("user3",usertest3);
         }};*/
-        Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
+/*        Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
         Chat chat2 = new Chat("ho", 1,"user2", Chat.Type.TEXT);
         Chat chat3 = new Chat("ha", 2,"user3", Chat.Type.TEXT);
         HashMap<String,Chat> chats1 = new HashMap<String,Chat>(){{
@@ -95,7 +96,7 @@ public class RoomActivity extends AppCompatActivity {
             put("113",chat3);
         }};
         ChatRoomMeta chatRoomMeta1 = new ChatRoomMeta("chatRoomTest", ChatRoomMeta.Type.BY_USER);
-        chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);
+        chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);*/
 
     }
     public void setUpRoomActivity(){
@@ -191,7 +192,7 @@ public class RoomActivity extends AppCompatActivity {
         userList = new HashMap<>();
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
-            ChatDB.messageAddedEventListener(chatRoomKey, this::floatMessage);
+            ChatDB.messageAddedEventListener(chatRoomKey, 15, this::floatMessage);
             ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
                 userList.put(userPair.first, userPair.second);
             });

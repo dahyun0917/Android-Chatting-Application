@@ -70,6 +70,8 @@ public class UserProfileActivity extends AppCompatActivity {
                     chat.putExtra("chatRoomKey",chatRoomKey);
                     startActivity(chat);
                 });
+                RoomActivity roomActivity = (RoomActivity)RoomActivity.roomActivity;
+                roomActivity.finish();
                 finish();
             }
         });

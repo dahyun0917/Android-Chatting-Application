@@ -3,71 +3,44 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
-
-
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_alignParentTop="true"
+        android:layout_above="@id/keyboard_bar"
+        android:background="@android:color/white"
+        android:paddingHorizontal="16dp"/>
 
-        <RelativeLayout
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <LinearLayout
+        android:id="@+id/keyboard_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/RecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/white"
-                android:paddingHorizontal="16dp" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab"
-                app:fabSize="auto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:src="@drawable/below_image"
-                app:maxImageSize="70dp"
-                app:borderWidth="0dp"
-                android:scaleType="fitCenter"
-                android:backgroundTint="@color/colorKNU"
-                app:tint = "@null"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"/>
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageButton
+            android:id="@+id/file_send"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
+            android:layout_margin="10dp"
+            android:src="@drawable/file_image"
+            android:background="#00000000" />
+        <EditText
+            android:id="@+id/chat_edit"
+            android:layout_width="300dp"
+            android:hint="Type a message..."
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/chat_sent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <ImageButton
-                android:id="@+id/file_send"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_gravity="center"
-                android:scaleType="fitCenter"
-                android:layout_margin="10dp"
-                android:src="@drawable/file_image"
-                android:background="#00000000"
-                ></ImageButton>
-            <EditText
-                android:id="@+id/chat_edit"
-                android:layout_width="300dp"
-                android:hint="Type a message..."
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/chat_sent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#000000"
-                android:text="send"
-                android:textSize="10sp"/>
-        </LinearLayout>
+            android:backgroundTint="#000000"
+            android:text="send"
+            android:textSize="10sp"/>
     </LinearLayout>
-
 </RelativeLayout>

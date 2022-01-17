@@ -30,6 +30,8 @@ import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.ViewType;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -72,7 +74,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 view = inflater.inflate(R.layout.item_element_right_image,parent,false);
                 return new RightImageViewHolder(view);
             default:
-                Log.e("VIEW_TYPE", "ViewType must be 1 or 2 or 3");
+                Log.e("VIEW_TYPE", "ViewType must be -1 to 4");
                 view = inflater.inflate(R.layout.item_element_right_text,parent,false);
                 return new RightTextViewHolder(view);
         }
@@ -83,7 +85,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     // 실제 각 뷰 홀더에 데이터를 연결해주는 함수
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-
         //각 xml의 데이터 set
         if(viewHolder instanceof LoadingViewHolder){
             showLoadingView((LoadingViewHolder)viewHolder,position);

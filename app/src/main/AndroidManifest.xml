@@ -12,7 +12,8 @@
 
         <activity
             android:name=".RoomActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".UserListActivity"
             android:exported="false" />

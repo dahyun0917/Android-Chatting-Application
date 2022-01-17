@@ -44,12 +44,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         myUserList = chatRoomUser;
         myDataList = dataList;
     }
-    //TODO : fix
-    public void setUserList(IndexDeque<Chat> dataList, HashMap<String, ChatRoomUser> userList){
-        myUserList = userList;
-        myDataList = dataList;
-        this.notifyDataSetChanged();
-    }
 
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -77,7 +71,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 view = inflater.inflate(R.layout.item_element_right_image,parent,false);
                 return new RightImageViewHolder(view);
             default:
-                Log.e("VIEW_TYPE", "ViewType must be 1 or 2 or 3");
+                Log.e("VIEW_TYPE", "ViewType must be -1 to 4");
                 view = inflater.inflate(R.layout.item_element_right_text,parent,false);
                 return new RightTextViewHolder(view);
         }

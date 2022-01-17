@@ -6,13 +6,13 @@
     android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/keyboard_bar"
         android:layout_alignParentTop="true"
+        android:layout_above="@id/keyboard_bar"
         android:background="@android:color/white"
-        android:paddingHorizontal="16dp"
-        android:id="@+id/recycler_view"/>
+        android:paddingHorizontal="16dp"/>
 
     <LinearLayout
         android:id="@+id/keyboard_bar"

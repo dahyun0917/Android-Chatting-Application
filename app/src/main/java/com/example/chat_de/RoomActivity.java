@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -168,7 +167,6 @@ public class RoomActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
-
         dataList.clear();
         userList.clear();
         frontChatKey = null;
@@ -225,7 +223,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     // 포커스가 키보드를 제외한 다른 곳으로 갔을 때 키보드 내리기
-    @Override
+/*    @Override
     public boolean dispatchTouchEvent(MotionEvent motionEvent) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         //Find the currently focused view, so we can grab the correct window token from it.
@@ -237,7 +235,7 @@ public class RoomActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
 
         return super.dispatchTouchEvent(motionEvent);
-    }
+    }*/
 
     public void initRecyclerView(){
         //binding.RecyclerView.setItemViewCacheSize(50);
@@ -261,12 +259,12 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void floatOldMessage(ArrayList<Chat> chatList) {
-        final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
         ListIterator i = chatList.listIterator(chatList.size());
         int cnt = chatList.size();
 
         while(i.hasPrevious()) {
             Chat chat = (Chat)i.previous();
+            final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
             final String DAY = SDF.format(chat.normalDate());
             if(dataList.size() != 0 && !SDF.format(dataList.getFront().normalDate()).equals(DAY)) {
                 Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
@@ -276,23 +274,26 @@ public class RoomActivity extends AppCompatActivity {
             }
             dataList.pushFront(chat);
         }
-        roomElementAdapter.notifyItemRangeInserted(0, cnt);
+        if(cnt != 0)
+            roomElementAdapter.notifyItemRangeInserted(0, cnt);
     }
 
     //파이어베이스에 메세지가 추가되었을때, 메세지를 화면에 띄워줌.(기존 addMessage)
     private void floatNewMessage(Chat dataItem) {
-        //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
-        final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
-        final String DAY = SDF.format(dataItem.normalDate());
-        final Chat chat = dataList.getBack();
         int cnt = 1;
 
-        if (!SDF.format(chat.normalDate()).equals(DAY)) {
-            Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
-            daySystemChat.setDate(dataItem.unixTime());
-            dataList.pushBack(daySystemChat);
-            cnt++;
+        if(dataList.size() != 0) {
+            //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
+            final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
+            final String DAY = SDF.format(dataItem.normalDate());
+            if (!SDF.format(dataList.getBack().normalDate()).equals(DAY)) {
+                Chat daySystemChat = new Chat("--------------------------" + DAY + "--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+                daySystemChat.setDate(dataItem.unixTime());
+                dataList.pushBack(daySystemChat);
+                cnt++;
+            }
         }
+
         lastIndex = dataItem.getIndex();
         dataList.pushBack(new Chat(dataItem));
         roomElementAdapter.notifyItemRangeInserted(dataList.size() - cnt + 1, cnt);

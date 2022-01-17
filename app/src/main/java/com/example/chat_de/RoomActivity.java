@@ -24,12 +24,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoom;
+import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
+import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -43,6 +46,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.ListIterator;
+import java.util.Map;
 
 import java.util.ListIterator;
 import java.util.Map;
@@ -152,12 +157,10 @@ public class RoomActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if(!recyclerView.canScrollVertically(-1)){ //최상단에 닿았을 때
                     if (!isLoading){
                         loadMore();
                         isLoading = true;
-
                         autoScroll = false;
                         binding.fab.show();
                     }
@@ -206,15 +209,19 @@ public class RoomActivity extends AppCompatActivity {
 
         frontChatKey = null;
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
-            userList = item;
+            for(Map.Entry<String, ChatRoomUser> i: item.entrySet()) {
+                userList.put(i.getKey(), i.getValue());
+            }
             ChatDB.getLastChatKey(chatRoomKey, key -> {
                 ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, dataItem -> {
                     frontChatKey = dataItem.first;
                     for(Chat i: dataItem.second) {
                         floatMessage(i);
+                        roomElementAdapter.notifyDataSetChanged();
                     }
                     ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
                         floatMessage(dataPair.second);
+                        roomElementAdapter.notifyDataSetChanged();
                     });
                 });
             });
@@ -269,7 +276,7 @@ public class RoomActivity extends AppCompatActivity {
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         binding.RecyclerView.setLayoutManager(manager);
-      
+
         //TODO LOGIN : 임시로 현재 사용자 설정함->사용자 인증 도입 후 수정해야됨
         currentUser = new ChatRoomUser(17, new User("이다현","http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg",2,"user2"));
         roomElementAdapter = new RoomElementAdapter(dataList, userList,currentUser);

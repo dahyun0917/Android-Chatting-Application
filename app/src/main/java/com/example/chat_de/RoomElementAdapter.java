@@ -38,7 +38,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         myDataList = dataList;
     }
     //TODO : fix
-    public void setUserList(IndexDeque<Chat> dataList,HashMap<String, ChatRoomUser> userList){
+    public void setUserList(IndexDeque<Chat> dataList, HashMap<String, ChatRoomUser> userList){
         myUserList = userList;
         myDataList = dataList;
         this.notifyDataSetChanged();

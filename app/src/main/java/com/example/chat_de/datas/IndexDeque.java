@@ -6,9 +6,10 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-// push: O(1)
-// pop:  Amortized O(1)
-// get:  O(1)
+// push:       O(1)
+// pop:        Amortized O(1)
+// get:        O(1)
+// getByIndex: O(1)
 
 public class IndexDeque<T> implements Cloneable {
     @SuppressWarnings("unchecked")
@@ -22,7 +23,7 @@ public class IndexDeque<T> implements Cloneable {
     public void add(T data)         { list[1].add(data); }
     public void pushFront(T data)   { list[0].add(data); }
     public void pushBack(T data)    { list[1].add(data); }
-    public void appendBack(ArrayList<T> dataList) {
+    public void appendFront(ArrayList<T> dataList) {
         if(dataList == null) {
             throw new NullPointerException();
         }
@@ -32,6 +33,15 @@ public class IndexDeque<T> implements Cloneable {
             list[0].add(data.previous());
         }
     }
+//    public void appendBack(ArrayList<T> dataList) {
+//        if(dataList == null) {
+//            throw new NullPointerException();
+//        }
+//
+//        for(T data: dataList) {
+//            list[1].add(data);
+//        }
+//    }
 
     public void popFront()  { pop(0); }
     public void popBack()   { pop(1); }

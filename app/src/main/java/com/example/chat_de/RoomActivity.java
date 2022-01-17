@@ -20,7 +20,6 @@ import android.widget.Toast;
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoom;
-import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -33,10 +32,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
+    private final int CHAT_LIMIT = 15;
     private ActivityRoomBinding binding;
     private RoomElementAdapter roomElementAdapter;
     private LinearLayoutManager manager;
@@ -46,6 +45,7 @@ public class RoomActivity extends AppCompatActivity {
     private String chatRoomKey;
     private String userKey = "user2";
     private String userName = "user2";
+    private String frontChatKey;
     private Chat.Type messageType = Chat.Type.TEXT;
 
     private ArrayList<String> listenerPath = new ArrayList<>();
@@ -116,8 +116,10 @@ public class RoomActivity extends AppCompatActivity {
 
                 if (!isLoading) { //최상단에 닿았을 때
                     if(!recyclerView.canScrollVertically(-1)){
-                        loadMore();
-                        isLoading = true;
+                        if(frontChatKey != null) {
+                            loadMore();
+                            isLoading = true;
+                        }
                         autoScroll = false;
                     }
                 }
@@ -134,7 +136,7 @@ public class RoomActivity extends AppCompatActivity {
     private void loadMore() {
         binding.RecyclerView.post(new Runnable() {
             public void run() {
-                dataList.addFirst(null);
+                dataList.pushFront(null);
                 roomElementAdapter.notifyItemInserted(0);
             }
         });
@@ -143,13 +145,13 @@ public class RoomActivity extends AppCompatActivity {
             public void run() {
                 dataList.popFront();
                 roomElementAdapter.notifyItemRemoved(0);
-                //TODO : 데이터 불러와서 넣기
-                for(int i = 0; i < 10; i++){
-                    dataList.pushFront(new Chat("성공! "+String.valueOf(i),0L, i,"user1", Chat.Type.TEXT));
-                }
 
-                roomElementAdapter.notifyItemRangeInserted(0,10);
-                isLoading = false;
+                ChatDB.getPrevChatCompleteListener(chatRoomKey, frontChatKey, CHAT_LIMIT, itemList -> {
+                    frontChatKey = itemList.first;
+                    dataList.appendFront(itemList.second);
+                    roomElementAdapter.notifyItemRangeInserted(0, itemList.second.size());
+                    isLoading = false;
+                });
                 autoScroll = false;
             }
         }, 1000);
@@ -161,9 +163,20 @@ public class RoomActivity extends AppCompatActivity {
 
         dataList = new IndexDeque<>();
         userList = new HashMap<>();
+        frontChatKey = null;
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
-            ChatDB.messageAddedEventListener(chatRoomKey, 15, this::floatMessage);
+            ChatDB.getLastChatKey(chatRoomKey, key -> {
+                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, dataItem -> {
+                    frontChatKey = dataItem.first;
+                    for(Chat i: dataItem.second) {
+                        floatMessage(i);
+                    }
+                    ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
+                        floatMessage(dataPair.second);
+                    });
+                });
+            });
             ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
                 userList.put(userPair.first, userPair.second);
             });
@@ -206,12 +219,12 @@ public class RoomActivity extends AppCompatActivity {
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         binding.RecyclerView.setLayoutManager(manager);
-        roomElementAdapter = new RoomElementAdapter(dataList,userList);
+        roomElementAdapter = new RoomElementAdapter(dataList, userList);
         binding.RecyclerView.setAdapter(roomElementAdapter);
     }
 
     private void showJoinedUserList(){
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("참가자"); //제목
         for(String i : userList.keySet()){
@@ -240,7 +253,7 @@ public class RoomActivity extends AppCompatActivity {
         }
 
         //TODO: 수정필요
-        if(dataItem.getType() != Chat.Type.SYSTEM)
+        if(dataItem.getType() != Chat.Type.SYSTEM && index < dataItem.getIndex())
             index = dataItem.getIndex();
 
         dataList.add(new Chat(dataItem));
@@ -330,8 +343,5 @@ public class RoomActivity extends AppCompatActivity {
                 Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
             }
         });
-
-
     }
-
 }

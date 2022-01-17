@@ -2,6 +2,11 @@ package com.example.chat_de;
 
 import android.content.Context;
 import android.content.Intent;
+
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.provider.MediaStore;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;

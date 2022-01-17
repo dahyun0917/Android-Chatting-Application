@@ -65,7 +65,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
         this.notifyDataSetChanged();
     }
     //전체 유저 넘겼을때
-    public void serUserList(ArrayList<UserListItem>[] userList) {
+    public void allUsersList(ArrayList<UserListItem>[] userList) {
         ArrayList<UserListItem> list = new ArrayList<>();
         for(ArrayList<UserListItem> i : userList)
             list.addAll(i);

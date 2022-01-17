@@ -18,18 +18,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.chat_de.databinding.ActivityMainBinding;
 import com.example.chat_de.databinding.ActivityUserListBinding;
 import com.example.chat_de.datas.User;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class UserListActivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
@@ -140,7 +134,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     // int i : item의 순서대로 0번부터 n-1번까지
                     // userList[0]: 1-10기 ...
                     if(i == 0) {
-                        userListAdapter.serUserList(userList);
+                        userListAdapter.allUsersList(userList);
                     } else {
                         userListAdapter.setUserList(userList[i-1]);
                     }
@@ -148,7 +142,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 //스피너에서 아무것도 선택되지 않은 상태일때
                 @Override
                 public void onNothingSelected(AdapterView<?> adapterView) {
-                    userListAdapter.serUserList(userList);
+                    userListAdapter.allUsersList(userList);
                 }
             });
         });

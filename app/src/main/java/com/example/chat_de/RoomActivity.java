@@ -24,7 +24,6 @@ import android.widget.ArrayAdapter;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
-import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -35,10 +34,13 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.ListIterator;
+import java.util.Map;
 
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
@@ -60,12 +62,11 @@ public class RoomActivity extends AppCompatActivity {
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
     private IndexDeque<Chat> dataList = new IndexDeque<>();
-
     private HashMap<String, ChatRoomUser> userList  = new HashMap<>(); //
 
     //private HashMap<String,ChatRoomUser> chatRoomUserList;
 
-    private int index=-1;
+    private int lastIndex =-1;
     private boolean isLoading = false;
     private boolean autoScroll = true;
     Uri filePath;
@@ -156,8 +157,7 @@ public class RoomActivity extends AppCompatActivity {
 
                 ChatDB.getPrevChatCompleteListener(chatRoomKey, frontChatKey, CHAT_LIMIT, itemList -> {
                     frontChatKey = itemList.first;
-                    dataList.appendFront(itemList.second);
-                    roomElementAdapter.notifyItemRangeInserted(0, itemList.second.size());
+                    floatOldMessage(itemList.second);
                     isLoading = false;
                 });
             }
@@ -169,19 +169,19 @@ public class RoomActivity extends AppCompatActivity {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
 
-        dataList = new IndexDeque<>();
-        userList = new HashMap<>();
+        dataList.clear();
+        userList.clear();
         frontChatKey = null;
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
-            userList = item;
+            for(Map.Entry<String, ChatRoomUser> i: item.entrySet()) {
+                userList.put(i.getKey(), i.getValue());
+            }
             ChatDB.getLastChatKey(chatRoomKey, key -> {
-                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, dataItem -> {
-                    frontChatKey = dataItem.first;
-                    for(Chat i: dataItem.second) {
-                        floatMessage(i);
-                    }
+                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, itemList -> {
+                    frontChatKey = itemList.first;
+                    floatOldMessage(itemList.second);
                     ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
-                        floatMessage(dataPair.second);
+                        floatNewMessage(dataPair.second);
                     });
                 });
             });
@@ -224,6 +224,7 @@ public class RoomActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // 포커스가 키보드를 제외한 다른 곳으로 갔을 때 키보드 내리기
     @Override
     public boolean dispatchTouchEvent(MotionEvent motionEvent) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
@@ -259,29 +260,42 @@ public class RoomActivity extends AppCompatActivity {
         dlg.show();
     }
 
+    private void floatOldMessage(ArrayList<Chat> chatList) {
+        final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
+        ListIterator i = chatList.listIterator(chatList.size());
+        int cnt = chatList.size();
+
+        while(i.hasPrevious()) {
+            Chat chat = (Chat)i.previous();
+            final String DAY = SDF.format(chat.normalDate());
+            if(dataList.size() != 0 && !SDF.format(dataList.getFront().normalDate()).equals(DAY)) {
+                Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+                daySystemChat.setDate(dataList.getFront().unixTime());
+                dataList.pushFront(daySystemChat);
+                cnt++;
+            }
+            dataList.pushFront(chat);
+        }
+        roomElementAdapter.notifyItemRangeInserted(0, cnt);
+    }
+
     //파이어베이스에 메세지가 추가되었을때, 메세지를 화면에 띄워줌.(기존 addMessage)
-    private void floatMessage(Chat dataItem) {
+    private void floatNewMessage(Chat dataItem) {
         //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
         final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
         final String DAY = SDF.format(dataItem.normalDate());
-        for(int i = dataList.size() - 1; i >= 0; i--) {
-            final Chat chat = dataList.get(i);
-            if(dataList.get(i).getType() != Chat.Type.SYSTEM) {
-                if (!SDF.format(chat.normalDate()).equals(DAY)) {
-                    Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
-                    daySystemChat.setDate(dataItem.unixTime());
-                    dataList.add(daySystemChat);
-                }
-                break;
-            }
+        final Chat chat = dataList.getBack();
+        int cnt = 1;
+
+        if (!SDF.format(chat.normalDate()).equals(DAY)) {
+            Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+            daySystemChat.setDate(dataItem.unixTime());
+            dataList.pushBack(daySystemChat);
+            cnt++;
         }
-
-        //TODO: 수정필요
-        if(dataItem.getType() != Chat.Type.SYSTEM && index < dataItem.getIndex())
-            index = dataItem.getIndex();
-
-        dataList.add(new Chat(dataItem));
-        roomElementAdapter.setUserList(dataList, userList);
+        lastIndex = dataItem.getIndex();
+        dataList.pushBack(new Chat(dataItem));
+        roomElementAdapter.notifyItemRangeInserted(dataList.size() - cnt + 1, cnt);
         if(autoScroll)
             binding.recyclerView.scrollToPosition(dataList.size() - 1);
     }
@@ -295,7 +309,7 @@ public class RoomActivity extends AppCompatActivity {
         if (binding.chatEdit.getText().toString().equals(""))
             return;
 
-        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, userKey, userList);
+        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++lastIndex, messageType, chatRoomKey, userKey, userList);
         binding.chatEdit.setText(""); //입력창 초기화
         autoScroll = true;
     }
@@ -368,7 +382,7 @@ public class RoomActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Uri uri) {
                         //userKey="user2";
-                        ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, userKey, userList);
+                        ChatDB.uploadMessage(uri.toString(), ++lastIndex, Chat.Type.IMAGE, chatRoomKey, userKey, userList);
                         progressDialog.dismiss();
                         //Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
                     }

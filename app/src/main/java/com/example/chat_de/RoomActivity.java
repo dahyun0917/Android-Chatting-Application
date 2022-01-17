@@ -14,20 +14,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoom;
-import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
-import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -40,10 +36,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
+    private final int CHAT_LIMIT = 15;
     private ActivityRoomBinding binding;
     private RoomElementAdapter roomElementAdapter;
     private LinearLayoutManager manager;
@@ -53,6 +49,7 @@ public class RoomActivity extends AppCompatActivity {
     private String chatRoomKey;
     private String userKey = "user2";
     private String userName = "user2";
+    private String frontChatKey;
     private Chat.Type messageType = Chat.Type.TEXT;
 
     private ArrayList<String> listenerPath = new ArrayList<>();
@@ -81,30 +78,6 @@ public class RoomActivity extends AppCompatActivity {
 
         //화면 기본 설정
         setUpRoomActivity();
-
-/*        //test용 데이터
-        User test1 = new User("양선아","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"user1");
-        User test2 = new User("이다현","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user2");
-        User test3 = new User("김규래","https://www.codingfactory.net/wp-content/uploads/abc.jpg",81,"user3");
-        ChatRoomUser usertest1= new ChatRoomUser(1,test1);
-        ChatRoomUser usertest2= new ChatRoomUser(2,test2);
-        ChatRoomUser usertest3= new ChatRoomUser(2,test3);
-        userList= new HashMap<String,ChatRoomUser>(){{
-            put("user1",usertest1);
-            put("user2",usertest2);
-            put("user3",usertest3);
-        }};*/
-        /*Chat chat1 = new Chat("hi", 0,"user1", Chat.Type.TEXT);
-        Chat chat2 = new Chat("ho", 1,"user2", Chat.Type.TEXT);
-        Chat chat3 = new Chat("ha", 2,"user3", Chat.Type.TEXT);
-        HashMap<String,Chat> chats1 = new HashMap<String,Chat>(){{
-            put("111",chat1);
-            put("112",chat2);
-            put("113",chat3);
-        }};
-        ChatRoomMeta chatRoomMeta1 = new ChatRoomMeta("chatRoomTest", ChatRoomMeta.Type.BY_USER);
-        chatRoomUserList = new ChatRoom(chats1,chatRoomMeta1);*/
-
     }
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
@@ -147,8 +120,10 @@ public class RoomActivity extends AppCompatActivity {
 
                 if (!isLoading) { //최상단에 닿았을 때
                     if(!recyclerView.canScrollVertically(-1)){
-                        loadMore();
-                        isLoading = true;
+                        if(frontChatKey != null) {
+                            loadMore();
+                            isLoading = true;
+                        }
                         autoScroll = false;
                     }
                 }
@@ -174,13 +149,13 @@ public class RoomActivity extends AppCompatActivity {
             public void run() {
                 dataList.popFront();
                 roomElementAdapter.notifyItemRemoved(0);
-                //TODO : 데이터 불러와서 넣기
-                for(int i = 0;i<10;i++){
-                    dataList.pushFront(new Chat("성공! "+String.valueOf(i),0L, i,"user1", Chat.Type.TEXT));
-                }
 
-                roomElementAdapter.notifyItemRangeInserted(0,10);
-                isLoading = false;
+                ChatDB.getPrevChatCompleteListener(chatRoomKey, frontChatKey, CHAT_LIMIT, itemList -> {
+                    frontChatKey = itemList.first;
+                    dataList.appendFront(itemList.second);
+                    roomElementAdapter.notifyItemRangeInserted(0, itemList.second.size());
+                    isLoading = false;
+                });
                 autoScroll = false;
             }
         }, 1000);
@@ -192,9 +167,20 @@ public class RoomActivity extends AppCompatActivity {
 
         dataList = new IndexDeque<>();
         userList = new HashMap<>();
+        frontChatKey = null;
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
-            ChatDB.messageAddedEventListener(chatRoomKey, this::floatMessage);
+            ChatDB.getLastChatKey(chatRoomKey, key -> {
+                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, dataItem -> {
+                    frontChatKey = dataItem.first;
+                    for(Chat i: dataItem.second) {
+                        floatMessage(i);
+                    }
+                    ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
+                        floatMessage(dataPair.second);
+                    });
+                });
+            });
             ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
                 userList.put(userPair.first, userPair.second);
             });
@@ -237,12 +223,12 @@ public class RoomActivity extends AppCompatActivity {
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         binding.RecyclerView.setLayoutManager(manager);
-        roomElementAdapter = new RoomElementAdapter(dataList,userList);
+        roomElementAdapter = new RoomElementAdapter(dataList, userList);
         binding.RecyclerView.setAdapter(roomElementAdapter);
     }
 
     private void showJoinedUserList(){
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("참가자"); //제목
         for(String i : userList.keySet()){
@@ -271,7 +257,7 @@ public class RoomActivity extends AppCompatActivity {
         }
 
         //TODO: 수정필요
-        if(dataItem.getType() != Chat.Type.SYSTEM)
+        if(dataItem.getType() != Chat.Type.SYSTEM && index < dataItem.getIndex())
             index = dataItem.getIndex();
 
         dataList.add(new Chat(dataItem));
@@ -385,9 +371,5 @@ public class RoomActivity extends AppCompatActivity {
                 progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
             }
         });
-
-
-
     }
-
 }

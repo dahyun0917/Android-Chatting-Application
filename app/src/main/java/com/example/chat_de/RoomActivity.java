@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -16,7 +17,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
@@ -61,7 +64,6 @@ public class RoomActivity extends AppCompatActivity {
     private HashMap<String, ChatRoomUser> userList  = new HashMap<>(); //
 
     //private HashMap<String,ChatRoomUser> chatRoomUserList;
-    private ChatRoom chatRoomUserList;
 
     private int index=-1;
     private boolean isLoading = false;
@@ -79,6 +81,7 @@ public class RoomActivity extends AppCompatActivity {
         //화면 기본 설정
         setUpRoomActivity();
     }
+
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
@@ -106,9 +109,10 @@ public class RoomActivity extends AppCompatActivity {
                 galleryAccess();
             }
         });
- }
+    }
+
     private void initScrollListener() {
-        binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -118,8 +122,8 @@ public class RoomActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if (!isLoading) { //최상단에 닿았을 때
-                    if(!recyclerView.canScrollVertically(-1)){
+                if (!recyclerView.canScrollVertically(-1)) { //최상단에 닿았을 때
+                    if(!isLoading){
                         if(frontChatKey != null) {
                             loadMore();
                             isLoading = true;
@@ -138,13 +142,13 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void loadMore() {
-        binding.RecyclerView.post(new Runnable() {
+        binding.recyclerView.post(new Runnable() {
             public void run() {
                 dataList.pushFront(null);
                 roomElementAdapter.notifyItemInserted(0);
             }
         });
-        binding.RecyclerView.postDelayed(new Runnable() {
+        binding.recyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 dataList.popFront();
@@ -156,10 +160,10 @@ public class RoomActivity extends AppCompatActivity {
                     roomElementAdapter.notifyItemRangeInserted(0, itemList.second.size());
                     isLoading = false;
                 });
-                autoScroll = false;
             }
         }, 1000);
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -187,11 +191,12 @@ public class RoomActivity extends AppCompatActivity {
         });
         ChatDB.userReadLatestMessage(chatRoomKey, userKey);
     }
+
     @Override
     public void onPause() {
         super.onPause();
         ChatDB.removeEventListenerBindOnThis();
-        binding.RecyclerView.clearOnScrollListeners();
+        binding.recyclerView.clearOnScrollListeners();
     }
 
     //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
@@ -219,12 +224,27 @@ public class RoomActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View vw = getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (vw == null) {
+            vw = new View(this);
+        }
+        imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+
+        return super.dispatchTouchEvent(motionEvent);
+    }
+
     public void initRecyclerView(){
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
-        binding.RecyclerView.setLayoutManager(manager);
+        manager.setStackFromEnd(true);
+        binding.recyclerView.setLayoutManager(manager);
         roomElementAdapter = new RoomElementAdapter(dataList, userList);
-        binding.RecyclerView.setAdapter(roomElementAdapter);
+        binding.recyclerView.setAdapter(roomElementAdapter);
     }
 
     private void showJoinedUserList(){
@@ -263,7 +283,7 @@ public class RoomActivity extends AppCompatActivity {
         dataList.add(new Chat(dataItem));
         roomElementAdapter.setUserList(dataList, userList);
         if(autoScroll)
-            binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+            binding.recyclerView.scrollToPosition(dataList.size() - 1);
     }
     //채팅방 정보 불러옴
     private void getChatRoomMeta() {
@@ -275,9 +295,9 @@ public class RoomActivity extends AppCompatActivity {
         if (binding.chatEdit.getText().toString().equals(""))
             return;
 
-        // USER_NAME 나중에 userKey로 바꿔줘야함
         ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, userKey, userList);
         binding.chatEdit.setText(""); //입력창 초기화
+        autoScroll = true;
     }
     //초대하기->유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser(){

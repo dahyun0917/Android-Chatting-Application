@@ -18,18 +18,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.chat_de.databinding.ActivityMainBinding;
 import com.example.chat_de.databinding.ActivityUserListBinding;
 import com.example.chat_de.datas.User;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class UserListActivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
@@ -79,7 +73,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             Log.e("ERROR MODE","Mode값은 1또는 2만 가능합니다.");
         }
     }
-    private void inputChatRoomName(){
+    private void showNewChatDialog(){
         //다이얼로그(대화상자) 띄우기
         final EditText editText = new EditText(UserListActivity.this);
         AlertDialog.Builder dlg = new AlertDialog.Builder(UserListActivity.this);
@@ -140,7 +134,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     // int i : item의 순서대로 0번부터 n-1번까지
                     // userList[0]: 1-10기 ...
                     if(i == 0) {
-                        userListAdapter.serUserList(userList);
+                        userListAdapter.allUsersList(userList);
                     } else {
                         userListAdapter.setUserList(userList[i-1]);
                     }
@@ -148,7 +142,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 //스피너에서 아무것도 선택되지 않은 상태일때
                 @Override
                 public void onNothingSelected(AdapterView<?> adapterView) {
-                    userListAdapter.serUserList(userList);
+                    userListAdapter.allUsersList(userList);
                 }
             });
         });
@@ -184,7 +178,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         //list의 user의 userJoined에 생성된 채팅방 정보 추가
         //생성메세지(message) 현재 채팅방에 시스템 메세지로 추가
         ChatDB.setChatRoom("noname", list, "나", chatRoomKey -> {
-            Log.d("asdfasdf", chatRoomKey);
+            //TODO SUNA : 새 채팅방 인텐트
         });
     }
     private void inviteChatRoom(){
@@ -232,8 +226,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 else{
                     if(mode==NEW_CAHT){
                         //채팅방 만들기
-                        //TODO 현재는 비동기적이라서 inputChatRoomName()이 끝나기 전에 createChatRoom()가 실행되는 문제가 있다
-                        //inputChatRoomName();
+                        //TODO 현재는 비동기적이라서 showNewChatDialog()이 끝나기 전에 createChatRoom()가 실행되는 문제가 있다
+                        //showNewChatDialog();
                         createChatRoom();
                         finish();//액티비티 종료
                     }

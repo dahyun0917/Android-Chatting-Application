@@ -8,15 +8,21 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+
+import android.os.Handler;
+import android.util.Log;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
@@ -26,6 +32,7 @@ import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -37,6 +44,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import java.util.ListIterator;
+import java.util.Map;
+
+
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
@@ -47,9 +58,10 @@ public class RoomActivity extends AppCompatActivity {
 
     private int GALLEY_CODE = 10;
     private String chatRoomKey;
-    private String userKey = "user2";
-    private String userName = "user2";
+
+    private ChatRoomUser currentUser; //TODO LOGIN : 현재 로그인된 사용자
     private String frontChatKey;
+
     private Chat.Type messageType = Chat.Type.TEXT;
 
     private ArrayList<String> listenerPath = new ArrayList<>();
@@ -68,6 +80,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean autoScroll = true;
     Uri filePath;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,10 +88,23 @@ public class RoomActivity extends AppCompatActivity {
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-
         //화면 기본 설정
         setUpRoomActivity();
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+
+    }
+
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
@@ -106,6 +132,14 @@ public class RoomActivity extends AppCompatActivity {
                 galleryAccess();
             }
         });
+
+        //floating 버튼에 대한 클릭 리스너 지정
+        binding.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+            }
+        });
  }
     private void initScrollListener() {
         binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -118,20 +152,24 @@ public class RoomActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if (!isLoading) { //최상단에 닿았을 때
-                    if(!recyclerView.canScrollVertically(-1)){
-                        if(frontChatKey != null) {
-                            loadMore();
-                            isLoading = true;
-                        }
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if(!recyclerView.canScrollVertically(-1)){ //최상단에 닿았을 때
+                    if (!isLoading){
+                        loadMore();
+                        isLoading = true;
+
                         autoScroll = false;
+                        binding.fab.show();
                     }
                 }
                 else if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
+                    Log.d("TAG",String.valueOf(autoScroll));
                     autoScroll = true;
+                    binding.fab.hide();
                 }
                 else{
                     autoScroll = false;
+                    binding.fab.show();
                 }
             }
         });
@@ -160,13 +198,12 @@ public class RoomActivity extends AppCompatActivity {
             }
         }, 1000);
     }
+
     @Override
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
 
-        dataList = new IndexDeque<>();
-        userList = new HashMap<>();
         frontChatKey = null;
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             userList = item;
@@ -181,19 +218,28 @@ public class RoomActivity extends AppCompatActivity {
                     });
                 });
             });
+          
             ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
                 userList.put(userPair.first, userPair.second);
+                roomElementAdapter.notifyDataSetChanged();
             });
+            roomElementAdapter.notifyDataSetChanged();
         });
-        ChatDB.userReadLatestMessage(chatRoomKey, userKey);
+        ChatDB.userReadLatestMessage(chatRoomKey, currentUser.getUserMeta().getUserKey());
+        initScrollListener();
     }
     @Override
     public void onPause() {
         super.onPause();
         ChatDB.removeEventListenerBindOnThis();
         binding.RecyclerView.clearOnScrollListeners();
-    }
 
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        binding.RecyclerView.clearOnScrollListeners();
+    }
     //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -223,8 +269,13 @@ public class RoomActivity extends AppCompatActivity {
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         binding.RecyclerView.setLayoutManager(manager);
-        roomElementAdapter = new RoomElementAdapter(dataList, userList);
+      
+        //TODO LOGIN : 임시로 현재 사용자 설정함->사용자 인증 도입 후 수정해야됨
+        currentUser = new ChatRoomUser(17, new User("이다현","http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg",2,"user2"));
+        roomElementAdapter = new RoomElementAdapter(dataList, userList,currentUser);
+
         binding.RecyclerView.setAdapter(roomElementAdapter);
+        roomElementAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.ALLOW);
     }
 
     private void showJoinedUserList(){
@@ -261,7 +312,7 @@ public class RoomActivity extends AppCompatActivity {
             index = dataItem.getIndex();
 
         dataList.add(new Chat(dataItem));
-        roomElementAdapter.setUserList(dataList, userList);
+        roomElementAdapter.notifyDataSetChanged();
         if(autoScroll)
             binding.RecyclerView.scrollToPosition(dataList.size() - 1);
     }
@@ -275,15 +326,14 @@ public class RoomActivity extends AppCompatActivity {
         if (binding.chatEdit.getText().toString().equals(""))
             return;
 
-        // USER_NAME 나중에 userKey로 바꿔줘야함
-        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, userKey, userList);
+        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
         binding.chatEdit.setText(""); //입력창 초기화
     }
     //초대하기->유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser(){
         Intent intent = new Intent(this, UserListActivity.class);
         intent.putExtra("tag",2);
-        intent.putExtra("who", userName);
+        intent.putExtra("who", currentUser.getUserMeta().getName());
         intent.putExtra("where", chatRoomKey);
         startActivity(intent);
     }
@@ -332,7 +382,7 @@ public class RoomActivity extends AppCompatActivity {
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
         //TODO:파일에 맞는 확장자 추가
-        String filename = sdf.format(new Date()) + "_" + userKey ;
+        String filename = sdf.format(new Date()) + "_" + currentUser.getUserMeta().getUserKey() ;
 
         //uploads라는 폴더가 없으면 자동 생성
         //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각
@@ -347,8 +397,7 @@ public class RoomActivity extends AppCompatActivity {
                 imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
-                        //userKey="user2";
-                        ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, userKey, userList);
+                        ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
                         progressDialog.dismiss();
                         //Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
                     }

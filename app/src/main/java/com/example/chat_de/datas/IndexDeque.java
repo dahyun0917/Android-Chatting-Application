@@ -1,19 +1,15 @@
 package com.example.chat_de.datas;
 
-
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.ListIterator;
 
-// push:  O(1)
-// pop:   Amortized O(1)
-// get: O(1)
-//
+// push:       O(1)
+// pop:        Amortized O(1)
+// get:        O(1)
+// getByIndex: O(1)
 
 public class IndexDeque<T> implements Cloneable {
     @SuppressWarnings("unchecked")
@@ -24,16 +20,31 @@ public class IndexDeque<T> implements Cloneable {
         list[1] = new ArrayList<>();
     }
 
+    public void add(T data)         { list[1].add(data); }
     public void pushFront(T data)   { list[0].add(data); }
     public void pushBack(T data)    { list[1].add(data); }
-    public void add(T data)         { list[1].add(data); }
+    public void appendFront(ArrayList<T> dataList) {
+        if(dataList == null) {
+            throw new NullPointerException();
+        }
 
-    public void popFront() {
-        pop(0);
+        ListIterator<T> data = dataList.listIterator(dataList.size());
+        while(data.hasPrevious()) {
+            list[0].add(data.previous());
+        }
     }
-    public void popBack() {
-        pop(1);
-    }
+//    public void appendBack(ArrayList<T> dataList) {
+//        if(dataList == null) {
+//            throw new NullPointerException();
+//        }
+//
+//        for(T data: dataList) {
+//            list[1].add(data);
+//        }
+//    }
+
+    public void popFront()  { pop(0); }
+    public void popBack()   { pop(1); }
     private void pop(int where) {
         if(list[where].size() == 1) {
             list[where].remove(0);

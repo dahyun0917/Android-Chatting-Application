@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -43,13 +44,11 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.ListIterator;
-import java.util.Map;
-
 import java.util.ListIterator;
 import java.util.Map;
 
@@ -75,13 +74,11 @@ public class RoomActivity extends AppCompatActivity {
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
     private IndexDeque<Chat> dataList = new IndexDeque<>();
-
     private HashMap<String, ChatRoomUser> userList  = new HashMap<>(); //
 
     //private HashMap<String,ChatRoomUser> chatRoomUserList;
-    private ChatRoom chatRoomUserList;
 
-    private int index=-1;
+    private int lastIndex =-1;
     private boolean isLoading = false;
     private boolean autoScroll = true;
     Uri filePath;
@@ -95,7 +92,7 @@ public class RoomActivity extends AppCompatActivity {
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-        roomActivity=RoomActivity.this;
+        roomActivity = RoomActivity.this;
         //화면 기본 설정
         setUpRoomActivity();
     }
@@ -148,9 +145,10 @@ public class RoomActivity extends AppCompatActivity {
                 binding.RecyclerView.scrollToPosition(dataList.size() - 1);
             }
         });
- }
+    }
+
     private void initScrollListener() {
-        binding.RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -162,8 +160,10 @@ public class RoomActivity extends AppCompatActivity {
 
                 if(!recyclerView.canScrollVertically(-1)){ //최상단에 닿았을 때
                     if (!isLoading){
-                        loadMore();
-                        isLoading = true;
+                        if(frontChatKey != null) {
+                            loadMore();
+                            isLoading = true;
+                        }
                         autoScroll = false;
                         binding.fab.show();
                     }
@@ -182,13 +182,13 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void loadMore() {
-        binding.RecyclerView.post(new Runnable() {
+        binding.recyclerView.post(new Runnable() {
             public void run() {
                 dataList.pushFront(null);
                 roomElementAdapter.notifyItemInserted(0);
             }
         });
-        binding.RecyclerView.postDelayed(new Runnable() {
+        binding.recyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 dataList.popFront();
@@ -196,8 +196,7 @@ public class RoomActivity extends AppCompatActivity {
 
                 ChatDB.getPrevChatCompleteListener(chatRoomKey, frontChatKey, CHAT_LIMIT, itemList -> {
                     frontChatKey = itemList.first;
-                    dataList.appendFront(itemList.second);
-                    roomElementAdapter.notifyItemRangeInserted(0, itemList.second.size());
+                    floatOldMessage(itemList.second);
                     isLoading = false;
                 });
                 autoScroll = false;
@@ -216,40 +215,34 @@ public class RoomActivity extends AppCompatActivity {
                 userList.put(i.getKey(), i.getValue());
             }
             ChatDB.getLastChatKey(chatRoomKey, key -> {
-                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, dataItem -> {
-                    frontChatKey = dataItem.first;
-                    for(Chat i: dataItem.second) {
-                        floatMessage(i);
-                        roomElementAdapter.notifyDataSetChanged();
-                    }
+                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, itemList -> {
+                    frontChatKey = itemList.first;
+                    floatOldMessage(itemList.second);
                     ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
-                        floatMessage(dataPair.second);
-                        roomElementAdapter.notifyDataSetChanged();
+                        floatNewMessage(dataPair.second);
                     });
                 });
             });
-          
             ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
                 userList.put(userPair.first, userPair.second);
-                roomElementAdapter.notifyDataSetChanged();
             });
-            roomElementAdapter.notifyDataSetChanged();
         });
         ChatDB.userReadLatestMessage(chatRoomKey, currentUser.getUserMeta().getUserKey());
         initScrollListener();
     }
+
     @Override
     public void onPause() {
         super.onPause();
         ChatDB.removeEventListenerBindOnThis();
-        binding.RecyclerView.clearOnScrollListeners();
-
+        binding.recyclerView.clearOnScrollListeners();
     }
     @Override
     public void onStop() {
         super.onStop();
-        binding.RecyclerView.clearOnScrollListeners();
+        binding.recyclerView.clearOnScrollListeners();
     }
+
     //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -275,16 +268,32 @@ public class RoomActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // 포커스가 키보드를 제외한 다른 곳으로 갔을 때 키보드 내리기
+/*    @Override
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View vw = getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (vw == null) {
+            vw = new View(this);
+        }
+        imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+
+        return super.dispatchTouchEvent(motionEvent);
+    }*/
+
     public void initRecyclerView(){
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
-        binding.RecyclerView.setLayoutManager(manager);
+        manager.setStackFromEnd(true);
+        binding.recyclerView.setLayoutManager(manager);
 
         //TODO LOGIN : 임시로 현재 사용자 설정함->사용자 인증 도입 후 수정해야됨
         currentUser = new ChatRoomUser(17, new User("이다현","http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg",2,"user2"));
-        roomElementAdapter = new RoomElementAdapter(dataList, userList,currentUser);
+        roomElementAdapter = new RoomElementAdapter(dataList, userList, currentUser);
 
-        binding.RecyclerView.setAdapter(roomElementAdapter);
+        binding.recyclerView.setAdapter(roomElementAdapter);
         roomElementAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.ALLOW);
     }
 
@@ -300,31 +309,47 @@ public class RoomActivity extends AppCompatActivity {
         dlg.show();
     }
 
+    private void floatOldMessage(ArrayList<Chat> chatList) {
+        ListIterator i = chatList.listIterator(chatList.size());
+        int cnt = chatList.size();
+
+        while(i.hasPrevious()) {
+            Chat chat = (Chat)i.previous();
+            final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
+            final String DAY = SDF.format(chat.normalDate());
+            if(dataList.size() != 0 && !SDF.format(dataList.getFront().normalDate()).equals(DAY)) {
+                Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+                daySystemChat.setDate(dataList.getFront().unixTime());
+                dataList.pushFront(daySystemChat);
+                cnt++;
+            }
+            dataList.pushFront(chat);
+        }
+        if(cnt != 0)
+            roomElementAdapter.notifyItemRangeInserted(0, cnt);
+    }
+
     //파이어베이스에 메세지가 추가되었을때, 메세지를 화면에 띄워줌.(기존 addMessage)
-    private void floatMessage(Chat dataItem) {
-        //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
-        final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
-        final String DAY = SDF.format(dataItem.normalDate());
-        for(int i = dataList.size() - 1; i >= 0; i--) {
-            final Chat chat = dataList.get(i);
-            if(dataList.get(i).getType() != Chat.Type.SYSTEM) {
-                if (!SDF.format(chat.normalDate()).equals(DAY)) {
-                    Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
-                    daySystemChat.setDate(dataItem.unixTime());
-                    dataList.add(daySystemChat);
-                }
-                break;
+    private void floatNewMessage(Chat dataItem) {
+        int cnt = 1;
+
+        if(dataList.size() != 0) {
+            //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
+            final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
+            final String DAY = SDF.format(dataItem.normalDate());
+            if (!SDF.format(dataList.getBack().normalDate()).equals(DAY)) {
+                Chat daySystemChat = new Chat("--------------------------" + DAY + "--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+                daySystemChat.setDate(dataItem.unixTime());
+                dataList.pushBack(daySystemChat);
+                cnt++;
             }
         }
 
-        //TODO: 수정필요
-        if(dataItem.getType() != Chat.Type.SYSTEM && index < dataItem.getIndex())
-            index = dataItem.getIndex();
-
-        dataList.add(new Chat(dataItem));
-        roomElementAdapter.notifyDataSetChanged();
+        lastIndex = dataItem.getIndex();
+        dataList.pushBack(new Chat(dataItem));
+        roomElementAdapter.notifyItemRangeInserted(dataList.size() - cnt + 1, cnt);
         if(autoScroll)
-            binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+            binding.recyclerView.scrollToPosition(dataList.size() - 1);
     }
     //채팅방 정보 불러옴
     private void getChatRoomMeta() {
@@ -336,8 +361,9 @@ public class RoomActivity extends AppCompatActivity {
         if (binding.chatEdit.getText().toString().equals(""))
             return;
 
-        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++index, messageType, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
+        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++lastIndex, messageType, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
         binding.chatEdit.setText(""); //입력창 초기화
+        autoScroll = true;
     }
     //초대하기->유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser(){
@@ -407,7 +433,8 @@ public class RoomActivity extends AppCompatActivity {
                 imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
-                        ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
+                        //userKey="user2";
+                        ChatDB.uploadMessage(uri.toString(), ++lastIndex, Chat.Type.IMAGE, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
                         progressDialog.dismiss();
                         //Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
                     }

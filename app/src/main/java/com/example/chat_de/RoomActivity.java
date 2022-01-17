@@ -8,14 +8,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
@@ -25,9 +27,11 @@ import com.example.chat_de.datas.IndexDeque;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -295,7 +299,7 @@ public class RoomActivity extends AppCompatActivity {
 
         //드롭박스, 구글드라이브, 갤러리 등 모든 파일
         Intent intent = new Intent();
-        intent.setType("image/*");
+        intent.setType("image/* video/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), GALLEY_CODE);
 
@@ -309,18 +313,30 @@ public class RoomActivity extends AppCompatActivity {
             filePath = data.getData();
             if(filePath!=null)
                 uploadFile();
+            try{
+                InputStream in = getContentResolver().openInputStream(filePath);
+                Bitmap img = BitmapFactory.decodeStream(in);
+                in.close();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
     //firebase storage에 업로드하기
     public void uploadFile() {
 
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("업로드중...");
+        progressDialog.show();
+
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
-        String filename = sdf.format(new Date()) + "_" + userKey + ".jpg";
+        //TODO:파일에 맞는 확장자 추가
+        String filename = sdf.format(new Date()) + "_" + userKey ;
 
         //uploads라는 폴더가 없으면 자동 생성
         //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각
-        StorageReference imgRef = firebaseStorage.getReference("uploads/" + filename);
+        StorageReference imgRef = firebaseStorage.getReference("pre_2/"+chatRoomKey+"/" + filename);
 
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);
@@ -333,6 +349,8 @@ public class RoomActivity extends AppCompatActivity {
                     public void onSuccess(Uri uri) {
                         //userKey="user2";
                         ChatDB.uploadMessage(uri.toString(), ++index, Chat.Type.IMAGE, chatRoomKey, userKey, userList);
+                        progressDialog.dismiss();
+                        //Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -340,7 +358,17 @@ public class RoomActivity extends AppCompatActivity {
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+                //Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                @SuppressWarnings("VisibleForTests") //이걸 넣어 줘야 아랫줄에 에러가 사라진다. 넌 누구냐?
+                double progress = (100 * taskSnapshot.getBytesTransferred()) /  taskSnapshot.getTotalByteCount();
+                //dialog에 진행률을 퍼센트로 출력해 준다
+                progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
             }
         });
     }

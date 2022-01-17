@@ -9,7 +9,7 @@ import java.util.Date;
 
 @IgnoreExtraProperties
 public class Chat {
-    public enum Type { TEXT, IMAGE, FILE, SYSTEM }
+    public enum Type { TEXT, IMAGE, VIDEO, FILE, SYSTEM }
 
     private String text;
     private int index;

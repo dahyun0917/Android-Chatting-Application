@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -85,6 +86,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean autoScroll = true;
     Uri filePath;
 
+    public static Activity roomActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +95,7 @@ public class RoomActivity extends AppCompatActivity {
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+        roomActivity=RoomActivity.this;
         //화면 기본 설정
         setUpRoomActivity();
     }

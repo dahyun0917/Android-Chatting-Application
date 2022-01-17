@@ -15,8 +15,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+
 import android.os.Handler;
 import android.util.Log;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +35,7 @@ import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -46,6 +49,10 @@ import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Map;
 
+import java.util.ListIterator;
+import java.util.Map;
+
+
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
@@ -56,8 +63,10 @@ public class RoomActivity extends AppCompatActivity {
 
     private int GALLEY_CODE = 10;
     private String chatRoomKey;
+
     private ChatRoomUser currentUser; //TODO LOGIN : 현재 로그인된 사용자
     private String frontChatKey;
+
     private Chat.Type messageType = Chat.Type.TEXT;
 
     private ArrayList<String> listenerPath = new ArrayList<>();
@@ -76,6 +85,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean autoScroll = true;
     Uri filePath;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +96,20 @@ public class RoomActivity extends AppCompatActivity {
         //화면 기본 설정
         setUpRoomActivity();
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+
+    }
+
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
@@ -132,6 +156,7 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
                 if(!recyclerView.canScrollVertically(-1)){ //최상단에 닿았을 때
                     if (!isLoading){
                         loadMore();
@@ -141,6 +166,7 @@ public class RoomActivity extends AppCompatActivity {
                     }
                 }
                 else if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
+                    Log.d("TAG",String.valueOf(autoScroll));
                     autoScroll = true;
                     binding.fab.hide();
                 }
@@ -180,6 +206,7 @@ public class RoomActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
+
         frontChatKey = null;
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
             for(Map.Entry<String, ChatRoomUser> i: item.entrySet()) {
@@ -198,6 +225,7 @@ public class RoomActivity extends AppCompatActivity {
                     });
                 });
             });
+          
             ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
                 userList.put(userPair.first, userPair.second);
                 roomElementAdapter.notifyDataSetChanged();
@@ -212,6 +240,7 @@ public class RoomActivity extends AppCompatActivity {
         super.onPause();
         ChatDB.removeEventListenerBindOnThis();
         binding.RecyclerView.clearOnScrollListeners();
+
     }
     @Override
     public void onStop() {
@@ -247,9 +276,11 @@ public class RoomActivity extends AppCompatActivity {
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
         binding.RecyclerView.setLayoutManager(manager);
+
         //TODO LOGIN : 임시로 현재 사용자 설정함->사용자 인증 도입 후 수정해야됨
         currentUser = new ChatRoomUser(17, new User("이다현","http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg",2,"user2"));
         roomElementAdapter = new RoomElementAdapter(dataList, userList,currentUser);
+
         binding.RecyclerView.setAdapter(roomElementAdapter);
         roomElementAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.ALLOW);
     }

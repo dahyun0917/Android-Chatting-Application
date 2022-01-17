@@ -2,9 +2,11 @@ package com.example.chat_de;
 
 import android.content.Context;
 import android.content.Intent;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,8 +29,6 @@ import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.ViewType;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -82,6 +82,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     // 실제 각 뷰 홀더에 데이터를 연결해주는 함수
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+
         //각 xml의 데이터 set
         if(viewHolder instanceof LoadingViewHolder){
             showLoadingView((LoadingViewHolder)viewHolder,position);

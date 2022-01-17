@@ -142,7 +142,7 @@ public class RoomActivity extends AppCompatActivity {
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                binding.RecyclerView.scrollToPosition(dataList.size() - 1);
+                binding.recyclerView.scrollToPosition(dataList.size() - 1);
             }
         });
     }

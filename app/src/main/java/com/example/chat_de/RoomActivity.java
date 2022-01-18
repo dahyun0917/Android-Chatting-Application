@@ -68,8 +68,6 @@ public class RoomActivity extends AppCompatActivity {
     private IndexDeque<Chat> dataList = new IndexDeque<>();
     private HashMap<String, ChatRoomUser> userList  = new HashMap<>(); //
 
-    //private HashMap<String,ChatRoomUser> chatRoomUserList;
-
     private int lastIndex =-1;
     private boolean isLoading = false;
     private boolean autoScroll = true;
@@ -174,7 +172,12 @@ public class RoomActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if(!recyclerView.canScrollVertically(-1)){ //최상단에 닿았을 때
+
+                if(!recyclerView.canScrollVertically(1)) { //최하단에 닿았을 때
+                    Log.d("TAG",String.valueOf(autoScroll));
+                    autoScroll = true;
+                    binding.fab.hide();
+                } else if(!recyclerView.canScrollVertically(-1)) { //최상단에 닿았을 때
                     if (!isLoading){
                         if(frontChatKey != null) {
                             loadMore();
@@ -184,12 +187,7 @@ public class RoomActivity extends AppCompatActivity {
                         binding.fab.show();
                     }
                 }
-                else if(!recyclerView.canScrollVertically(1)){ //최하단에 닿았을 때
-                    Log.d("TAG",String.valueOf(autoScroll));
-                    autoScroll = true;
-                    binding.fab.hide();
-                }
-                else{
+                else {
                     autoScroll = false;
                     binding.fab.show();
                 }

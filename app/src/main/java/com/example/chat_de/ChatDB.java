@@ -200,20 +200,25 @@ public class ChatDB {
         });
     }
     public static void getPrevChatCompleteListener(String chatRoomKey, String frontChatKey, int chatLimit, RoomElementEventListener<Pair<String, ArrayList<Chat>>> listener) {
-        ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).orderByKey().endBefore(frontChatKey).limitToLast(chatLimit).get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()) {
-                ArrayList<Chat> chatList = new ArrayList<>();
-                String chatKey = null;
-                for(DataSnapshot snapshot: task.getResult().getChildren()) {
-                    if(chatKey == null)
-                        chatKey = snapshot.getKey();
-                    chatList.add(snapshot.getValue(Chat.class));
+        if(frontChatKey != null) {
+            ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).orderByKey().endBefore(frontChatKey).limitToLast(chatLimit).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    ArrayList<Chat> chatList = new ArrayList<>();
+                    String chatKey = null;
+                    for (DataSnapshot snapshot : task.getResult().getChildren()) {
+                        if (chatKey == null) {
+                            chatKey = snapshot.getKey();
+                        }
+                        chatList.add(snapshot.getValue(Chat.class));
+                    }
+                    listener.eventListener(new Pair<>(chatKey, chatList));
+                } else {
+                    Log.e("FRD", "Can not get chats of the" + chatRoomKey);
                 }
-                listener.eventListener(new Pair<>(chatKey, chatList));
-            } else {
-                Log.e("FRD", "Can not get chats of the" + chatRoomKey);
-            }
-        });
+            });
+        } else {
+            listener.eventListener(new Pair<>(null, new ArrayList<>()));
+        }
     }
     public static void messageAddedEventListener(String chatRoomKey, String lastChatKey, RoomElementEventListener<Pair<String, Chat>> listener) {
         class myChildEventListener implements ChildEventListener {

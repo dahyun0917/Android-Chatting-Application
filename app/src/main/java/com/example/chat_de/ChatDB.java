@@ -99,7 +99,7 @@ public class ChatDB {
         });
     }
     public static void setPersonalChatRoom(ChatRoomUser userMe, ChatRoomUser userOther, RoomElementEventListener<String> listener) {
-        String chatRoomName = userMe.takeName()+userOther.takeName();
+        String chatRoomName = userMe.takeName()+", "+userOther.takeName();
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
@@ -273,21 +273,24 @@ public class ChatDB {
             }
         });
     }
-    public static void chatRoomListChangedEventListener(String userKey, RoomElementEventListener<ChatRoomMeta> listener) {
+    public static void chatRoomListChangedEventListener(String userKey, ChatRoomListAdapter chatRoomListAdapter) {
         ref.child(makePath(USER_JOINED, userKey)).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                snapshot.child(CHAT_ROOM_META).getValue(ChatRoomMeta.class);
+                ChatRoomMeta chatRoomMeta = snapshot.getChildren().iterator().next().getValue(ChatRoomMeta.class);
+                //TODO : 나중에 ChatRoomMeta에 pictureURL 추가되면 그것도 받아서
+                chatRoomListAdapter.addChatRoom(snapshot.getKey(),"",chatRoomMeta.getName());
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                ChatRoomMeta chatRoomMeta = snapshot.getChildren().iterator().next().getValue(ChatRoomMeta.class);
+                chatRoomListAdapter.changeChatRoom(snapshot.getKey(),"",chatRoomMeta.getName());
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
+                chatRoomListAdapter.removeChatRoom(snapshot.getKey());
             }
 
             @Override

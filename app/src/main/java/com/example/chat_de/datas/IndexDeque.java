@@ -31,26 +31,28 @@ public class IndexDeque<T> implements Cloneable {
             list[0].add(data.previous());
         }
     }
-//    public void appendBack(ArrayList<T> dataList) {
-//        if(dataList == null) {
-//            throw new NullPointerException();
-//        }
-//
-//        for(T data: dataList) {
-//            list[1].add(data);
-//        }
-//    }
+    public void appendBack(ArrayList<T> dataList) {
+        if(dataList == null) {
+            throw new NullPointerException();
+        }
+
+        for(T data: dataList) {
+            list[1].add(data);
+        }
+    }
 
     public void popFront()  { pop(0); }
     public void popBack()   { pop(1); }
     private void pop(int where) {
+        if(size() == 0) {
+            throw new NullPointerException();
+        }
+
         if(list[where].size() == 1) {
             list[where].remove(0);
             divide((where + 1) % 2);
         } else if(list[where].size() == 0) {
-            if(list[(where + 1) % 2].size() == 0) {
-                throw new NullPointerException();
-            } else if(list[(where + 1) % 2].size() == 1) {
+            if(list[(where + 1) % 2].size() == 1) {
                 list[(where + 1) % 2].remove(0);
                 return;
             }
@@ -61,8 +63,9 @@ public class IndexDeque<T> implements Cloneable {
         }
     }
     private void divide(int where) {
-        if(list[where].size() == 0)
+        if(list[where].size() == 0) {
             return;
+        }
         final int sz = list[where].size();
         final int half = sz / 2 + sz % 2;
 
@@ -81,10 +84,15 @@ public class IndexDeque<T> implements Cloneable {
     }
 
     public T get(int position) {
-        if (position < list[0].size())
+        if(position < 0 || position >= size()) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        if (position < list[0].size()) {
             return list[0].get(list[0].size() - position - 1);
-        else
+        } else {
             return list[1].get(position - list[0].size());
+        }
     }
     public T getFront() { return get(0); }
     public T getBack()  { return get(size() - 1); }

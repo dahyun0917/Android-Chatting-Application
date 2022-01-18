@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,34 +16,26 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 
-import android.os.Handler;
 import android.util.Log;
 
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.view.Window;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
-import com.example.chat_de.datas.ChatRoom;
-import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,8 +59,6 @@ public class RoomActivity extends AppCompatActivity {
     private String frontChatKey;
 
     private Chat.Type messageType = Chat.Type.TEXT;
-
-    private ArrayList<String> listenerPath = new ArrayList<>();
 
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
@@ -214,9 +203,11 @@ public class RoomActivity extends AppCompatActivity {
             for(Map.Entry<String, ChatRoomUser> i: item.entrySet()) {
                 userList.put(i.getKey(), i.getValue());
             }
-            ChatDB.getLastChatKey(chatRoomKey, key -> {
+            ChatDB.getLastChat(chatRoomKey, lastChat -> {
+                String key = lastChat.first;
                 ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, itemList -> {
                     frontChatKey = itemList.first;
+                    itemList.second.add(lastChat.second);
                     floatOldMessage(itemList.second);
                     ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
                         floatNewMessage(dataPair.second);

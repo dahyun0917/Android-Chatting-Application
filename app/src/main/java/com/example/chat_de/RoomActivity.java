@@ -9,18 +9,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-
 import android.util.Log;
 
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
@@ -40,8 +42,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.ListIterator;
+import java.util.List;
 import java.util.Map;
+import java.util.ListIterator;
 
 
 public class RoomActivity extends AppCompatActivity {
@@ -52,13 +55,13 @@ public class RoomActivity extends AppCompatActivity {
     private LinearLayoutManager manager;
     //private ListView chat_view;
 
-    private int GALLEY_CODE = 10;
+    private int IMAGE_CODE = 10;
+    private int VIDEO_CODE = 20;
     private String chatRoomKey;
 
     private ChatRoomUser currentUser; //TODO LOGIN : 현재 로그인된 사용자
     private String frontChatKey;
-
-    private Chat.Type messageType = Chat.Type.TEXT;
+    private Chat.Type messageType = null;
 
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
@@ -85,20 +88,6 @@ public class RoomActivity extends AppCompatActivity {
         //화면 기본 설정
         setUpRoomActivity();
     }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-
-    }
-
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
@@ -259,21 +248,6 @@ public class RoomActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // 포커스가 키보드를 제외한 다른 곳으로 갔을 때 키보드 내리기
-/*    @Override
-    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View vw = getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (vw == null) {
-            vw = new View(this);
-        }
-        imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
-
-        return super.dispatchTouchEvent(motionEvent);
-    }*/
-
     public void initRecyclerView(){
         //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL,false);
@@ -349,6 +323,7 @@ public class RoomActivity extends AppCompatActivity {
 
     //사용자가 send 버튼 눌렀을때, 메세지를 보내고 메세지 내용 파이어베이스에 저장
     private void sendMessage(){
+        messageType=Chat.Type.TEXT;
         if (binding.chatEdit.getText().toString().equals(""))
             return;
 
@@ -367,29 +342,84 @@ public class RoomActivity extends AppCompatActivity {
 
     //사용자 갤러리로 접근
     private void galleryAccess(){
+        /*final int[] image = {R.drawable.image_red,R.drawable.video_red};*/
+        final String[] fileKind = {"image","video"};
 
+        Intent intent = new Intent();
         //갤러리만
         /*Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
 
         startActivityForResult(intent,10);*/
 
+        /*final List<Map<String,Object>> dialogItemList = new ArrayList<>();
+        for(int i =0;i>image.length;i++){
+            Map<String,Object> itemMap = new HashMap<>();
+            itemMap.put("image",image[i]);
+            itemMap.put("text",fileKind[i]);
+
+            dialogItemList.add(itemMap);
+        }*/
+
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,android.R.id.text1);
+        AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
+        dlg.setTitle("파일 종류") //제목
+        .setItems(fileKind,new DialogInterface.OnClickListener(){
+
+            @Override
+            public void onClick(DialogInterface dialogInterface, int position) {
+
+                switch (position){
+                    case 0 :  //image
+                        intent.setType("image/*");
+                        intent.setAction(Intent.ACTION_GET_CONTENT);
+                        startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), IMAGE_CODE);
+                        break;
+                    case 1 :  //video
+                        intent.setType("video/*");
+                        intent.setAction(Intent.ACTION_GET_CONTENT);
+                        startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
+                        break;
+                }
+            }
+        });
+        dlg.setIcon(R.drawable.file_blue);  //대화창 아이콘 설정
+        //dlg.setAdapter(adapter,null);
+
+        /*adapter.add("image");
+        adapter.add("video");
+        dlg.setAdapter(adapter,new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                if(fileKind[position].equals("image")){
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), IMAGE_CODE);
+                } else if(fileKind[position].equals("video")){
+                    intent.setType("video/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
+                }
+            }
+        });*/
+
+        dlg.setNegativeButton("cancle",null);
+
+        dlg.show();
+
         //드롭박스, 구글드라이브, 갤러리 등 모든 파일
-        Intent intent = new Intent();
-        intent.setType("image/* video/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), GALLEY_CODE);
-
-
+        //intent.setType("image/* video/*");
     }
     //갤러리 액티비티에서 결과값을 제대로 받았는지 확인
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == GALLEY_CODE &&resultCode == RESULT_OK){
+        if((requestCode == IMAGE_CODE||requestCode == VIDEO_CODE) &&resultCode == RESULT_OK){
             filePath = data.getData();
+            Log.d("fildPath", String.valueOf(filePath));
             if(filePath!=null)
-                uploadFile();
+                uploadFile(resultCode);
             try{
                 InputStream in = getContentResolver().openInputStream(filePath);
                 Bitmap img = BitmapFactory.decodeStream(in);
@@ -400,11 +430,18 @@ public class RoomActivity extends AppCompatActivity {
         }
     }
     //firebase storage에 업로드하기
-    public void uploadFile() {
+    public void uploadFile(int resultCode) {
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("업로드중...");
         progressDialog.show();
+
+        //파이어베이스에 push할 메세지 타입 정하기(이미지, 비디오)
+        //TODO:파일 타입도 정하기
+        if(resultCode==IMAGE_CODE)
+            messageType=Chat.Type.IMAGE;
+        else if(resultCode==VIDEO_CODE)
+            messageType=Chat.Type.VIDEO;
 
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
@@ -425,7 +462,7 @@ public class RoomActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Uri uri) {
                         //userKey="user2";
-                        ChatDB.uploadMessage(uri.toString(), ++lastIndex, Chat.Type.IMAGE, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
+                        ChatDB.uploadMessage(uri.toString(), ++lastIndex,messageType, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
                         progressDialog.dismiss();
                         //Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
                     }

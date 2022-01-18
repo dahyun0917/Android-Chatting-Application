@@ -338,12 +338,9 @@ public class RoomActivity extends AppCompatActivity {
     }
     //채팅방 정보 불러옴
     private void getChatRoomMeta() {
-        ChatDB.getChatRoomMeta(chatRoomKey, new RoomElementEventListener<ChatRoomMeta>() {
-            @Override
-            public void eventListener(ChatRoomMeta item) {
-                chatRoomMeta = item;
-                ab.setTitle(chatRoomMeta.getName()) ;
-            }
+        ChatDB.getChatRoomMeta(chatRoomKey, item -> {
+            chatRoomMeta = item;
+            ab.setTitle(chatRoomMeta.getName()) ;
         });
     }
 

@@ -67,12 +67,10 @@ public class UserProfileActivity extends AppCompatActivity {
             public void onClick(View view) {
                 ChatDB.setPersonalChatRoom(userMe, userOther, chatRoomKey -> {
                     Intent chat = new Intent(UserProfileActivity.this, RoomActivity.class);
+                    chat.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     chat.putExtra("chatRoomKey",chatRoomKey);
                     startActivity(chat);
                 });
-                RoomActivity roomActivity = (RoomActivity)RoomActivity.roomActivity;
-                roomActivity.finish();
-                finish();
             }
         });
     }

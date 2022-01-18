@@ -61,7 +61,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 return new LeftTextViewHolder(view);
             case ViewType.LEFT_CONTENT_IMAGE:
                 view = inflater.inflate(R.layout.item_element_left_image,parent,false);
-                return new LeftVideoViewHolder(view);
+                return new LeftImageViewHolder(view);
             case ViewType.LEFT_CONTENT_VIDEO:
                 view = inflater.inflate(R.layout.item_element_left_video,parent,false);
                 return new LeftVideoViewHolder(view);
@@ -100,7 +100,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             else if(viewHolder instanceof LeftTextViewHolder){
                 ((LeftTextViewHolder) viewHolder).bind(item);
             }else if(viewHolder instanceof LeftImageViewHolder){
-                    ((LeftVideoViewHolder) viewHolder).bind(item);
+                ((LeftImageViewHolder) viewHolder).bind(item);
             }else if(viewHolder instanceof LeftVideoViewHolder){
                 ((LeftVideoViewHolder) viewHolder).bind(item);
             }
@@ -304,7 +304,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     chatRoomUser = myUserList.get(i);
                 }
             }
-            Glide.with(itemView.getContext()).load(item.getText()).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftVideoBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(R.drawable.player).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftVideoBinding.imagevMsg);
             leftVideoBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
             leftVideoBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(leftVideoBinding.imgv);

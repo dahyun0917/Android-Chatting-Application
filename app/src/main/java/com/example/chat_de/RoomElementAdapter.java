@@ -1,12 +1,7 @@
 package com.example.chat_de;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.provider.MediaStore;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,17 +16,17 @@ import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ItemElementCenterSystemBinding;
 import com.example.chat_de.databinding.ItemElementLeftImageBinding;
 import com.example.chat_de.databinding.ItemElementLeftTextBinding;
+import com.example.chat_de.databinding.ItemElementLeftVideoBinding;
 import com.example.chat_de.databinding.ItemElementLoadingBinding;
 import com.example.chat_de.databinding.ItemElementRightImageBinding;
 import com.example.chat_de.databinding.ItemElementRightTextBinding;
+import com.example.chat_de.databinding.ItemElementRightVideoBinding;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.ViewType;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -66,13 +61,19 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 return new LeftTextViewHolder(view);
             case ViewType.LEFT_CONTENT_IMAGE:
                 view = inflater.inflate(R.layout.item_element_left_image,parent,false);
-                return new LeftImageViewHolder(view);
+                return new LeftVideoViewHolder(view);
+            case ViewType.LEFT_CONTENT_VIDEO:
+                view = inflater.inflate(R.layout.item_element_left_video,parent,false);
+                return new LeftVideoViewHolder(view);
             case ViewType.RIGHT_CONTENT_TEXT:
                 view = inflater.inflate(R.layout.item_element_right_text,parent,false);
                 return new RightTextViewHolder(view);
             case ViewType.RIGHT_CONTENT_IMAGE:
                 view = inflater.inflate(R.layout.item_element_right_image,parent,false);
                 return new RightImageViewHolder(view);
+            case ViewType.RIGHT_CONTENT_VIDEO:
+                view = inflater.inflate(R.layout.item_element_right_video,parent,false);
+                return new RightVideoViewHolder(view);
             default:
                 Log.e("VIEW_TYPE", "ViewType must be -1 to 4");
                 view = inflater.inflate(R.layout.item_element_right_text,parent,false);
@@ -99,15 +100,18 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             else if(viewHolder instanceof LeftTextViewHolder){
                 ((LeftTextViewHolder) viewHolder).bind(item);
             }else if(viewHolder instanceof LeftImageViewHolder){
-                    ((LeftImageViewHolder) viewHolder).bind(item);
+                    ((LeftVideoViewHolder) viewHolder).bind(item);
+            }else if(viewHolder instanceof LeftVideoViewHolder){
+                ((LeftVideoViewHolder) viewHolder).bind(item);
             }
             else if(viewHolder instanceof RightTextViewHolder){
-                if(item.getType().equals(Chat.Type.TEXT)){
-                    ((RightTextViewHolder) viewHolder).bind(item);
-                }
+                ((RightTextViewHolder) viewHolder).bind(item);
             }
             else if(viewHolder instanceof RightImageViewHolder){
                 ((RightImageViewHolder) viewHolder).bind(item);
+            }
+            else if(viewHolder instanceof RightVideoViewHolder){
+                ((RightVideoViewHolder) viewHolder).bind(item);
             }
         }
     }
@@ -140,11 +144,15 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 return ViewType.RIGHT_CONTENT_TEXT;
             else if ((item.getType().equals(Chat.Type.IMAGE)))
                 return ViewType.RIGHT_CONTENT_IMAGE;
+            else if((item.getType().equals(Chat.Type.VIDEO)))
+                return ViewType.RIGHT_CONTENT_VIDEO;
         } else {
             if ((item.getType().equals(Chat.Type.TEXT)))
                 return ViewType.LEFT_CONTENT_TEXT;
             else if ((item.getType().equals(Chat.Type.IMAGE)))
                 return ViewType.LEFT_CONTENT_IMAGE;
+            else if ((item.getType().equals(Chat.Type.VIDEO)))
+                return ViewType.LEFT_CONTENT_VIDEO;
         }
         return ViewType.RIGHT_CONTENT_TEXT;
     }
@@ -230,10 +238,76 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     chatRoomUser = myUserList.get(i);
                 }
             }
-            Glide.with(itemView.getContext()).load(item.getText()).override(200,200).into(leftImageBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(item.getText()).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).override(200,200).into(leftImageBinding.imagevMsg);
             leftImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
             leftImageBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(leftImageBinding.imgv);
+        }
+    }
+    public class LeftVideoViewHolder extends RecyclerView.ViewHolder{
+        ItemElementLeftVideoBinding leftVideoBinding;
+        ChatRoomUser chatRoomUser=null; //채팅을 보낸 사람
+        String chatDate; //채팅을 보낸 날짜, 시간
+        public LeftVideoViewHolder(@NonNull View itemView) {
+            super(itemView);
+            leftVideoBinding = ItemElementLeftVideoBinding.bind(itemView);
+            leftVideoBinding.imagevMsg.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    Chat item = myDataList.get(getBindingAdapterPosition());
+                    SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+                    String passDate= passDateFormat.format(item.normalDate());
+
+                    if(chatRoomUser==null){
+                        Log.e("USERKEY EROOR","해당하는 유저의 키가 현재 채팅방에 존재하지 않습니다.");
+                    }
+                    else {
+                        Intent intent = new Intent(itemView.getContext(), VideoFrameActivity.class);
+                        intent.putExtra("fromName", chatRoomUser.getUserMeta().getName());
+                        intent.putExtra("passDate", passDate);
+                        intent.putExtra("imageView", item.getText());
+                        view.getContext().startActivity(intent);
+                    }
+                }
+            });
+            leftVideoBinding.imgv.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    //1대1 채팅방 만들기
+                    Intent intent = new Intent(itemView.getContext(), UserProfileActivity.class);
+                    if(chatRoomUser==null){
+                        Log.e("USERKEY EROOR","해당하는 유저의 키가 현재 채팅방에 존재하지 않습니다.");
+                    }
+                    else {
+                        //선택한 사용자 정보 전송
+                        intent.putExtra("otherName", chatRoomUser.getUserMeta().getName());
+                        intent.putExtra("otherPictureURL", chatRoomUser.getUserMeta().getPictureURL());
+                        intent.putExtra("otherGeneration", chatRoomUser.getUserMeta().getGeneration());
+                        intent.putExtra("otherUserKey", chatRoomUser.getUserMeta().getUserKey());
+                        intent.putExtra("otherLastReadIndex", chatRoomUser.getLastReadIndex());
+                        //로그인된 사용자 정보 전송
+                        intent.putExtra("myLastReadIndex", myCurrentUser.getLastReadIndex());
+                        intent.putExtra("myName", myCurrentUser.getUserMeta().getName());
+                        intent.putExtra("myPictureURL", myCurrentUser.getUserMeta().getPictureURL());
+                        intent.putExtra("myGeneration", myCurrentUser.getUserMeta().getGeneration());
+                        intent.putExtra("myUserKey", myCurrentUser.getUserMeta().getUserKey());
+                    }
+                    view.getContext().startActivity(intent);
+                }
+            });
+        }
+        void bind(Chat item){
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
+            chatDate = simpleDateFormat.format(item.normalDate());
+            for (String i : myUserList.keySet()) {
+                if (item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())) {
+                    chatRoomUser = myUserList.get(i);
+                }
+            }
+            Glide.with(itemView.getContext()).load(item.getText()).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftVideoBinding.imagevMsg);
+            leftVideoBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            leftVideoBinding.textvTime.setText(chatDate);
+            Glide.with(itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(leftVideoBinding.imgv);
         }
     }
 
@@ -303,19 +377,11 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     if (chatRoomUser == null) {
                         Log.e("USERKEY EROOR", "해당하는 유저의 키가 현재 채팅방에 존재하지 않습니다.");
                     } else {
-                        if (item.getType().equals(Chat.Type.IMAGE)) {
-                            Intent intent = new Intent(itemView.getContext(), ImageFrameActivity.class);
-                            intent.putExtra("fromName", chatRoomUser.getUserMeta().getName());
-                            intent.putExtra("passDate", passDate);
-                            intent.putExtra("imageView", item.getText());
-                            view.getContext().startActivity(intent);
-                        } else if (item.getType().equals(Chat.Type.VIDEO)) {
-                            Intent intent = new Intent(itemView.getContext(), VideoFrameActivity.class);
-                            intent.putExtra("fromName", chatRoomUser.getUserMeta().getName());
-                            intent.putExtra("passDate", passDate);
-                            intent.putExtra("imageView", item.getText());
-                            view.getContext().startActivity(intent);
-                        }
+                        Intent intent = new Intent(itemView.getContext(), ImageFrameActivity.class);
+                        intent.putExtra("fromName", chatRoomUser.getUserMeta().getName());
+                        intent.putExtra("passDate", passDate);
+                        intent.putExtra("imageView", item.getText());
+                        view.getContext().startActivity(intent);
                     }
                 }
             });
@@ -328,12 +394,47 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     chatRoomUser = myUserList.get(i);
                 }
             }
-            if(item.getType().equals(Chat.Type.IMAGE))
-                Glide.with(itemView.getContext()).load(item.getText()).into(rightImageBinding.imagevMsg);
-            else //video
-                Glide.with(itemView.getContext()).load("https://firebasestorage.googleapis.com/v0/b/ftest-2abe4.appspot.com/o/uploads%2F202201140341565500_user2.jpg?alt=media&token=acc6057a-796a-4f97-b809-1920dbcb988f").into(rightImageBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(item.getText()).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightImageBinding.imagevMsg);
             rightImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
             rightImageBinding.textvTime.setText(chatDate);
+        }
+    }
+    public class RightVideoViewHolder extends RecyclerView.ViewHolder{
+        ItemElementRightVideoBinding rightVideoBinding;
+        ChatRoomUser chatRoomUser=null;
+        public RightVideoViewHolder(@NonNull View itemView) {
+            super(itemView);
+            rightVideoBinding = ItemElementRightVideoBinding.bind(itemView);
+            rightVideoBinding.imagevMsg.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    int pos = getBindingAdapterPosition();
+                    Chat item = myDataList.get(pos);
+                    SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+                    String passDate = passDateFormat.format(item.normalDate());
+                    if (chatRoomUser == null) {
+                        Log.e("USERKEY EROOR", "해당하는 유저의 키가 현재 채팅방에 존재하지 않습니다.");
+                    } else {
+                            Intent intent = new Intent(itemView.getContext(), VideoFrameActivity.class);
+                            intent.putExtra("fromName", chatRoomUser.getUserMeta().getName());
+                            intent.putExtra("passDate", passDate);
+                            intent.putExtra("imageView", item.getText());
+                            view.getContext().startActivity(intent);
+                    }
+                }
+            });
+        }
+        void bind(Chat item){
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
+            String chatDate = simpleDateFormat.format(item.normalDate());
+            for (String i : myUserList.keySet()) {
+                if (item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())) {
+                    chatRoomUser = myUserList.get(i);
+                }
+            }
+            Glide.with(itemView.getContext()).load(R.drawable.player).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightVideoBinding.imagevMsg);
+            rightVideoBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            rightVideoBinding.textvTime.setText(chatDate);
         }
     }
     public class RightTextViewHolder extends RecyclerView.ViewHolder{

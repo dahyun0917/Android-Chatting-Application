@@ -419,7 +419,7 @@ public class RoomActivity extends AppCompatActivity {
             filePath = data.getData();
             Log.d("fildPath", String.valueOf(filePath));
             if(filePath!=null)
-                uploadFile(resultCode);
+                uploadFile(requestCode);
             try{
                 InputStream in = getContentResolver().openInputStream(filePath);
                 Bitmap img = BitmapFactory.decodeStream(in);
@@ -430,7 +430,7 @@ public class RoomActivity extends AppCompatActivity {
         }
     }
     //firebase storage에 업로드하기
-    public void uploadFile(int resultCode) {
+    public void uploadFile(int requestCode) {
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("업로드중...");
@@ -438,9 +438,9 @@ public class RoomActivity extends AppCompatActivity {
 
         //파이어베이스에 push할 메세지 타입 정하기(이미지, 비디오)
         //TODO:파일 타입도 정하기
-        if(resultCode==IMAGE_CODE)
+        if(requestCode==IMAGE_CODE)
             messageType=Chat.Type.IMAGE;
-        else if(resultCode==VIDEO_CODE)
+        else if(requestCode==VIDEO_CODE)
             messageType=Chat.Type.VIDEO;
 
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
@@ -449,8 +449,8 @@ public class RoomActivity extends AppCompatActivity {
         String filename = sdf.format(new Date()) + "_" + currentUser.getUserMeta().getUserKey() ;
 
         //uploads라는 폴더가 없으면 자동 생성
-        //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각
-        StorageReference imgRef = firebaseStorage.getReference("pre_2/"+chatRoomKey+"/" + filename);
+        //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각 pre_2빼
+        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP"+"pre_2/"+chatRoomKey+"/" + filename);
 
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);
@@ -479,7 +479,6 @@ public class RoomActivity extends AppCompatActivity {
         uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                @SuppressWarnings("VisibleForTests") //이걸 넣어 줘야 아랫줄에 에러가 사라진다. 넌 누구냐?
                 double progress = (100 * taskSnapshot.getBytesTransferred()) /  taskSnapshot.getTotalByteCount();
                 //dialog에 진행률을 퍼센트로 출력해 준다
                 progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");

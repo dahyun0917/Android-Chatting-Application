@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ListIterator;
 
-
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
@@ -60,7 +59,8 @@ public class RoomActivity extends AppCompatActivity {
     private String chatRoomKey;
 
     private ChatRoomUser currentUser; //TODO LOGIN : 현재 로그인된 사용자
-    private String frontChatKey;
+    private String frontChatKey = null;
+    private String lastChatKey = null;
     private Chat.Type messageType = null;
 
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
@@ -73,6 +73,7 @@ public class RoomActivity extends AppCompatActivity {
     private int lastIndex =-1;
     private boolean isLoading = false;
     private boolean autoScroll = true;
+    private boolean isFirstRun = true;
     Uri filePath;
 
     public static Activity roomActivity;
@@ -87,7 +88,45 @@ public class RoomActivity extends AppCompatActivity {
         roomActivity = RoomActivity.this;
         //화면 기본 설정
         setUpRoomActivity();
+        // 처음 CHAT_LIMIT + 1개의 채팅 불러오고 리스너 설정
+        ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, frontChat -> {
+            for(Map.Entry<String, ChatRoomUser> i: frontChat.entrySet()) {
+                userList.put(i.getKey(), i.getValue());
+            }
+            ChatDB.getLastChatCompleteListener(chatRoomKey, lastChat -> {
+                String key = lastChat.first;
+                lastChatKey = frontChatKey = key;
+                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, prevChatList -> {
+                    if(prevChatList.first != null) {
+                        frontChatKey = prevChatList.first;
+                    }
+                    if(lastChat.first != null) {
+                        prevChatList.second.add(lastChat.second);
+                    }
+                    floatOldMessage(prevChatList.second);
+                    ChatDB.messageAddedEventListener(chatRoomKey, key, newChat -> {
+                        lastChatKey = newChat.first;
+                        floatNewMessage(newChat.second);
+                    });
+                });
+            });
+            ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
+                userList.put(userPair.first, userPair.second);
+            });
+        });
+        ChatDB.userReadLatestMessage(chatRoomKey, currentUser.getUserMeta().getUserKey());
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
     public void setUpRoomActivity(){
         //리사이클러뷰 설정
         initRecyclerView();
@@ -124,7 +163,6 @@ public class RoomActivity extends AppCompatActivity {
             }
         });
     }
-
     private void initScrollListener() {
         binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -185,29 +223,14 @@ public class RoomActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        //메시지가 새로 올라올 때마다 동작하는 리스너 설정
-
-        frontChatKey = null;
-        ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
-            for(Map.Entry<String, ChatRoomUser> i: item.entrySet()) {
-                userList.put(i.getKey(), i.getValue());
-            }
-            ChatDB.getLastChat(chatRoomKey, lastChat -> {
-                String key = lastChat.first;
-                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, itemList -> {
-                    frontChatKey = itemList.first;
-                    itemList.second.add(lastChat.second);
-                    floatOldMessage(itemList.second);
-                    ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
-                        floatNewMessage(dataPair.second);
-                    });
-                });
+        //onCreate를 통해 만들어 진 것이 아니면 messageAddedEventListener를 붙임
+        if(!isFirstRun) {
+            ChatDB.messageAddedEventListener(chatRoomKey, lastChatKey, newChat -> {
+                lastChatKey = newChat.first;
+                floatNewMessage(newChat.second);
             });
-            ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
-                userList.put(userPair.first, userPair.second);
-            });
-        });
-        ChatDB.userReadLatestMessage(chatRoomKey, currentUser.getUserMeta().getUserKey());
+        }
+        isFirstRun = false;
         initScrollListener();
     }
 
@@ -323,7 +346,7 @@ public class RoomActivity extends AppCompatActivity {
 
     //사용자가 send 버튼 눌렀을때, 메세지를 보내고 메세지 내용 파이어베이스에 저장
     private void sendMessage(){
-        messageType=Chat.Type.TEXT;
+        messageType = Chat.Type.TEXT;
         if (binding.chatEdit.getText().toString().equals(""))
             return;
 
@@ -415,7 +438,7 @@ public class RoomActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if((requestCode == IMAGE_CODE||requestCode == VIDEO_CODE) &&resultCode == RESULT_OK){
+        if((requestCode == IMAGE_CODE || requestCode == VIDEO_CODE) && resultCode == RESULT_OK){
             filePath = data.getData();
             Log.d("fildPath", String.valueOf(filePath));
             if(filePath!=null)

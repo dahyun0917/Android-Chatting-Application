@@ -185,11 +185,15 @@ public class ChatDB {
             }
         });
     }
-    public static void getLastChat(String chatRoomKey, RoomElementEventListener<Pair<String, Chat>> listener) {
+    public static void getLastChatCompleteListener(String chatRoomKey, RoomElementEventListener<Pair<String, Chat>> listener) {
         ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).limitToLast(1).get().addOnCompleteListener(task -> {
            if(task.isSuccessful()) {
-               DataSnapshot snapshot = task.getResult().getChildren().iterator().next();
-               listener.eventListener(new Pair<>(snapshot.getKey(), snapshot.getValue(Chat.class)));
+               Pair<String, Chat> result = new Pair<>(null, null);
+               for(DataSnapshot snapshot: task.getResult().getChildren()) {
+                   result = new Pair<>(snapshot.getKey(), snapshot.getValue(Chat.class));
+                   break;
+               }
+               listener.eventListener(result);
            } else {
                Log.e("FRD", "Can not get last chat of the " + chatRoomKey);
            }
@@ -241,7 +245,11 @@ public class ChatDB {
         myChildEventListener myListener = new myChildEventListener();
         String path = makePath(CHAT_ROOMS, chatRoomKey, CHATS);
 
-        ref.child(path).orderByKey().startAfter(lastChatKey).limitToLast(1).addChildEventListener(myListener);
+        if(lastChatKey != null) {   // 빈 채팅방이 아닐 때
+            ref.child(path).orderByKey().startAfter(lastChatKey).addChildEventListener(myListener);
+        } else {                    // 빈 채팅방일 때
+            ref.child(path).addChildEventListener(myListener);
+        }
         eventListeners.add(new Pair<>(path, myListener));
     }
     public static void userListChangedEventListener(String chatRoomKey, RoomElementEventListener<Pair<String, ChatRoomUser>> listener) {

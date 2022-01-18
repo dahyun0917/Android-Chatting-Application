@@ -317,13 +317,13 @@ public class ChatDB {
         });
     }
 
-    public static void getChatRoomMeta(String chatRoomKey, RoomElementEventListener<ChatRoomMeta> listener) {
+    public static void getChatRoomMeta(String chatRoomKey, IEventListener<ChatRoomMeta> listener) {
         ref.child(makePath(CHAT_ROOMS,chatRoomKey,CHAT_ROOM_META)).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DataSnapshot dataSnapshot = task.getResult();
                 listener.eventListener(dataSnapshot.getValue(ChatRoomMeta.class));
             } else {
-                Log.e("CHAT ROOM META ERROR", "Can not get meta data of the" + chatRoomKey);
+                Log.e("FRD", "Can not get meta data of the" + chatRoomKey);
             }
         });
     }

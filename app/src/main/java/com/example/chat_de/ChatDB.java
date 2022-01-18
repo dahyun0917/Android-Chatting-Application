@@ -12,19 +12,15 @@ import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.User;
 import com.example.chat_de.datas.UserChatRoom;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class ChatDB {
     public static final String CHAT_ROOMS = "chatRooms";
@@ -55,7 +51,7 @@ public class ChatDB {
         return rootPath;
     }
 
-    public static void getUsersCompleteEventListener(RoomElementEventListener<HashMap<String, User>> listener) {
+    public static void getUsersCompleteEventListener(IEventListener<HashMap<String, User>> listener) {
         ref.child(USERS).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()) {
                 HashMap<String, User> item = new HashMap<>();
@@ -69,7 +65,7 @@ public class ChatDB {
             }
         });
     }
-    public static void setChatRoom(String chatRoomName, ArrayList<UserListItem> userList, String callUserName, RoomElementEventListener<String> listener) {
+    public static void setChatRoom(String chatRoomName, ArrayList<UserListItem> userList, String callUserName, IEventListener<String> listener) {
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
@@ -98,7 +94,7 @@ public class ChatDB {
             }
         });
     }
-    public static void setPersonalChatRoom(ChatRoomUser userMe, ChatRoomUser userOther, RoomElementEventListener<String> listener) {
+    public static void setPersonalChatRoom(ChatRoomUser userMe, ChatRoomUser userOther, IEventListener<String> listener) {
         String chatRoomName = userMe.takeName()+", "+userOther.takeName();
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
@@ -172,7 +168,7 @@ public class ChatDB {
         });
     }
 
-    public static void getChatRoomUserListCompleteListener(String chatRoomKey, RoomElementEventListener<HashMap<String, ChatRoomUser>> listener) {
+    public static void getChatRoomUserListCompleteListener(String chatRoomKey, IEventListener<HashMap<String, ChatRoomUser>> listener) {
         ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()) {
                 HashMap<String, ChatRoomUser> chatRoomUserList = new HashMap<>();
@@ -185,21 +181,23 @@ public class ChatDB {
             }
         });
     }
-    public static void getLastChatCompleteListener(String chatRoomKey, RoomElementEventListener<Pair<String, Chat>> listener) {
+    public static void getLastChatCompleteListener(String chatRoomKey, IKeyValueEventListener<String, Chat> listener) {
         ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).limitToLast(1).get().addOnCompleteListener(task -> {
            if(task.isSuccessful()) {
-               Pair<String, Chat> result = new Pair<>(null, null);
+               String resultKey = null;
+               Chat resultValue = null;
                for(DataSnapshot snapshot: task.getResult().getChildren()) {
-                   result = new Pair<>(snapshot.getKey(), snapshot.getValue(Chat.class));
+                   resultKey = snapshot.getKey();
+                   resultValue = snapshot.getValue(Chat.class);
                    break;
                }
-               listener.eventListener(result);
+               listener.eventListener(resultKey, resultValue);
            } else {
                Log.e("FRD", "Can not get last chat of the " + chatRoomKey);
            }
         });
     }
-    public static void getPrevChatCompleteListener(String chatRoomKey, String frontChatKey, int chatLimit, RoomElementEventListener<Pair<String, ArrayList<Chat>>> listener) {
+    public static void getPrevChatListCompleteListener(String chatRoomKey, String frontChatKey, int chatLimit, IKeyValueEventListener<String, ArrayList<Chat>> listener) {
         if(frontChatKey != null) {
             ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).orderByKey().endBefore(frontChatKey).limitToLast(chatLimit).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -211,20 +209,21 @@ public class ChatDB {
                         }
                         chatList.add(snapshot.getValue(Chat.class));
                     }
-                    listener.eventListener(new Pair<>(chatKey, chatList));
+                    listener.eventListener(chatKey, chatList);
                 } else {
                     Log.e("FRD", "Can not get chats of the" + chatRoomKey);
                 }
             });
         } else {
-            listener.eventListener(new Pair<>(null, new ArrayList<>()));
+            listener.eventListener(null, new ArrayList<>());
         }
     }
-    public static void messageAddedEventListener(String chatRoomKey, String lastChatKey, RoomElementEventListener<Pair<String, Chat>> listener) {
+
+    public static void messageAddedEventListener(String chatRoomKey, String lastChatKey, IKeyValueEventListener<String, Chat> listener) {
         class myChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.eventListener(new Pair<>(snapshot.getKey(), snapshot.getValue(Chat.class)));
+                listener.eventListener(snapshot.getKey(), snapshot.getValue(Chat.class));
             }
 
             @Override
@@ -257,17 +256,17 @@ public class ChatDB {
         }
         eventListeners.add(new Pair<>(path, myListener));
     }
-    public static void userListChangedEventListener(String chatRoomKey, RoomElementEventListener<Pair<String, ChatRoomUser>> listener) {
+    public static void userListChangedEventListener(String chatRoomKey, IKeyValueEventListener<String, ChatRoomUser> listener) {
         String path = makePath(CHAT_ROOM_JOINED, chatRoomKey);
         ref.child(path).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.eventListener(new Pair<>(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class)));
+                listener.eventListener(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.eventListener(new Pair<>(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class)));
+                listener.eventListener(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override

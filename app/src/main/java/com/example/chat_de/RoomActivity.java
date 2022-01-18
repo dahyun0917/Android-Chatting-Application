@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -480,8 +481,8 @@ public class RoomActivity extends AppCompatActivity {
         String filename = sdf.format(new Date()) + "_" + currentUser.getUserMeta().getUserKey();
 
         //uploads라는 폴더가 없으면 자동 생성
-        //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각
-        StorageReference imgRef = firebaseStorage.getReference("pre_2/" + chatRoomKey + "/" + filename);
+        //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각 pre_2빼
+        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP"+"pre_2/"+chatRoomKey+"/" + filename);
 
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);
@@ -510,8 +511,8 @@ public class RoomActivity extends AppCompatActivity {
         uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                @SuppressWarnings("VisibleForTests") //이걸 넣어 줘야 아랫줄에 에러가 사라진다. 넌 누구냐?
-                double progress = (100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                @SuppressWarnings("VisibleForTests")
+                double progress = (100 * taskSnapshot.getBytesTransferred()) /  taskSnapshot.getTotalByteCount();
                 //dialog에 진행률을 퍼센트로 출력해 준다
                 progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
             }

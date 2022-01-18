@@ -100,7 +100,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             else if(viewHolder instanceof LeftTextViewHolder){
                 ((LeftTextViewHolder) viewHolder).bind(item);
             }else if(viewHolder instanceof LeftImageViewHolder){
-                    ((LeftImageViewHolder) viewHolder).bind(item);
+                ((LeftImageViewHolder) viewHolder).bind(item);
             }else if(viewHolder instanceof LeftVideoViewHolder){
                 ((LeftVideoViewHolder) viewHolder).bind(item);
             }

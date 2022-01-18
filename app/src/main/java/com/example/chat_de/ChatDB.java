@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class ChatDB {
     public static final String CHAT_ROOMS = "chatRooms";
@@ -93,12 +94,11 @@ public class ChatDB {
 
                 listener.eventListener(chatRoomKey);
             } else {
-                Log.e("FDB", "Make chat room error: " + error.toString());
+                Log.e("FRD", "Make chat room error: " + error.toString());
             }
         });
     }
-
-    public static void setPersonalChatRoom(ChatRoomUser userMe,ChatRoomUser userOther, RoomElementEventListener<String> listener) {
+    public static void setPersonalChatRoom(ChatRoomUser userMe, ChatRoomUser userOther, RoomElementEventListener<String> listener) {
         String chatRoomName = userMe.takeName()+userOther.takeName();
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
@@ -185,14 +185,13 @@ public class ChatDB {
             }
         });
     }
-
-    public static void getLastChatKey(String chatRoomKey, RoomElementEventListener<String> listener) {
+    public static void getLastChat(String chatRoomKey, RoomElementEventListener<Pair<String, Chat>> listener) {
         ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).limitToLast(1).get().addOnCompleteListener(task -> {
            if(task.isSuccessful()) {
-               for(DataSnapshot snapshot: task.getResult().getChildren()) {
-                   listener.eventListener(snapshot.getKey());
-                   break;
-               }
+               DataSnapshot snapshot = task.getResult().getChildren().iterator().next();
+               listener.eventListener(new Pair<>(snapshot.getKey(), snapshot.getValue(Chat.class)));
+           } else {
+               Log.e("FRD", "Can not get last chat of the " + chatRoomKey);
            }
         });
     }
@@ -207,6 +206,8 @@ public class ChatDB {
                     chatList.add(snapshot.getValue(Chat.class));
                 }
                 listener.eventListener(new Pair<>(chatKey, chatList));
+            } else {
+                Log.e("FRD", "Can not get chats of the" + chatRoomKey);
             }
         });
     }
@@ -240,7 +241,7 @@ public class ChatDB {
         myChildEventListener myListener = new myChildEventListener();
         String path = makePath(CHAT_ROOMS, chatRoomKey, CHATS);
 
-        ref.child(path).orderByKey().startAt(lastChatKey).limitToLast(1).addChildEventListener(myListener);
+        ref.child(path).orderByKey().startAfter(lastChatKey).limitToLast(1).addChildEventListener(myListener);
         eventListeners.add(new Pair<>(path, myListener));
     }
     public static void userListChangedEventListener(String chatRoomKey, RoomElementEventListener<Pair<String, ChatRoomUser>> listener) {
@@ -300,15 +301,12 @@ public class ChatDB {
             }
         });
     }
-    private static void addEventListener(String path, ChildEventListener eventListener) {
-        eventListeners.add(new Pair<>(path, eventListener));
-    }
 
     @NonNull
-    private static String makePath(String... strings) {
+    private static String makePath(@NonNull String... strings) {
         StringBuilder ret = new StringBuilder();
         for(String str: strings) {
-            ret.append("/" + str);
+            ret.append("/").append(str);
         }
 
         return ret.toString();

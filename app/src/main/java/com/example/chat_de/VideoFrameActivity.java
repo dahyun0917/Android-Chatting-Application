@@ -1,5 +1,6 @@
 package com.example.chat_de;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ public class VideoFrameActivity extends AppCompatActivity {
     private String fromName;
     private String passDate;
     private String videoViewUrl;
+    private int touchnum=0;
 
     Uri videoUri=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
     Uri sample=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
@@ -62,14 +64,28 @@ public class VideoFrameActivity extends AppCompatActivity {
         fromName = getintent.getStringExtra("fromName");
         passDate = getintent.getStringExtra("passDate");
         videoViewUrl = getintent.getStringExtra("imageView");
+        videoUri=Uri.parse(videoViewUrl);
 
-        fromName = "hi";
-        passDate = "dfd";
 
         binding.fromName.setText(fromName);
         binding.passDate.setText(passDate);
 
+        //테스트해보기
+        binding.videoView.setOnClickListener(new View.OnClickListener(){
 
+            @Override
+            public void onClick(View view) {
+                if(touchnum==0) {
+                    touchnum=1;
+                    binding.fromName.setVisibility(View.GONE);
+                    binding.passDate.setVisibility(View.GONE);
+                } else {
+                    touchnum=0;
+                    binding.fromName.setVisibility(View.VISIBLE);
+                    binding.passDate.setVisibility(View.VISIBLE);
+                }
+            }
+        });
         //pv=findViewById(R.id.pv);
 
     }
@@ -108,12 +124,11 @@ public class VideoFrameActivity extends AppCompatActivity {
 
 
 
-        MediaItem mediaItem = MediaItem.fromUri(videoViewUrl);
+        MediaItem mediaItem = MediaItem.fromUri(videoUri);
 
         player.setMediaItem(mediaItem);
         player.prepare();
         //player.play();
-
         //로딩이 완료되어 준비가 되었을 때
         //자동 실행되도록..
         player.setPlayWhenReady(true);

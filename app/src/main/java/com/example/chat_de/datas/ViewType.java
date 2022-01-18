@@ -5,7 +5,9 @@ public class ViewType {
     public static final int LOADING = -1;
     public static final int LEFT_CONTENT_TEXT = 0;
     public static final int LEFT_CONTENT_IMAGE = 1;
-    public static final int RIGHT_CONTENT_TEXT = 2;
-    public static final int RIGHT_CONTENT_IMAGE = 3;
-    public static final int CENTER_CONTENT = 4;
+    public static final int LEFT_CONTENT_VIDEO = 2;
+    public static final int RIGHT_CONTENT_TEXT = 3;
+    public static final int RIGHT_CONTENT_IMAGE = 4;
+    public static final int RIGHT_CONTENT_VIDEO = 5;
+    public static final int CENTER_CONTENT = 6;
 }

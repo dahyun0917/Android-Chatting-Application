@@ -295,7 +295,7 @@ public class RoomActivity extends AppCompatActivity {
             final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
             final String DAY = SDF.format(chat.normalDate());
             if(dataList.size() != 0 && !SDF.format(dataList.getFront().normalDate()).equals(DAY)) {
-                Chat daySystemChat = new Chat("--------------------------"+DAY+"--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+                Chat daySystemChat = new Chat(DAY, SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
                 daySystemChat.setDate(dataList.getFront().unixTime());
                 dataList.pushFront(daySystemChat);
                 cnt++;
@@ -315,7 +315,7 @@ public class RoomActivity extends AppCompatActivity {
             final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
             final String DAY = SDF.format(dataItem.normalDate());
             if (!SDF.format(dataList.getBack().normalDate()).equals(DAY)) {
-                Chat daySystemChat = new Chat("--------------------------" + DAY + "--------------------------", SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
+                Chat daySystemChat = new Chat(DAY, SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
                 daySystemChat.setDate(dataItem.unixTime());
                 dataList.pushBack(daySystemChat);
                 cnt++;

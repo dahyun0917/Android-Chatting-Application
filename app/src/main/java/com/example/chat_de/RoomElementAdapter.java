@@ -61,7 +61,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 return new LeftTextViewHolder(view);
             case ViewType.LEFT_CONTENT_IMAGE:
                 view = inflater.inflate(R.layout.item_element_left_image,parent,false);
-                return new LeftVideoViewHolder(view);
+                return new LeftImageViewHolder(view);
             case ViewType.LEFT_CONTENT_VIDEO:
                 view = inflater.inflate(R.layout.item_element_left_video,parent,false);
                 return new LeftVideoViewHolder(view);
@@ -100,7 +100,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             else if(viewHolder instanceof LeftTextViewHolder){
                 ((LeftTextViewHolder) viewHolder).bind(item);
             }else if(viewHolder instanceof LeftImageViewHolder){
-                    ((LeftVideoViewHolder) viewHolder).bind(item);
+                    ((LeftImageViewHolder) viewHolder).bind(item);
             }else if(viewHolder instanceof LeftVideoViewHolder){
                 ((LeftVideoViewHolder) viewHolder).bind(item);
             }
@@ -304,7 +304,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     chatRoomUser = myUserList.get(i);
                 }
             }
-            Glide.with(itemView.getContext()).load(item.getText()).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftVideoBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(R.drawable.player).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftVideoBinding.imagevMsg);
             leftVideoBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
             leftVideoBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(leftVideoBinding.imgv);
@@ -363,7 +363,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
     public class RightImageViewHolder extends RecyclerView.ViewHolder{
         ItemElementRightImageBinding rightImageBinding;
-        ChatRoomUser chatRoomUser=null;
         public RightImageViewHolder(@NonNull View itemView) {
             super(itemView);
             rightImageBinding = ItemElementRightImageBinding.bind(itemView);
@@ -374,34 +373,24 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     Chat item = myDataList.get(pos);
                     SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
                     String passDate = passDateFormat.format(item.normalDate());
-                    if (chatRoomUser == null) {
-                        Log.e("USERKEY EROOR", "해당하는 유저의 키가 현재 채팅방에 존재하지 않습니다.");
-                    } else {
-                        Intent intent = new Intent(itemView.getContext(), ImageFrameActivity.class);
-                        intent.putExtra("fromName", chatRoomUser.getUserMeta().getName());
-                        intent.putExtra("passDate", passDate);
-                        intent.putExtra("imageView", item.getText());
-                        view.getContext().startActivity(intent);
-                    }
+                    Intent intent = new Intent(itemView.getContext(), ImageFrameActivity.class);
+                    intent.putExtra("fromName", myCurrentUser.getUserMeta().getName());
+                    intent.putExtra("passDate", passDate);
+                    intent.putExtra("imageView", item.getText());
+                    view.getContext().startActivity(intent);
                 }
             });
         }
         void bind(Chat item){
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String chatDate = simpleDateFormat.format(item.normalDate());
-            for (String i : myUserList.keySet()) {
-                if (item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())) {
-                    chatRoomUser = myUserList.get(i);
-                }
-            }
             Glide.with(itemView.getContext()).load(item.getText()).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightImageBinding.imagevMsg);
-            rightImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            rightImageBinding.textvNicname.setText(myCurrentUser.getUserMeta().getName());
             rightImageBinding.textvTime.setText(chatDate);
         }
     }
     public class RightVideoViewHolder extends RecyclerView.ViewHolder{
         ItemElementRightVideoBinding rightVideoBinding;
-        ChatRoomUser chatRoomUser=null;
         public RightVideoViewHolder(@NonNull View itemView) {
             super(itemView);
             rightVideoBinding = ItemElementRightVideoBinding.bind(itemView);
@@ -412,34 +401,25 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     Chat item = myDataList.get(pos);
                     SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
                     String passDate = passDateFormat.format(item.normalDate());
-                    if (chatRoomUser == null) {
-                        Log.e("USERKEY EROOR", "해당하는 유저의 키가 현재 채팅방에 존재하지 않습니다.");
-                    } else {
-                            Intent intent = new Intent(itemView.getContext(), VideoFrameActivity.class);
-                            intent.putExtra("fromName", chatRoomUser.getUserMeta().getName());
-                            intent.putExtra("passDate", passDate);
-                            intent.putExtra("imageView", item.getText());
-                            view.getContext().startActivity(intent);
-                    }
+                    Intent intent = new Intent(itemView.getContext(), VideoFrameActivity.class);
+                    intent.putExtra("fromName", myCurrentUser.getUserMeta().getName());
+                    intent.putExtra("passDate", passDate);
+                    intent.putExtra("imageView", item.getText());
+                    view.getContext().startActivity(intent);
+
                 }
             });
         }
         void bind(Chat item){
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String chatDate = simpleDateFormat.format(item.normalDate());
-            for (String i : myUserList.keySet()) {
-                if (item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())) {
-                    chatRoomUser = myUserList.get(i);
-                }
-            }
             Glide.with(itemView.getContext()).load(R.drawable.player).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightVideoBinding.imagevMsg);
-            rightVideoBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            rightVideoBinding.textvNicname.setText(myCurrentUser.getUserMeta().getName());
             rightVideoBinding.textvTime.setText(chatDate);
         }
     }
     public class RightTextViewHolder extends RecyclerView.ViewHolder{
         ItemElementRightTextBinding rightTextBinding;
-        ChatRoomUser chatRoomUser=null; //채팅을 보낸 사람
         String chatDate; //채팅을 보낸 날짜, 시간
 
         public RightTextViewHolder(@NonNull View itemView) {
@@ -449,13 +429,9 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void bind(Chat item){
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             chatDate = simpleDateFormat.format(item.normalDate());
-            for (String i : myUserList.keySet()) {
-                if (item.getFrom().equals(myUserList.get(i).getUserMeta().getUserKey())) {
-                    chatRoomUser = myUserList.get(i);
-                }
-            }
+
             rightTextBinding.textvMsg.setText(item.getText());
-            rightTextBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
+            rightTextBinding.textvNicname.setText(myCurrentUser.getUserMeta().getName());
             rightTextBinding.textvTime.setText(chatDate);
         }
     }

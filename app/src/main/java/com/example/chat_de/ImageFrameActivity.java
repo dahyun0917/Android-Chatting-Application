@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -40,7 +41,8 @@ public class ImageFrameActivity extends AppCompatActivity {
         binding = ActivityImageFrameBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-
+        ActionBar ab = getSupportActionBar() ;
+        ab.setTitle("");
         Intent getintent = getIntent();
         fromName = getintent.getStringExtra("fromName");
         passDate = getintent.getStringExtra("passDate");

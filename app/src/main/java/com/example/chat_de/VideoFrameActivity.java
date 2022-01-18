@@ -12,6 +12,7 @@ import android.view.Window;
 import android.widget.SimpleExpandableListAdapter;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -59,6 +60,9 @@ public class VideoFrameActivity extends AppCompatActivity {
         View view = binding.getRoot();
         //supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(view);
+
+        ActionBar ab = getSupportActionBar() ;
+        ab.setTitle("");
 
         Intent getintent = getIntent();
         fromName = getintent.getStringExtra("fromName");
@@ -174,4 +178,3 @@ public class VideoFrameActivity extends AppCompatActivity {
 
 
 }
-

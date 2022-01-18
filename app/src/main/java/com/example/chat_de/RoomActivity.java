@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,9 +25,11 @@ import android.widget.ArrayAdapter;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
+import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.User;
+import com.google.android.exoplayer2.C;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -68,7 +71,10 @@ public class RoomActivity extends AppCompatActivity {
     private boolean isLoading = false;
     private boolean autoScroll = true;
     private boolean isFirstRun = true;
+    private ChatRoomMeta chatRoomMeta;
     private Uri filePath;
+
+    private ActionBar ab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,11 +126,13 @@ public class RoomActivity extends AppCompatActivity {
         initRecyclerView();
         initScrollListener();
 
+        //채팅방 설정
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
+        getChatRoomMeta();
 
         //액션바 타이틀 바 이름 설정
-        ActionBar ab = getSupportActionBar() ;
-        ab.setTitle(chatRoomKey.toString()) ;
+        ab = getSupportActionBar() ;
+        ab.setTitle("");
 
         // 메시지 전송 버튼에 대한 클릭 리스너 지정
         binding.chatSent.setOnClickListener(new View.OnClickListener() {
@@ -330,7 +338,13 @@ public class RoomActivity extends AppCompatActivity {
     }
     //채팅방 정보 불러옴
     private void getChatRoomMeta() {
-        //TODO : 채팅방 정보 불러오기
+        ChatDB.getChatRoomMeta(chatRoomKey, new RoomElementEventListener<ChatRoomMeta>() {
+            @Override
+            public void eventListener(ChatRoomMeta item) {
+                chatRoomMeta = item;
+                ab.setTitle(chatRoomMeta.getName()) ;
+            }
+        });
     }
 
     //사용자가 send 버튼 눌렀을때, 메세지를 보내고 메세지 내용 파이어베이스에 저장

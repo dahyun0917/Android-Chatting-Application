@@ -39,7 +39,7 @@ public class ChatDB {
     private static String rootPath;
 
     public static void setReference(String root) { // 앱 시작할때 딱 1번만 호출할 것
-        if(ref == null) {
+        if (ref == null) {
             ref = FirebaseDatabase.getInstance().getReference(root);
             rootPath = root;
         }
@@ -53,9 +53,9 @@ public class ChatDB {
 
     public static void getUsersCompleteEventListener(IEventListener<HashMap<String, User>> listener) {
         ref.child(USERS).get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()) {
+            if (task.isSuccessful()) {
                 HashMap<String, User> item = new HashMap<>();
-                for(DataSnapshot userSnapshot: task.getResult().getChildren()) {
+                for (DataSnapshot userSnapshot : task.getResult().getChildren()) {
                     item.put(userSnapshot.getKey(), userSnapshot.getValue(User.class));
                 }
                 listener.eventListener(item);
@@ -69,7 +69,7 @@ public class ChatDB {
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
-            if(error == null) {
+            if (error == null) {
                 final String chatRoomKey = rf.getKey();
                 HashMap<String, Object> result = new HashMap<>();
                 for (UserListItem item : userList) {
@@ -95,11 +95,11 @@ public class ChatDB {
         });
     }
     public static void setPersonalChatRoom(ChatRoomUser userMe, ChatRoomUser userOther, IEventListener<String> listener) {
-        String chatRoomName = userMe.takeName()+", "+userOther.takeName();
+        String chatRoomName = userMe.takeName() + ", " + userOther.takeName();
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
-            if(error == null) {
+            if (error == null) {
                 final String chatRoomKey = rf.getKey();
                 HashMap<String, Object> result = new HashMap<>();
                 // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
@@ -129,10 +129,10 @@ public class ChatDB {
     public static void uploadMessage(String message, int index, Chat.Type messageType, String chatRoomKey, String userKey, HashMap<String, ChatRoomUser> chatRoomUserList) {
         // upload message
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHATS).push().setValue(new Chat(message, index, userKey, messageType), (error, rf) -> {
-            if(error == null && messageType != Chat.Type.SYSTEM) {
+            if (error == null && messageType != Chat.Type.SYSTEM) {
                 rf.child(DATE).get().addOnCompleteListener(task -> {
                     Object serverTime;
-                    if(task.isSuccessful()) {
+                    if (task.isSuccessful()) {
                         serverTime = task.getResult().getValue();
                     } else {
                         serverTime = ServerValue.TIMESTAMP;
@@ -145,14 +145,14 @@ public class ChatDB {
                     result.put(makePath(CHAT_ROOMS, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_INDEX), index);
                     result.put(makePath(CHAT_ROOMS, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_TIME), serverTime);
                     // update last message index and time of all users in the chat room
-                    for(String key: chatRoomUserList.keySet()) {
+                    for (String key : chatRoomUserList.keySet()) {
                         result.put(makePath(USER_JOINED, key, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_INDEX), index);
                         result.put(makePath(USER_JOINED, key, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_TIME), serverTime);
                     }
                     // update
                     ref.updateChildren(result);
                 });
-            } else if(error != null) {
+            } else if (error != null) {
                 Log.e("FRD", "Upload message error:" + error.toString());
             }
         });
@@ -160,7 +160,7 @@ public class ChatDB {
 
     public static void userReadLatestMessage(String chatRoomKey, String userKey) {
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()) {
+            if (task.isSuccessful()) {
                 ref.child(makePath(CHAT_ROOM_JOINED, chatRoomKey, userKey, LAST_READ_INDEX)).setValue(task.getResult().getValue(Integer.class));
             } else {
                 Log.e("FRD", "Can not get a lastMessageIndex of: " + chatRoomKey);
@@ -170,9 +170,9 @@ public class ChatDB {
 
     public static void getChatRoomUserListCompleteListener(String chatRoomKey, IEventListener<HashMap<String, ChatRoomUser>> listener) {
         ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()) {
+            if (task.isSuccessful()) {
                 HashMap<String, ChatRoomUser> chatRoomUserList = new HashMap<>();
-                for(DataSnapshot snapshot: task.getResult().getChildren()) {
+                for (DataSnapshot snapshot : task.getResult().getChildren()) {
                     chatRoomUserList.put(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class));
                 }
                 listener.eventListener(chatRoomUserList);
@@ -183,22 +183,22 @@ public class ChatDB {
     }
     public static void getLastChatCompleteListener(String chatRoomKey, IKeyValueEventListener<String, Chat> listener) {
         ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).limitToLast(1).get().addOnCompleteListener(task -> {
-           if(task.isSuccessful()) {
-               String resultKey = null;
-               Chat resultValue = null;
-               for(DataSnapshot snapshot: task.getResult().getChildren()) {
-                   resultKey = snapshot.getKey();
-                   resultValue = snapshot.getValue(Chat.class);
-                   break;
-               }
-               listener.eventListener(resultKey, resultValue);
-           } else {
-               Log.e("FRD", "Can not get last chat of the " + chatRoomKey);
-           }
+            if (task.isSuccessful()) {
+                String resultKey = null;
+                Chat resultValue = null;
+                for (DataSnapshot snapshot : task.getResult().getChildren()) {
+                    resultKey = snapshot.getKey();
+                    resultValue = snapshot.getValue(Chat.class);
+                    break;
+                }
+                listener.eventListener(resultKey, resultValue);
+            } else {
+                Log.e("FRD", "Can not get last chat of the " + chatRoomKey);
+            }
         });
     }
     public static void getPrevChatListCompleteListener(String chatRoomKey, String frontChatKey, int chatLimit, IKeyValueEventListener<String, ArrayList<Chat>> listener) {
-        if(frontChatKey != null) {
+        if (frontChatKey != null) {
             ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).orderByKey().endBefore(frontChatKey).limitToLast(chatLimit).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     ArrayList<Chat> chatList = new ArrayList<>();
@@ -249,7 +249,7 @@ public class ChatDB {
         myChildEventListener myListener = new myChildEventListener();
         String path = makePath(CHAT_ROOMS, chatRoomKey, CHATS);
 
-        if(lastChatKey != null) {   // 빈 채팅방이 아닐 때
+        if (lastChatKey != null) {   // 빈 채팅방이 아닐 때
             ref.child(path).orderByKey().startAfter(lastChatKey).addChildEventListener(myListener);
         } else {                    // 빈 채팅방일 때
             ref.child(path).addChildEventListener(myListener);
@@ -291,13 +291,13 @@ public class ChatDB {
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 ChatRoomMeta chatRoomMeta = snapshot.getChildren().iterator().next().getValue(ChatRoomMeta.class);
                 //TODO : 나중에 ChatRoomMeta에 pictureURL 추가되면 그것도 받아서
-                chatRoomListAdapter.addChatRoom(snapshot.getKey(),"",chatRoomMeta.getName());
+                chatRoomListAdapter.addChatRoom(snapshot.getKey(), "", chatRoomMeta.getName());
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 ChatRoomMeta chatRoomMeta = snapshot.getChildren().iterator().next().getValue(ChatRoomMeta.class);
-                chatRoomListAdapter.changeChatRoom(snapshot.getKey(),"",chatRoomMeta.getName());
+                chatRoomListAdapter.changeChatRoom(snapshot.getKey(), "", chatRoomMeta.getName());
             }
 
             @Override
@@ -331,7 +331,7 @@ public class ChatDB {
     @NonNull
     private static String makePath(@NonNull String... strings) {
         StringBuilder ret = new StringBuilder();
-        for(String str: strings) {
+        for (String str : strings) {
             ret.append("/").append(str);
         }
 
@@ -339,7 +339,7 @@ public class ChatDB {
     }
 
     public static void removeEventListenerBindOnThis() {
-        for(Pair<String, ChildEventListener> i: eventListeners) {
+        for (Pair<String, ChildEventListener> i : eventListeners) {
             ref.child(i.first).removeEventListener(i.second);
         }
         eventListeners.clear();

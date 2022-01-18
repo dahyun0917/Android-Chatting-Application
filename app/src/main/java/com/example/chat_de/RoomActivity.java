@@ -7,9 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,7 +20,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
@@ -42,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.ListIterator;
 
@@ -72,9 +68,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean isLoading = false;
     private boolean autoScroll = true;
     private boolean isFirstRun = true;
-    Uri filePath;
-
-    public static Activity roomActivity;
+    private Uri filePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,33 +77,29 @@ public class RoomActivity extends AppCompatActivity {
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-        roomActivity = RoomActivity.this;
         //화면 기본 설정
         setUpRoomActivity();
         // 처음 CHAT_LIMIT + 1개의 채팅 불러오고 리스너 설정
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, frontChat -> {
-            for(Map.Entry<String, ChatRoomUser> i: frontChat.entrySet()) {
-                userList.put(i.getKey(), i.getValue());
-            }
-            ChatDB.getLastChatCompleteListener(chatRoomKey, lastChat -> {
-                String key = lastChat.first;
-                lastChatKey = frontChatKey = key;
-                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, prevChatList -> {
-                    if(prevChatList.first != null) {
-                        frontChatKey = prevChatList.first;
+            userList.putAll(frontChat);
+            ChatDB.getLastChatCompleteListener(chatRoomKey, (chatKey, chatValue) -> {
+                lastChatKey = frontChatKey = chatKey;
+                ChatDB.getPrevChatListCompleteListener(chatRoomKey, chatKey, CHAT_LIMIT, (prevChatListKey, prevChatList) -> {
+                    if(prevChatListKey != null) {
+                        frontChatKey = prevChatListKey;
                     }
-                    if(lastChat.first != null) {
-                        prevChatList.second.add(lastChat.second);
+                    if(chatKey != null) {
+                        prevChatList.add(chatValue);
                     }
-                    floatOldMessage(prevChatList.second);
-                    ChatDB.messageAddedEventListener(chatRoomKey, key, newChat -> {
-                        lastChatKey = newChat.first;
-                        floatNewMessage(newChat.second);
+                    floatOldMessage(prevChatList);
+                    ChatDB.messageAddedEventListener(chatRoomKey, chatKey, (newChatKey, newChat) -> {
+                        lastChatKey = newChatKey;
+                        floatNewMessage(newChat);
                     });
                 });
             });
-            ChatDB.userListChangedEventListener(chatRoomKey, userPair -> {
-                userList.put(userPair.first, userPair.second);
+            ChatDB.userListChangedEventListener(chatRoomKey, (changedUserKey, changedUser) -> {
+                userList.put(changedUserKey, changedUser);
             });
         });
         ChatDB.userReadLatestMessage(chatRoomKey, currentUser.getUserMeta().getUserKey());
@@ -208,9 +198,9 @@ public class RoomActivity extends AppCompatActivity {
                 dataList.popFront();
                 roomElementAdapter.notifyItemRemoved(0);
 
-                ChatDB.getPrevChatCompleteListener(chatRoomKey, frontChatKey, CHAT_LIMIT, itemList -> {
-                    frontChatKey = itemList.first;
-                    floatOldMessage(itemList.second);
+                ChatDB.getPrevChatListCompleteListener(chatRoomKey, frontChatKey, CHAT_LIMIT, (prevChatListKey, prevChatListValue) -> {
+                    frontChatKey = prevChatListKey;
+                    floatOldMessage(prevChatListValue);
                     isLoading = false;
                 });
                 autoScroll = false;
@@ -223,9 +213,9 @@ public class RoomActivity extends AppCompatActivity {
         super.onResume();
         //onCreate를 통해 만들어 진 것이 아니면 messageAddedEventListener를 붙임
         if(!isFirstRun) {
-            ChatDB.messageAddedEventListener(chatRoomKey, lastChatKey, newChat -> {
-                lastChatKey = newChat.first;
-                floatNewMessage(newChat.second);
+            ChatDB.messageAddedEventListener(chatRoomKey, lastChatKey, (newChatKey, newChat) -> {
+                lastChatKey = newChatKey;
+                floatNewMessage(newChat);
             });
         }
         isFirstRun = false;

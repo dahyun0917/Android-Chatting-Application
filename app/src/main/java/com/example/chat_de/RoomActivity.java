@@ -43,7 +43,6 @@ import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Map;
 
-
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
@@ -89,14 +88,11 @@ public class RoomActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-
     }
 
     public void setUpRoomActivity(){
@@ -199,18 +195,18 @@ public class RoomActivity extends AppCompatActivity {
         //메시지가 새로 올라올 때마다 동작하는 리스너 설정
 
         frontChatKey = null;
-        ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, item -> {
-            for(Map.Entry<String, ChatRoomUser> i: item.entrySet()) {
+        ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, frontChat -> {
+            for(Map.Entry<String, ChatRoomUser> i: frontChat.entrySet()) {
                 userList.put(i.getKey(), i.getValue());
             }
-            ChatDB.getLastChat(chatRoomKey, lastChat -> {
+            ChatDB.getLastChatCompleteListener(chatRoomKey, lastChat -> {
                 String key = lastChat.first;
-                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, itemList -> {
-                    frontChatKey = itemList.first;
-                    itemList.second.add(lastChat.second);
-                    floatOldMessage(itemList.second);
-                    ChatDB.messageAddedEventListener(chatRoomKey, key, dataPair -> {
-                        floatNewMessage(dataPair.second);
+                ChatDB.getPrevChatCompleteListener(chatRoomKey, key, CHAT_LIMIT, prevChatList -> {
+                    frontChatKey = prevChatList.first;
+                    prevChatList.second.add(lastChat.second);
+                    floatOldMessage(prevChatList.second);
+                    ChatDB.messageAddedEventListener(chatRoomKey, key, newChat -> {
+                        floatNewMessage(newChat.second);
                     });
                 });
             });

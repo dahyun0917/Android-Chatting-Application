@@ -185,7 +185,7 @@ public class ChatDB {
             }
         });
     }
-    public static void getLastChat(String chatRoomKey, RoomElementEventListener<Pair<String, Chat>> listener) {
+    public static void getLastChatCompleteListener(String chatRoomKey, RoomElementEventListener<Pair<String, Chat>> listener) {
         ref.child(makePath(CHAT_ROOMS, chatRoomKey, CHATS)).limitToLast(1).get().addOnCompleteListener(task -> {
            if(task.isSuccessful()) {
                DataSnapshot snapshot = task.getResult().getChildren().iterator().next();

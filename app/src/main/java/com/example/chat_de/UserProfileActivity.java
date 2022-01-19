@@ -17,10 +17,11 @@ import com.example.chat_de.datas.User;
 import java.util.ArrayList;
 
 public class UserProfileActivity extends AppCompatActivity {
-    ActivityUserProfileBinding binding;
-    private User userOther;
+    private ActivityUserProfileBinding binding;
+    private Dialog dialog;
+    private User userOther = new User();
     private User userMe;
-    ArrayList<User> userList = new ArrayList<>();
+    private ArrayList<User> userList = new ArrayList<>();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,21 +31,10 @@ public class UserProfileActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(view);
 
-        //인텐트 설정
-        Intent getIntent = getIntent();
-
         //선택한 사용자 정보 전송
-        userOther = new User();
-        userOther.setName(getIntent.getStringExtra("otherName"));
-        userOther.setPictureURL(getIntent.getStringExtra("otherPictureURL"));
-        userOther.setGeneration(getIntent.getIntExtra("otherGeneration",0));
-        userOther.setUserKey(getIntent.getStringExtra("otherUserKey"));
+        userOther = (User)getIntent().getSerializableExtra("userOther");
         //로그인된 사용자 정보 전송
-        userMe = new User();
-        userMe.setName(getIntent.getStringExtra("myName"));
-        userMe.setPictureURL(getIntent.getStringExtra("myPictureURL"));
-        userMe.setGeneration(getIntent.getIntExtra("myGeneration",0));
-        userMe.setUserKey(getIntent.getStringExtra("myUserKey"));
+        userMe = (User)getIntent().getSerializableExtra("userMe");
 
         userList.add(userMe);
         userList.add(userOther);

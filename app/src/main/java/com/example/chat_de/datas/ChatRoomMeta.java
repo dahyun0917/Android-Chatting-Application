@@ -4,9 +4,11 @@ import androidx.annotation.NonNull;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
+
 // DB에서 chatRoomMeta들 전부 수정될때까지는 pictureURL에 관련된 주석 풀지 말 것
 @IgnoreExtraProperties
-public class ChatRoomMeta {
+public class ChatRoomMeta implements Serializable {
 
     public enum Type { BY_COLLEGE, BY_YEAR, BY_USER }
     private String name;
@@ -42,5 +44,13 @@ public class ChatRoomMeta {
     public void setLastMessageIndex(int lastMessageIndex)   { this.lastMessageIndex = lastMessageIndex; }
     public void setType(Type type)                          { this.type = type; }
     public void setLastMessageTime(long lastMessageTime)    { this.lastMessageTime = lastMessageTime; }
-    public void setPictureURL(String pictureURL)            { this.pictureURL = pictureURL; }
+    public void setPictureURL(String pictureURL)            { this.pictureURL = pictureURL; }     { this.pictureURL = pictureURL; }
+
+    @Override
+    public String toString() {
+        return  "{ name: " + name +
+                ", lastMessageIndex: " + lastMessageIndex +
+                ", type: " + type +
+                ", lastMessageTime: " + lastMessageTime + " }";
+    }
 }

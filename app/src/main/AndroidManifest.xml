@@ -27,6 +27,9 @@
             android:name=".VideoFrameActivity"
             android:exported="false" />
         <activity
+            android:name=".FileFrameActivity"
+            android:exported="false" />
+        <activity
             android:name=".UserProfileActivity"
             android:theme="@style/Theme.AppCompat.Dialog"
             android:exported="false" />

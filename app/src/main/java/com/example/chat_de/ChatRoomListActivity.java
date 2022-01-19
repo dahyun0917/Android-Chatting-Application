@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.HashSet;
+
 public class ChatRoomListActivity extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
 
@@ -61,7 +63,9 @@ public class ChatRoomListActivity extends AppCompatActivity {
         //RoomActivity로 넘어간 뒤, 종료
         Intent intent = new Intent(this, UserListActivity.class);
         intent.putExtra("tag",1);
-        intent.putExtra("who", userKey);
+        HashSet<String> set = new HashSet<>();
+        set.add(userKey);
+        intent.putExtra("userList", set);
         startActivity(intent);
     }
 }

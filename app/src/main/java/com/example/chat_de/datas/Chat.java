@@ -5,10 +5,11 @@ import androidx.annotation.NonNull;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ServerValue;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @IgnoreExtraProperties
-public class Chat {
+public class Chat implements Serializable {
     public enum Type { TEXT, IMAGE, VIDEO, FILE, SYSTEM }
 
     private String text;
@@ -56,5 +57,14 @@ public class Chat {
     public long unixTime()      { return (long)date; }
     public Date normalDate()    {
         return new Date((long)date);
+    }
+
+    @Override
+    public String toString() {
+        return  "{ text: " + text +
+                ", index: " + index +
+                ", date: " + date.toString() +
+                ", from: " + from +
+                ", type: " + type + " }";
     }
 }

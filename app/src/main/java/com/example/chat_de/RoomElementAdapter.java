@@ -47,6 +47,10 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         myCurrentUser = currentUser;
     }
 
+    public void setCurrentUser(ChatRoomUser chatRoomUser) {
+        myCurrentUser = chatRoomUser;
+    }
+
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
@@ -149,7 +153,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         //채팅 위치 타입 (왼, 중간, 오) 과 메세지 타입(이미지, 텍스트) 정하기
         if (item.getType().equals(Chat.Type.SYSTEM)) {
             return ViewType.CENTER_CONTENT;
-        } else if ((item.getFrom().equals(myCurrentUser.getUserMeta().getUserKey()))) {
+        } else if ((item.getFrom().equals(ChatDB.getCurrentUserKey()))) {
             if ((item.getType().equals(Chat.Type.TEXT)))
                 return ViewType.RIGHT_CONTENT_TEXT;
             else if ((item.getType().equals(Chat.Type.IMAGE)))

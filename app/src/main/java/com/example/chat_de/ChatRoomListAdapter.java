@@ -81,7 +81,7 @@ public class ChatRoomListAdapter extends BaseAdapter {
         Glide
                 .with(context)
                 .load(item.getChatRoomPictureURL())
-//            .centerCrop()
+                .circleCrop()
                 .placeholder(R.drawable.knu_mark)
                 .into(itemListChatRoomBinding.chatRoomImage);
 

@@ -414,9 +414,9 @@ public class RoomActivity extends AppCompatActivity {
                                 startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
                                 break;
                             case 2 :  //file
-                                //intent.setType("file/*");
-                                //intent.setAction(Intent.ACTION_GET_CONTENT);
-                                //startActivityForResult(Intent.createChooser(intent, "파일를 선택하세요."), FILE_CODE);
+                                intent.setType("application/*");
+                                intent.setAction(Intent.ACTION_GET_CONTENT);
+                                startActivityForResult(Intent.createChooser(intent, "파일를 선택하세요."), FILE_CODE);
                                 break;
                         }
                     }
@@ -446,8 +446,6 @@ public class RoomActivity extends AppCompatActivity {
 
         dlg.show();
 
-        //드롭박스, 구글드라이브, 갤러리 등 모든 파일
-        //intent.setType("image/* video/*");
     }
 
 
@@ -459,7 +457,6 @@ public class RoomActivity extends AppCompatActivity {
             filePath = data.getData();
             String extension =getMimeType(this,filePath);
             Log.d("filePath", String.valueOf(filePath));
-            //getExtension(String.valueOf(filePath));
             Log.d("확장자", getMimeType(this,filePath));
             if (filePath != null)
                 uploadFile(requestCode,extension);

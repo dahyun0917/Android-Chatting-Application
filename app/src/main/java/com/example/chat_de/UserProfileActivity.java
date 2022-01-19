@@ -31,8 +31,6 @@ public class UserProfileActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(view);
 
-        //인텐트 설정
-
         //선택한 사용자 정보 전송
         userOther = (User)getIntent().getSerializableExtra("userOther");
         //로그인된 사용자 정보 전송

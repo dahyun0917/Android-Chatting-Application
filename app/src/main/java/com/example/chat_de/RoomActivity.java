@@ -51,6 +51,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.ListIterator;
 
@@ -372,6 +373,10 @@ public class RoomActivity extends AppCompatActivity {
         intent.putExtra("tag", 2);
         intent.putExtra("where", chatRoomKey);
         intent.putExtra("myUserKey", currentUser.getUserMeta().getUserKey());
+        HashSet<String> set = new HashSet<>(userList.size());
+        set.addAll(userList.keySet());
+        intent.putExtra("userList", set);
+
         startActivity(intent);
     }
 

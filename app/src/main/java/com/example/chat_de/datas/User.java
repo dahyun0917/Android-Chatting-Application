@@ -2,10 +2,11 @@ package com.example.chat_de.datas;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 @IgnoreExtraProperties
-public class User {
+public class User implements Serializable {
     private String name;
     private String pictureURL;
     private int generation;
@@ -35,4 +36,12 @@ public class User {
     public void setPictureURL(String pictureURL)    { this.pictureURL = pictureURL; }
     public void setGeneration(int generation)       { this.generation = generation; }
     public void setUserKey(String userKey)          { this.userKey = userKey; }
+
+    @Override
+    public String toString() {
+        return  "{ name: " + name +
+                ", pictureURL: " + pictureURL +
+                ", generation: " + generation +
+                ", userKey: " + userKey + " }";
+    }
 }

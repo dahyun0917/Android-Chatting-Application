@@ -43,6 +43,7 @@ public class UserProfileActivity extends AppCompatActivity {
         Glide
                 .with(this)
                 .load(userOther.getPictureURL())
+                .error(R.drawable.knu_mark_white)
                 .into(binding.profileImage);
         //이름 설정
         binding.userName.setText(userOther.getName());

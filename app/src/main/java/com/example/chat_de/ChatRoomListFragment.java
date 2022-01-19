@@ -26,13 +26,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 public class ChatRoomListFragment extends Fragment {
-    //private String userKey = "user2";
-    //private String userName = "user2";
 
    private FragmentChatRoomListBinding binding;
 
-    //private String CHAT_NAME;
-    //private String USER_NAME;
+
 
     private String userKey;
 
@@ -53,11 +50,9 @@ public class ChatRoomListFragment extends Fragment {
         binding = FragmentChatRoomListBinding.inflate(inflater,container,false);
         View view = binding.getRoot();
 
-        //ViewGroup rootview = (ViewGroup)inflater.inflate(R.layout.fragment_chat_room_list,container,false);
 
         userKey = ChatDB.getCurrentUserKey();
 
-        Bundle bundle = getArguments();
 
         showChatRoomList();
         binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -10,8 +10,9 @@ android {
     }
     defaultConfig {
         applicationId "com.example.chat_de"
-        minSdk 21
-        targetSdk 32
+        minSdk 19
+        targetSdk 30
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
 
@@ -32,6 +33,9 @@ android {
 }
 
 dependencies {
+    //multidex
+    implementation "androidx.multidex:multidex:2.0.1"
+
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
 

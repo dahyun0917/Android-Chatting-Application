@@ -19,9 +19,9 @@ import java.util.ArrayList;
 public class UserProfileActivity extends AppCompatActivity {
     ActivityUserProfileBinding binding;
     private Dialog dialog;
-    private ChatRoomUser userOther;
-    private ChatRoomUser userMe;
-    ArrayList<ChatRoomUser> userList = new ArrayList<>();
+    private User userOther;
+    private User userMe;
+    ArrayList<User> userList = new ArrayList<>();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,21 +35,17 @@ public class UserProfileActivity extends AppCompatActivity {
         Intent getIntent = getIntent();
 
         //선택한 사용자 정보 전송
-        userOther = new ChatRoomUser();
-        userOther.setUserMeta(new User());
-        userOther.getUserMeta().setName(getIntent.getStringExtra("otherName"));
-        userOther.getUserMeta().setPictureURL(getIntent.getStringExtra("otherPictureURL"));
-        userOther.getUserMeta().setGeneration(getIntent.getIntExtra("otherGeneration",0));
-        userOther.getUserMeta().setUserKey(getIntent.getStringExtra("otherUserKey"));
-        userOther.setLastReadIndex(getIntent.getIntExtra("otherLastReadIndex",0));
+        userOther = new User();
+        userOther.setName(getIntent.getStringExtra("otherName"));
+        userOther.setPictureURL(getIntent.getStringExtra("otherPictureURL"));
+        userOther.setGeneration(getIntent.getIntExtra("otherGeneration",0));
+        userOther.setUserKey(getIntent.getStringExtra("otherUserKey"));
         //로그인된 사용자 정보 전송
-        userMe = new ChatRoomUser();
-        userMe.setUserMeta(new User());
-        userMe.setLastReadIndex(getIntent.getIntExtra("myLastReadIndex",0));
-        userMe.getUserMeta().setName(getIntent.getStringExtra("myName"));
-        userMe.getUserMeta().setPictureURL(getIntent.getStringExtra("myPictureURL"));
-        userMe.getUserMeta().setGeneration(getIntent.getIntExtra("myGeneration",0));
-        userMe.getUserMeta().setUserKey(getIntent.getStringExtra("myUserKey"));
+        userMe = new User();
+        userMe.setName(getIntent.getStringExtra("myName"));
+        userMe.setPictureURL(getIntent.getStringExtra("myPictureURL"));
+        userMe.setGeneration(getIntent.getIntExtra("myGeneration",0));
+        userMe.setUserKey(getIntent.getStringExtra("myUserKey"));
 
         userList.add(userMe);
         userList.add(userOther);
@@ -57,10 +53,10 @@ public class UserProfileActivity extends AppCompatActivity {
         //프로필 사진 설정
         Glide
                 .with(this)
-                .load(userOther.takePictureURL())
+                .load(userOther.getPictureURL())
                 .into(binding.profileImage);
         //이름 설정
-        binding.userName.setText(userOther.takeName());
+        binding.userName.setText(userOther.getName());
         //채팅방 만들기 버튼 설정
         binding.makeChat.setOnClickListener(new View.OnClickListener() {
             @Override

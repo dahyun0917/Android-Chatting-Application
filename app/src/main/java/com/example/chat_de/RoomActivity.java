@@ -275,8 +275,8 @@ public class RoomActivity extends AppCompatActivity {
         binding.recyclerView.setLayoutManager(manager);
 
         //TODO LOGIN : 임시로 현재 사용자 설정함->사용자 인증 도입 후 수정해야됨
-        //currentUser = new ChatRoomUser(17, new User("이다현","http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg",2,"user2"));
-        currentUser = new ChatRoomUser(1, new User("양선아", "https://cdn.clien.net/web/api/file/F01/7233602/127e595099f1bf.jpg?thumb=true", 1, "user1"));
+        currentUser = new ChatRoomUser(17, new User("이다현","http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg",2,"user2"));
+        //currentUser = new ChatRoomUser(1, new User("양선아", "https://cdn.clien.net/web/api/file/F01/7233602/127e595099f1bf.jpg?thumb=true", 1, "user1"));
         roomElementAdapter = new RoomElementAdapter(dataList, userList, currentUser);
 
         binding.recyclerView.setAdapter(roomElementAdapter);
@@ -361,8 +361,8 @@ public class RoomActivity extends AppCompatActivity {
     private void inviteUser() {
         Intent intent = new Intent(this, UserListActivity.class);
         intent.putExtra("tag", 2);
-        intent.putExtra("who", currentUser.getUserMeta().getName());
         intent.putExtra("where", chatRoomKey);
+        intent.putExtra("myUserKey", currentUser.getUserMeta().getUserKey());
         startActivity(intent);
     }
 
@@ -404,11 +404,11 @@ public class RoomActivity extends AppCompatActivity {
                                 intent.setAction(Intent.ACTION_GET_CONTENT);
                                 startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
                                 break;
-                    /*case 2 :  //file
-                        intent.setType("video/*");
-                        intent.setAction(Intent.ACTION_GET_CONTENT);
-                        startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
-                        break;*/
+                            /*case 2 :  //file
+                                intent.setType("video/*");
+                                intent.setAction(Intent.ACTION_GET_CONTENT);
+                                startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
+                                break;*/
                         }
                     }
                 });

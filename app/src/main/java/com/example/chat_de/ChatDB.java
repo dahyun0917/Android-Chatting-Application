@@ -37,11 +37,13 @@ public class ChatDB {
     private static DatabaseReference ref = null;
     private static final ArrayList<Pair<String, ChildEventListener>> eventListeners = new ArrayList<>();
     private static String rootPath;
+    private static String currentUserKey = null;
 
-    public static void setReference(String root) { // 앱 시작할때 딱 1번만 호출할 것
+    public static void setReference(String root, String userKey) { // 앱 시작할때 딱 1번만 호출할 것
         if (ref == null) {
             ref = FirebaseDatabase.getInstance().getReference(root);
             rootPath = root;
+            currentUserKey = userKey;
         }
     }
     public static DatabaseReference getReference() {
@@ -49,6 +51,10 @@ public class ChatDB {
     }
     public static String getRootPath() {
         return rootPath;
+    }
+    //TODO : intent로 본인의 키를 넘겨주는 부분 있으면 전부 이쪽으로 바꿔야 함
+    public static String getCurrentUserKey() {
+        return currentUserKey;
     }
 
     public static void getUsersCompleteEventListener(IEventListener<HashMap<String, User>> listener) {
@@ -94,8 +100,8 @@ public class ChatDB {
             }
         });
     }
-    public static void setPersonalChatRoom(ChatRoomUser userMe, ChatRoomUser userOther, IEventListener<String> listener) {
-        String chatRoomName = userMe.takeName() + ", " + userOther.takeName();
+    public static void setPersonalChatRoom(User userMe, User userOther, IEventListener<String> listener) {
+        String chatRoomName = userMe.getName() + ", " + userOther.getName();
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
@@ -103,16 +109,16 @@ public class ChatDB {
                 final String chatRoomKey = rf.getKey();
                 HashMap<String, Object> result = new HashMap<>();
                 // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
-                result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userMe.getUserMeta().getUserKey()), new ChatRoomUser(userMe.getUserMeta()));
-                result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userOther.getUserMeta().getUserKey()), new ChatRoomUser(userOther.getUserMeta()));
+                result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userMe.getUserKey()), new ChatRoomUser(userMe));
+                result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userOther.getUserKey()), new ChatRoomUser(userOther));
                 // userJoined의 userKey들에 새로운 chatRoom 추가
-                result.put(makePath(USER_JOINED, userMe.getUserMeta().getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
-                result.put(makePath(USER_JOINED, userOther.getUserMeta().getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
+                result.put(makePath(USER_JOINED, userMe.getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
+                result.put(makePath(USER_JOINED, userOther.getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
 
                 // 종합한 값들을 최종적으로 update
                 ref.updateChildren(result).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        String message = userMe.takeName() + "님이 새 채팅방을 생성하셨습니다.";
+                        String message = userMe.getName() + "님이 새 채팅방을 생성하셨습니다.";
                         uploadMessage(message, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM", new HashMap<>());
                     } else {
                         Log.e("FRD", "Can not update data of users and the new chat room");

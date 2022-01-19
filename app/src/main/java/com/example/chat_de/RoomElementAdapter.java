@@ -218,9 +218,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         intent.putExtra("otherPictureURL", chatRoomUser.getUserMeta().getPictureURL());
                         intent.putExtra("otherGeneration", chatRoomUser.getUserMeta().getGeneration());
                         intent.putExtra("otherUserKey", chatRoomUser.getUserMeta().getUserKey());
-                        intent.putExtra("otherLastReadIndex", chatRoomUser.getLastReadIndex());
                         //로그인된 사용자 정보 전송
-                        intent.putExtra("myLastReadIndex", myCurrentUser.getLastReadIndex());
                         intent.putExtra("myName", myCurrentUser.getUserMeta().getName());
                         intent.putExtra("myPictureURL", myCurrentUser.getUserMeta().getPictureURL());
                         intent.putExtra("myGeneration", myCurrentUser.getUserMeta().getGeneration());

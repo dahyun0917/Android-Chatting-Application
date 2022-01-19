@@ -12,15 +12,16 @@ public class ChatRoomListActivity extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
 
     //private String CHAT_NAME;
-    //private String USER_NAME;
-    private String userName = "user2";
-    private String userKey = "user2";
+    private final String USER_KEY = "user2";
+    private String userKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatDB.setReference("pre_2");
+        ChatDB.setReference("pre_2", USER_KEY);
         setContentView(R.layout.activity_chat_room_list);
+
+        userKey = ChatDB.getCurrentUserKey();
 
         mainFragment = new ChatRoomListFragment();
         Intent intent = getIntent();
@@ -30,7 +31,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         Bundle bundle = new Bundle(); // 파라미터의 숫자는 전달하려는 값의 갯수
         //bundle.putString("chat_name", CHAT_NAME);
         //bundle.putString("user_name", USER_NAME);
-        bundle.putString("userKey",userKey);
+        bundle.putString("userKey", userKey);
         mainFragment.setArguments(bundle);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, mainFragment).commit();
@@ -57,10 +58,10 @@ public class ChatRoomListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     private void selelctUser(){
-        //ChatUserListActivity로 넘어간 뒤, 종료
+        //RoomActivity로 넘어간 뒤, 종료
         Intent intent = new Intent(this, UserListActivity.class);
         intent.putExtra("tag",1);
-        intent.putExtra("who",userName);
+        intent.putExtra("who", userKey);
         startActivity(intent);
     }
 }

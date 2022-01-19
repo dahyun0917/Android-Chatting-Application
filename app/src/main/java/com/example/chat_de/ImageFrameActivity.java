@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -50,7 +51,8 @@ public class ImageFrameActivity extends AppCompatActivity {
         binding = ActivityImageFrameBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-
+        ActionBar ab = getSupportActionBar() ;
+        ab.setTitle("");
         Intent getintent = getIntent();
         fromName = getintent.getStringExtra("fromName");
         passDate = getintent.getStringExtra("passDate");
@@ -62,7 +64,7 @@ public class ImageFrameActivity extends AppCompatActivity {
        /* SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
         String str= passDateFormat.format(passDate);  //TODO : 수정해야함*/
 
-        Glide.with(this).load(imageViewUrl).centerCrop().thumbnail(Glide.with(this).load(R.drawable.loading)).into(binding.photoView);
+        Glide.with(this).load(imageViewUrl).thumbnail(Glide.with(this).load(R.drawable.loading)).into(binding.photoView);
         binding.fromName.setText(fromName);
         binding.passDate.setText(passDate);
 
@@ -154,6 +156,8 @@ public class ImageFrameActivity extends AppCompatActivity {
 
 
     }
+
+    //파일 확장자 가져오기
     public static String getExtension(String fileStr){
         //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
         String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));

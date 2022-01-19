@@ -168,6 +168,8 @@ public class VideoFrameActivity extends AppCompatActivity {
 
 
     }
+
+    //파일 확장자 가져오기
     public static String getExtension(String fileStr){
         //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
         String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));

@@ -68,10 +68,10 @@ public class VideoFrameActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar() ;
         ab.setTitle("");
 
-        Intent getintent = getIntent();
-        fromName = getintent.getStringExtra("fromName");
-        passDate = getintent.getStringExtra("passDate");
-        videoViewUrl = getintent.getStringExtra("imageView");
+        Intent getIntent = getIntent();
+        fromName = getIntent.getStringExtra("fromName");
+        passDate = getIntent.getStringExtra("passDate");
+        videoViewUrl = getIntent.getStringExtra("imageView");
         videoUri=Uri.parse(videoViewUrl);
 
 
@@ -157,7 +157,6 @@ public class VideoFrameActivity extends AppCompatActivity {
         String localPath = "/KNU_AMP/video/" + filename;
 
         urlToDownload = Uri.parse(videoViewUrl);
-        List<String> pathSegments = videoUri.getPathSegments();
         request = new DownloadManager.Request(videoUri);
         request.setTitle(filename); //제목
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);

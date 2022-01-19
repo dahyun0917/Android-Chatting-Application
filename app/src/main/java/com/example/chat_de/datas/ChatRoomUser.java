@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
+
 @IgnoreExtraProperties
-public class ChatRoomUser {
+public class ChatRoomUser implements Serializable {
     private int lastReadIndex;
     private User userMeta;
 
@@ -37,4 +39,10 @@ public class ChatRoomUser {
     public void setPictureURL(String pictureURL)    { this.userMeta.setPictureURL(pictureURL); }
     public void setGeneration(int generation)       { this.userMeta.setGeneration(generation); }
     public void setUserKey(String userKey)          { this.userMeta.setUserKey(userKey); }
+
+    @Override
+    public String toString() {
+        return  "{ lastReadIndex: " + lastReadIndex +
+                ", userMeta: " + userMeta.toString() + " }";
+    }
 }

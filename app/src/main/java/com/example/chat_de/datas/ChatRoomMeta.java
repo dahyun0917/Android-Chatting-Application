@@ -13,15 +13,15 @@ public class ChatRoomMeta {
     private int lastMessageIndex;
     private Type type;
     private long lastMessageTime;
-//    private String pictureURL;
+    private String pictureURL;
 
     public ChatRoomMeta() { }
-    public ChatRoomMeta(String name, Type type/*, String pictureURL*/) {
+    public ChatRoomMeta(String name, Type type, String pictureURL) {
         setName(name);
         setLastMessageIndex(-1);
         setType(type);
         setLastMessageTime(0L);
-//        setPictureURL(pictureURL);
+        setPictureURL(pictureURL);
     }
     //Copy constructor
     public ChatRoomMeta(@NonNull ChatRoomMeta original) {
@@ -29,18 +29,18 @@ public class ChatRoomMeta {
         setLastMessageIndex(original.getLastMessageIndex());
         setType(original.getType());
         setLastMessageTime(original.getLastMessageTime());
-//        setPictureURL(original.getPictureURL());
+        setPictureURL(original.getPictureURL());
     }
 
     public String getName()             { return name; }
     public int getLastMessageIndex()    { return lastMessageIndex; }
     public Type getType()               { return type; }
     public long getLastMessageTime()    { return lastMessageTime; }
-//    public String getPictureURL()       { return pictureURL; }
+    public String getPictureURL()       { return pictureURL; }
 
     public void setName(String name)                        { this.name = name; }
     public void setLastMessageIndex(int lastMessageIndex)   { this.lastMessageIndex = lastMessageIndex; }
     public void setType(Type type)                          { this.type = type; }
     public void setLastMessageTime(long lastMessageTime)    { this.lastMessageTime = lastMessageTime; }
-//    public void setPictureURL(String pictureURL)            { this.pictureURL = pictureURL; }
+    public void setPictureURL(String pictureURL)            { this.pictureURL = pictureURL; }
 }

@@ -21,7 +21,9 @@ import android.util.Log;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
@@ -152,11 +154,12 @@ public class RoomActivity extends AppCompatActivity {
         });
 
         //floating 버튼에 대한 클릭 리스너 지정
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                binding.recyclerView.scrollToPosition(dataList.size() - 1);
-            }
+        binding.fab.setOnClickListener(view -> binding.recyclerView.scrollToPosition(dataList.size() - 1));
+
+        binding.recyclerView.setOnTouchListener((view, motionEvent) -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(binding.chatEdit.getWindowToken(), 0);
+            return false;
         });
     }
 

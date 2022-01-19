@@ -10,6 +10,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -82,7 +84,9 @@ public class ImageFrameActivity extends AppCompatActivity {
             }
         });
 
-
+        /*String extension = getExtension(imageViewUrl);
+        Log.d("extension",imageViewUrl);
+        Log.d("extension",extension);*/
     }
     @Override
     public void onResume(){
@@ -122,10 +126,6 @@ public class ImageFrameActivity extends AppCompatActivity {
     public void downImage() {
         String filename;
 
-        /*String StoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        String savePath = StoragePath + "/KNU_AMP";
-        File f = new File(savePath);
-        if (!f.isDirectory()) f.mkdirs();*/
 
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -133,19 +133,16 @@ public class ImageFrameActivity extends AppCompatActivity {
         //loading.setCancelable(false);
         loading.show();
 
-        //파일 이름 :날짜_시간
+        //파일 이름 :날짜_시간_확장자
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
-        filename = String.valueOf(sdf.format(day));
+        String extension = getExtension(imageViewUrl);
+        Log.d("extension",extension);
+        filename = String.valueOf(sdf.format(day))+"."+ extension;
 
-        //String fileUrl = imageViewUrl[0];
 
-        /*//다운로드 폴더에 동일한 파일명이 존재하는지 확인
-        if (new File(savePath + "/" + filename).exists() == false) {
-        } else {
-        }*/
+        String localPath = "/KNU_AMP/" + filename;
 
-        String localPath = "/KNU_AMP"+ "/" + filename + ".jpg";
 
         urlToDownload = Uri.parse(imageViewUrl);
         List<String> pathSegments = urlToDownload.getPathSegments();
@@ -159,6 +156,14 @@ public class ImageFrameActivity extends AppCompatActivity {
 
 
     }
+
+    //파일 확장자 가져오기
+    public static String getExtension(String fileStr){
+        //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
+        String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
+        return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
+    }
+
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 
         @Override

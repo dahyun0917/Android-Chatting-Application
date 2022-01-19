@@ -226,9 +226,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         intent.putExtra("otherPictureURL", chatRoomUser.getUserMeta().getPictureURL());
                         intent.putExtra("otherGeneration", chatRoomUser.getUserMeta().getGeneration());
                         intent.putExtra("otherUserKey", chatRoomUser.getUserMeta().getUserKey());
-                        intent.putExtra("otherLastReadIndex", chatRoomUser.getLastReadIndex());
                         //로그인된 사용자 정보 전송
-                        intent.putExtra("myLastReadIndex", myCurrentUser.getLastReadIndex());
                         intent.putExtra("myName", myCurrentUser.getUserMeta().getName());
                         intent.putExtra("myPictureURL", myCurrentUser.getUserMeta().getPictureURL());
                         intent.putExtra("myGeneration", myCurrentUser.getUserMeta().getGeneration());
@@ -246,7 +244,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     chatRoomUser = myUserList.get(i);
                 }
             }
-            Glide.with(itemView.getContext()).load(item.getText()).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).override(200,200).into(leftImageBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).override(200,200).into(leftImageBinding.imagevMsg);
             leftImageBinding.textvNicname.setText(chatRoomUser.getUserMeta().getName());
             leftImageBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.getUserMeta().getPictureURL()).into(leftImageBinding.imgv);
@@ -458,7 +456,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void bind(Chat item){
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String chatDate = simpleDateFormat.format(item.normalDate());
-            Glide.with(itemView.getContext()).load(item.getText()).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightImageBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightImageBinding.imagevMsg);
             rightImageBinding.textvNicname.setText(myCurrentUser.getUserMeta().getName());
             rightImageBinding.textvTime.setText(chatDate);
         }

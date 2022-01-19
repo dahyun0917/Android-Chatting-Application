@@ -34,8 +34,9 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private final int NEW_CAHT = 1;
     private final int INVITE_CHAT = 2;
     private int mode=0;
-    private String callUserName;
-    private String receivedKey;
+    private User userMe;
+    private String myUserName;
+    private String myUserKey;
     private String chatRoomName="";
 
     private ActivityUserListBinding binding;
@@ -46,17 +47,18 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         View view = binding.getRoot();
         setContentView(view);
 
-        for(int i = 0; i < userList.length; ++i)
+        for(int i = 0; i < userList.length; ++i) {
             userList[i] = new ArrayList<>();
+        }
+        myUserKey = ChatDB.getCurrentUserKey();
         setActionBar();
         showUserList();
     }
 
     public void setActionBar(){
         //인텐트로 mode값 , 초대/생성하는 User 정보 받아오기기
-        Intent getintent = getIntent();
-        mode = getintent.getIntExtra("tag",0);
-        callUserName = getintent.getStringExtra("who");
+        Intent intent = getIntent();
+        mode = intent.getIntExtra("tag",0);
 
         if(mode==NEW_CAHT){
             //채팅방 만들기
@@ -67,7 +69,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             //초대하기
             ActionBar ab = getSupportActionBar() ;
             ab.setTitle("초대하기") ;
-            receivedKey = getintent.getStringExtra("where");
+            myUserKey = intent.getStringExtra("where");
         }
         else{
             Log.e("ERROR MODE","Mode값은 1또는 2만 가능합니다.");
@@ -86,28 +88,12 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             if(chatRoomName.isEmpty()){
                 chatRoomName = changeToString(returnChoose(),false);
             }
-            finish(); //액티비티 종료
+            createChatRoom();
         });
         dlg.setNegativeButton("취소",null);
         dlg.show();
     }
-    private void getAllUserList(){
-        // TODO : 유저 리스트 받아오기
-        ArrayList<User> users = new ArrayList<>();
-        //firebase에서 users데이터 받아오기
 
-        for (int i = 0; i<users.size() ;i++){
-            //usermeta를 userList에 넣기
-            //user클래스를 userItem 생성자에 넣으면  userItem형식으로 객체 생성가능
-            //userList.add(new UserListItem(users.get(i)));
-        }
-
-        //테스트용 데이터 - 나중에 삭제 해야됨
-        classifyAdd(new UserListItem("user1","https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory&fname=https://k.kakaocdn.net/dn/EShJF/btquPLT192D/SRxSvXqcWjHRTju3kHcOQK/img.png",81,"hje"));
-        classifyAdd(new UserListItem("user2","",10,"whs"));
-        classifyAdd(new UserListItem("user3","",30,"rke"));
-        classifyAdd(new UserListItem("user4","https://t1.daumcdn.net/cfile/blog/2455914A56ADB1E315",20,"df"));
-    }
     private void classifyAdd(@NonNull UserListItem item){
         userList[(item.getGeneration()-1)/10].add(item);
     }
@@ -119,6 +105,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             for(User user: item.values()) {
                 classifyAdd(new UserListItem(user));
             }
+            userMe = item.get(myUserKey);
             userListAdapter = new UserListAdapter(getApplicationContext(),userList);
             binding.recyclerUserList.setAdapter(userListAdapter);
             binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
@@ -161,7 +148,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         ArrayList<UserListItem> choose = new ArrayList<>();
         for(ArrayList<UserListItem> list : userList) {
             for (UserListItem i : list) {
-                if (i.getChecked())
+                if (i.getChecked() || i.getUserKey().equals(myUserKey))
                     choose.add(i);
             }
         }
@@ -172,13 +159,17 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         //체크박스로 표시된 유저 정보를 받아옴.
         ArrayList<UserListItem> list = returnChoose();
         //채팅방 만들기 누른 유저 정보 : callUserName
-        String message = callUserName+"님이 채팅방"+""+"를 생성하셨습니다.";
+        String message = userMe.getName() +"님이 채팅방"+""+"를 생성하셨습니다.";
         //새 ChatRoom 생성
         //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
         //list의 user의 userJoined에 생성된 채팅방 정보 추가
         //생성메세지(message) 현재 채팅방에 시스템 메세지로 추가
-        ChatDB.setChatRoom("noname", list, "나", chatRoomKey -> {
-            //TODO SUNA : 새 채팅방 인텐트
+        ChatDB.setChatRoom(chatRoomName, list, userMe.getName(), chatRoomKey -> {
+            Intent intent = new Intent(this, RoomActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("chatRoomKey", chatRoomKey);
+            startActivity(intent);
+            finish(); //액티비티 종료
         });
     }
     private void inviteChatRoom(){
@@ -187,23 +178,24 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         ArrayList<UserListItem> list = returnChoose();
         //초대하기 누른 유저 정보 : callUserName
         //changeToString : 유저리스트를 ~님, 형식으로 바꿔줌.
-        String message = callUserName+"님이 "+changeToString(list,true)+"님을 초대하셨습니다.";
+        String message = userMe.getName() +"님이 "+changeToString(list,true)+"님을 초대하셨습니다.";
         //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
         //list의 user의 userJoined에 현재 채팅방 정보 추가->receivedKey 사용
         //초대메세지(message) 현재 채탕방에 시스템 메세지로 추가.
+        finish();
     }
     private String changeToString(ArrayList<UserListItem> list, boolean formal){
         //유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.
         StringBuilder result = new StringBuilder();
         if(formal){
             for(UserListItem i : list){
-                result.append(i.getName() + "님, ");
+                result.append(i.getName()).append("님, ");
             }
             return result.substring(0, result.length() - 3);
         }
         else {
             for (UserListItem i : list) {
-                result.append(i.getName() + ", ");
+                result.append(i.getName()).append(", ");
             }
             return result.substring(0, result.length() - 2);
         }
@@ -226,15 +218,11 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 else{
                     if(mode==NEW_CAHT){
                         //채팅방 만들기
-                        //TODO 현재는 비동기적이라서 showNewChatDialog()이 끝나기 전에 createChatRoom()가 실행되는 문제가 있다
-                        //showNewChatDialog();
-                        createChatRoom();
-                        finish();//액티비티 종료
+                        showNewChatDialog();
                     }
                     else if(mode==INVITE_CHAT){
                         //초대하기
                         inviteChatRoom();
-                        finish();//액티비티 종료
                     }
                 }
                 break;

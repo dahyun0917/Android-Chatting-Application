@@ -503,7 +503,11 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     int pos = getBindingAdapterPosition();
                     Chat item = myDataList.get(pos);
 
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getText()));
+                    /*Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getText()));
+                    view.getContext().startActivity(intent);*/
+
+                    Intent intent = new Intent(itemView.getContext(), FileFrameActivity.class);
+                    intent.putExtra("file", item.getText());
                     view.getContext().startActivity(intent);
 
                 }

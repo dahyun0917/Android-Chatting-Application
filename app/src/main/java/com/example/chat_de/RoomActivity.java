@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,14 +19,17 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
@@ -40,6 +45,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -451,9 +457,12 @@ public class RoomActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if ((requestCode == IMAGE_CODE || requestCode == VIDEO_CODE) && resultCode == RESULT_OK) {
             filePath = data.getData();
-            Log.d("fildPath", String.valueOf(filePath));
+            String extension =getMimeType(this,filePath);
+            Log.d("filePath", String.valueOf(filePath));
+            //getExtension(String.valueOf(filePath));
+            Log.d("확장자", getMimeType(this,filePath));
             if (filePath != null)
-                uploadFile(requestCode);
+                uploadFile(requestCode,extension);
             try {
                 InputStream in = getContentResolver().openInputStream(filePath);
                 Bitmap img = BitmapFactory.decodeStream(in);
@@ -464,8 +473,24 @@ public class RoomActivity extends AppCompatActivity {
         }
     }
 
+    //파일 확장자 가져오기
+    public static String getMimeType(Context context, Uri uri) {
+        String extension;
+
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            final MimeTypeMap mime = MimeTypeMap.getSingleton();
+            extension = mime.getExtensionFromMimeType(context.getContentResolver().getType(uri));
+        } else {
+            extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(uri.getPath())).toString());
+
+        }
+
+        return extension;
+    }
+
+
     //firebase storage에 업로드하기
-    public void uploadFile(int requestCode) {
+    public void uploadFile(int requestCode,String extension) {
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("업로드중...");
@@ -481,11 +506,11 @@ public class RoomActivity extends AppCompatActivity {
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
         //TODO:파일에 맞는 확장자 추가
-        String filename = sdf.format(new Date()) + "_" + currentUser.getUserMeta().getUserKey();
+        String filename = sdf.format(new Date()) + "_" + currentUser.getUserMeta().getUserKey()+"."+extension;
 
         //uploads라는 폴더가 없으면 자동 생성
         //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각 pre_2빼
-        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP"+"pre_2/"+chatRoomKey+"/" + filename);
+        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/pre_2/"+chatRoomKey+"/" + filename);
 
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);
@@ -508,7 +533,7 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 progressDialog.dismiss();
-                //Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
             }
         });
         uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {

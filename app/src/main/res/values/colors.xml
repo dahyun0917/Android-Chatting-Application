@@ -8,5 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="colorKNU">#da2127</color>
+    <color name="backgroundChatRoom">#D7F1C2D2</color>
+    <color name="backgroundUserList">#FFFFFF</color>
     <color name="colorGray">#665A5555</color>
 </resources>

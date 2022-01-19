@@ -29,11 +29,7 @@ public class ChatRoomListFragment extends Fragment {
     //private String userKey = "user2";
     //private String userName = "user2";
 
-    private ChatRoomListActivity ChatActivity;
-    private FragmentChatRoomListBinding binding;
-
-    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference databaseReference = firebaseDatabase.getReference();
+   private FragmentChatRoomListBinding binding;
 
     //private String CHAT_NAME;
     //private String USER_NAME;
@@ -45,30 +41,23 @@ public class ChatRoomListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        ChatActivity = (ChatRoomListActivity)getActivity();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        ChatActivity = null;
     }
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentChatRoomListBinding.inflate(inflater,container,false);
         View view = binding.getRoot();
+
         //ViewGroup rootview = (ViewGroup)inflater.inflate(R.layout.fragment_chat_room_list,container,false);
 
-        Bundle bundle = getArguments();
+        userKey = ChatDB.getCurrentUserKey();
 
-        /*if (bundle != null) {
-            CHAT_NAME = bundle.getString("chat_name");
-            USER_NAME = bundle.getString("user_name");
-        }*/
-        if (bundle != null) {
-            userKey=bundle.getString("userKey");
-        }
+        Bundle bundle = getArguments();
 
         showChatRoomList();
         binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -20,7 +20,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatDB.setReference("pre_2", USER_KEY);
+        ChatDB.setReference("pre_3", USER_KEY);
         setContentView(R.layout.activity_chat_room_list);
 
         userKey = ChatDB.getCurrentUserKey();

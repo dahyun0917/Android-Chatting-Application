@@ -72,7 +72,7 @@ public class ChatDB {
         });
     }
     public static void setChatRoom(String chatRoomName, ArrayList<UserListItem> userList, String callUserName, IEventListener<String> listener) {
-        final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
+        final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER,"");
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
             if (error == null) {
@@ -102,7 +102,7 @@ public class ChatDB {
     }
     public static void setPersonalChatRoom(User userMe, User userOther, IEventListener<String> listener) {
         String chatRoomName = userMe.getName() + ", " + userOther.getName();
-        final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER);
+        final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER,"");
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
             if (error == null) {
@@ -296,14 +296,13 @@ public class ChatDB {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 ChatRoomMeta chatRoomMeta = snapshot.getChildren().iterator().next().getValue(ChatRoomMeta.class);
-                //TODO : 나중에 ChatRoomMeta에 pictureURL 추가되면 그것도 받아서
-                chatRoomListAdapter.addChatRoom(snapshot.getKey(), "", chatRoomMeta.getName());
+                chatRoomListAdapter.addChatRoom(snapshot.getKey(), chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 ChatRoomMeta chatRoomMeta = snapshot.getChildren().iterator().next().getValue(ChatRoomMeta.class);
-                chatRoomListAdapter.changeChatRoom(snapshot.getKey(), "", chatRoomMeta.getName());
+                chatRoomListAdapter.changeChatRoom(snapshot.getKey(), chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
             }
 
             @Override

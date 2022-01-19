@@ -31,15 +31,17 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference myRef = database.getReference("pre_3");
 
 
-        myRef.child("chat").setValue(new Chat("Hi", 0,"user1", Chat.Type.TEXT));
-        myRef.child("chat").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+        myRef.child("users").child("user1").setValue(new User("양선아", "https://cdn.clien.net/web/api/file/F01/7233602/127e595099f1bf.jpg?thumb=true",1,"user1"));
+        myRef.child("users").child("user2").setValue(new User("이다현", "http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg",1,"user2"));
+        myRef.child("users").child("user3").setValue(new User("김규래", "https://cdn.clien.net/web/api/file/F01/7233602/127e595099f1bf.jpg?thumb=true",1,"user3"));
+        /*myRef.child("chat").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
                 Chat myChat = task.getResult().getValue(Chat.class);
                 Log.i("DATE", myChat.normalDate().toString());
                 myRef.push().setValue(task.getResult().getValue());
             }
-        });
+        });*/
 
 //        myRef.addChildEventListener(new ChildEventListener() {
 //            @Override

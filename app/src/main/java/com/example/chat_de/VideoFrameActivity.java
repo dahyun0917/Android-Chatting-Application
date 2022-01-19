@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -96,7 +97,10 @@ public class VideoFrameActivity extends AppCompatActivity {
                 }
             }
         });
-        //pv=findViewById(R.id.pv);
+
+       /* String extension = getExtension(videoViewUrl);
+        Log.d("extension",videoViewUrl);
+        Log.d("extension",extension);*/
 
     }
     //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
@@ -134,10 +138,6 @@ public class VideoFrameActivity extends AppCompatActivity {
     public void downVideo(){
         String filename;
 
-        /*String StoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        String savePath = StoragePath + "/KNU_AMP";
-        File f = new File(savePath);
-        if (!f.isDirectory()) f.mkdirs();*/
         Toast.makeText(this, "다운로드 시작되었습니다.",Toast.LENGTH_SHORT).show();
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -148,16 +148,13 @@ public class VideoFrameActivity extends AppCompatActivity {
         //파일 이름 :날짜_시간
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
-        filename = String.valueOf(sdf.format(day));
 
-        //String fileUrl = imageViewUrl[0];
+        String extension = getExtension(videoViewUrl);
+        Log.d("extension",extension);
+        filename = String.valueOf(sdf.format(day))+"."+ extension;
 
-        /*//다운로드 폴더에 동일한 파일명이 존재하는지 확인
-        if (new File(savePath + "/" + filename).exists() == false) {
-        } else {
-        }*/
 
-        String localPath = "/KNU_AMP"+ "/video/" + filename + ".mp4";
+        String localPath = "/KNU_AMP/video/" + filename;
 
         urlToDownload = Uri.parse(videoViewUrl);
         List<String> pathSegments = videoUri.getPathSegments();
@@ -171,6 +168,12 @@ public class VideoFrameActivity extends AppCompatActivity {
 
 
     }
+    public static String getExtension(String fileStr){
+        //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
+        String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
+        return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
+    }
+
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 
         @Override

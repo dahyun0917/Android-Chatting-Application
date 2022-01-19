@@ -99,6 +99,7 @@ public class RoomActivity extends AppCompatActivity {
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, joinedUserList -> {
             userList.putAll(joinedUserList);
             currentUser = joinedUserList.get(ChatDB.getCurrentUserKey());
+            roomElementAdapter.setCurrentUser(currentUser);
             ChatDB.getLastChatCompleteListener(chatRoomKey, (chatKey, chatValue) -> {
                 lastChatKey = frontChatKey = chatKey;
                 ChatDB.getPrevChatListCompleteListener(chatRoomKey, chatKey, CHAT_LIMIT, (prevChatListKey, prevChatList) -> {
@@ -119,7 +120,7 @@ public class RoomActivity extends AppCompatActivity {
                 userList.put(changedUserKey, changedUser);
             });
         });
-        ChatDB.userReadLatestMessage(chatRoomKey, currentUser.getUserMeta().getUserKey());
+        ChatDB.userReadLatestMessage(chatRoomKey, ChatDB.getCurrentUserKey());
     }
 
     @Override
@@ -285,9 +286,6 @@ public class RoomActivity extends AppCompatActivity {
         manager.setStackFromEnd(true);
         binding.recyclerView.setLayoutManager(manager);
 
-        //TODO LOGIN : 임시로 현재 사용자 설정함->사용자 인증 도입 후 수정해야됨
-        //currentUser = new ChatRoomUser(17, new User("이다현","http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg",2,"user2"));
-        currentUser = new ChatRoomUser(1, new User("양선아", "https://cdn.clien.net/web/api/file/F01/7233602/127e595099f1bf.jpg?thumb=true", 1, "user1"));
         roomElementAdapter = new RoomElementAdapter(dataList, userList, currentUser);
 
         binding.recyclerView.setAdapter(roomElementAdapter);

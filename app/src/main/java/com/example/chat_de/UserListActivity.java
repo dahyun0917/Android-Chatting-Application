@@ -24,6 +24,8 @@ import com.example.chat_de.databinding.ActivityUserListBinding;
 import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
 
 public class UserListActivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
@@ -31,13 +33,14 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private ArrayList<UserListItem>[] userList = new ArrayList[9];
     private UserListAdapter userListAdapter;
 
-    private final int NEW_CAHT = 1;
+    private final int NEW_CHAT = 1;
     private final int INVITE_CHAT = 2;
     private int mode=0;
     private User userMe;
-    private String myUserName;
+    private String chatRoomKey = null;
     private String myUserKey;
     private String chatRoomName="";
+    private HashSet<String> userKeySet;
 
     private ActivityUserListBinding binding;
     @Override
@@ -59,8 +62,9 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         //인텐트로 mode값 , 초대/생성하는 User 정보 받아오기기
         Intent intent = getIntent();
         mode = intent.getIntExtra("tag",0);
+        userKeySet = (HashSet<String>)intent.getSerializableExtra("userList");
 
-        if(mode==NEW_CAHT){
+        if(mode== NEW_CHAT){
             //채팅방 만들기
             ActionBar ab = getSupportActionBar() ;
             ab.setTitle("새 채팅방 만들기") ;
@@ -69,7 +73,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             //초대하기
             ActionBar ab = getSupportActionBar() ;
             ab.setTitle("초대하기") ;
-            myUserKey = intent.getStringExtra("where");
+            chatRoomKey = intent.getStringExtra("where");
         }
         else{
             Log.e("ERROR MODE","Mode값은 1또는 2만 가능합니다.");
@@ -102,8 +106,10 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
 //        getAllUserList();
         //리사이클러뷰 설정
         ChatDB.getUsersCompleteEventListener(item -> {
-            for(User user: item.values()) {
-                classifyAdd(new UserListItem(user));
+            for(Map.Entry<String, User> i: item.entrySet()) {
+                if(!userKeySet.contains(i.getKey())) {
+                    classifyAdd(new UserListItem(i.getValue()));
+                }
             }
             userMe = item.get(myUserKey);
             userListAdapter = new UserListAdapter(getApplicationContext(),userList);
@@ -148,18 +154,16 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         ArrayList<UserListItem> choose = new ArrayList<>();
         for(ArrayList<UserListItem> list : userList) {
             for (UserListItem i : list) {
-                if (i.getChecked() || i.getUserKey().equals(myUserKey))
+                if (i.getChecked() || (mode == NEW_CHAT && i.getUserKey().equals(myUserKey)))
                     choose.add(i);
             }
         }
         return choose;
     }
     private void createChatRoom(){
-        //TODO : 새 채팅방 생성
         //체크박스로 표시된 유저 정보를 받아옴.
         ArrayList<UserListItem> list = returnChoose();
         //채팅방 만들기 누른 유저 정보 : callUserName
-        String message = userMe.getName() +"님이 채팅방"+""+"를 생성하셨습니다.";
         //새 ChatRoom 생성
         //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
         //list의 user의 userJoined에 생성된 채팅방 정보 추가
@@ -173,12 +177,12 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         });
     }
     private void inviteChatRoom(){
-        //TODO : 초대한 유저를 해당 채팅방에 추가
         //체크박스로 표시된 유저 정보를 받아옴
         ArrayList<UserListItem> list = returnChoose();
         //초대하기 누른 유저 정보 : callUserName
         //changeToString : 유저리스트를 ~님, 형식으로 바꿔줌.
         String message = userMe.getName() +"님이 "+changeToString(list,true)+"님을 초대하셨습니다.";
+        //TODO : 초대한 유저를 해당 채팅방에 추가
         //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
         //list의 user의 userJoined에 현재 채팅방 정보 추가->receivedKey 사용
         //초대메세지(message) 현재 채탕방에 시스템 메세지로 추가.
@@ -216,7 +220,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     Toast.makeText(UserListActivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    if(mode==NEW_CAHT){
+                    if(mode== NEW_CHAT){
                         //채팅방 만들기
                         showNewChatDialog();
                     }

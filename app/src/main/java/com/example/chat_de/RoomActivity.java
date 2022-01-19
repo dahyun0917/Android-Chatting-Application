@@ -58,6 +58,7 @@ public class RoomActivity extends AppCompatActivity {
 
     private int IMAGE_CODE = 10;
     private int VIDEO_CODE = 20;
+    private int FILE_CODE = 30;
     private String chatRoomKey;
 
     private ChatRoomUser currentUser; //TODO LOGIN : 현재 로그인된 사용자
@@ -148,7 +149,6 @@ public class RoomActivity extends AppCompatActivity {
         binding.fileSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                StorageReference rootRef = firebaseStorage.getReference();
                 galleryAccess();
             }
         });
@@ -372,7 +372,7 @@ public class RoomActivity extends AppCompatActivity {
     //사용자 갤러리로 접근
     private void galleryAccess() {
         /*final int[] image = {R.drawable.image_red,R.drawable.video_red};*/
-        final String[] fileKind = {"image", "video"};
+        final String[] fileKind = {"image", "video","file"};
 
         Intent intent = new Intent();
         //갤러리만
@@ -407,11 +407,11 @@ public class RoomActivity extends AppCompatActivity {
                                 intent.setAction(Intent.ACTION_GET_CONTENT);
                                 startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
                                 break;
-                    /*case 2 :  //file
-                        intent.setType("video/*");
-                        intent.setAction(Intent.ACTION_GET_CONTENT);
-                        startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
-                        break;*/
+                            case 2 :  //file
+                                //intent.setType("file/*");
+                                //intent.setAction(Intent.ACTION_GET_CONTENT);
+                                //startActivityForResult(Intent.createChooser(intent, "파일를 선택하세요."), FILE_CODE);
+                                break;
                         }
                     }
                 });
@@ -449,7 +449,7 @@ public class RoomActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode == IMAGE_CODE || requestCode == VIDEO_CODE) && resultCode == RESULT_OK) {
+        if ((requestCode == IMAGE_CODE || requestCode == VIDEO_CODE || requestCode == FILE_CODE) && resultCode == RESULT_OK) {
             filePath = data.getData();
             Log.d("fildPath", String.valueOf(filePath));
             if (filePath != null)
@@ -477,6 +477,8 @@ public class RoomActivity extends AppCompatActivity {
             messageType = Chat.Type.IMAGE;
         else if (requestCode == VIDEO_CODE)
             messageType = Chat.Type.VIDEO;
+        else
+            messageType = Chat.Type.FILE;
 
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");

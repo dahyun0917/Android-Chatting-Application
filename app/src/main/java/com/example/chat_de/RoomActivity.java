@@ -515,7 +515,7 @@ public class RoomActivity extends AppCompatActivity {
 
         //uploads라는 폴더가 없으면 자동 생성
         //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각 pre_2빼
-        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/pre_2/"+chatRoomKey+"/" + filename);
+        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+chatRoomKey+"/" + filename);
 
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);

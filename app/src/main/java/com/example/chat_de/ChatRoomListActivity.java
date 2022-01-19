@@ -26,14 +26,10 @@ public class ChatRoomListActivity extends AppCompatActivity {
         userKey = ChatDB.getCurrentUserKey();
 
         mainFragment = new ChatRoomListFragment();
-        Intent intent = getIntent();
-        //CHAT_NAME = intent.getStringExtra("chatName");
-        //USER_NAME = intent.getStringExtra("userName");
+
 
         Bundle bundle = new Bundle(); // 파라미터의 숫자는 전달하려는 값의 갯수
-        //bundle.putString("chat_name", CHAT_NAME);
-        //bundle.putString("user_name", USER_NAME);
-        bundle.putString("userKey", userKey);
+
         mainFragment.setArguments(bundle);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, mainFragment).commit();

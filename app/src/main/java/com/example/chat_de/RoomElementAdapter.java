@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Context context;
+    private Context context;
     private IndexDeque<Chat> myDataList;
     private HashMap<String, ChatRoomUser> myUserList;
     private ChatRoomUser myCurrentUser;
@@ -229,15 +229,9 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                     else {
                         //선택한 사용자 정보 전송
-                        intent.putExtra("otherName", chatRoomUser.getUserMeta().getName());
-                        intent.putExtra("otherPictureURL", chatRoomUser.getUserMeta().getPictureURL());
-                        intent.putExtra("otherGeneration", chatRoomUser.getUserMeta().getGeneration());
-                        intent.putExtra("otherUserKey", chatRoomUser.getUserMeta().getUserKey());
+                        intent.putExtra("userOther", chatRoomUser.getUserMeta());
                         //로그인된 사용자 정보 전송
-                        intent.putExtra("myName", myCurrentUser.getUserMeta().getName());
-                        intent.putExtra("myPictureURL", myCurrentUser.getUserMeta().getPictureURL());
-                        intent.putExtra("myGeneration", myCurrentUser.getUserMeta().getGeneration());
-                        intent.putExtra("myUserKey", myCurrentUser.getUserMeta().getUserKey());
+                        intent.putExtra("userMe", myCurrentUser.getUserMeta());
                     }
                     view.getContext().startActivity(intent);
                 }
@@ -293,17 +287,9 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                     else {
                         //선택한 사용자 정보 전송
-                        intent.putExtra("otherName", chatRoomUser.getUserMeta().getName());
-                        intent.putExtra("otherPictureURL", chatRoomUser.getUserMeta().getPictureURL());
-                        intent.putExtra("otherGeneration", chatRoomUser.getUserMeta().getGeneration());
-                        intent.putExtra("otherUserKey", chatRoomUser.getUserMeta().getUserKey());
-                        intent.putExtra("otherLastReadIndex", chatRoomUser.getLastReadIndex());
+                        intent.putExtra("userOther", chatRoomUser.getUserMeta());
                         //로그인된 사용자 정보 전송
-                        intent.putExtra("myLastReadIndex", myCurrentUser.getLastReadIndex());
-                        intent.putExtra("myName", myCurrentUser.getUserMeta().getName());
-                        intent.putExtra("myPictureURL", myCurrentUser.getUserMeta().getPictureURL());
-                        intent.putExtra("myGeneration", myCurrentUser.getUserMeta().getGeneration());
-                        intent.putExtra("myUserKey", myCurrentUser.getUserMeta().getUserKey());
+                        intent.putExtra("userMe", myCurrentUser.getUserMeta());
                     }
                     view.getContext().startActivity(intent);
                 }
@@ -403,17 +389,9 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                     else {
                         //선택한 사용자 정보 전송
-                        intent.putExtra("otherName", chatRoomUser.getUserMeta().getName());
-                        intent.putExtra("otherPictureURL", chatRoomUser.getUserMeta().getPictureURL());
-                        intent.putExtra("otherGeneration", chatRoomUser.getUserMeta().getGeneration());
-                        intent.putExtra("otherUserKey", chatRoomUser.getUserMeta().getUserKey());
-                        intent.putExtra("otherLastReadIndex", chatRoomUser.getLastReadIndex());
+                        intent.putExtra("userOther", chatRoomUser.getUserMeta());
                         //로그인된 사용자 정보 전송
-                        intent.putExtra("myLastReadIndex", myCurrentUser.getLastReadIndex());
-                        intent.putExtra("myName", myCurrentUser.getUserMeta().getName());
-                        intent.putExtra("myPictureURL", myCurrentUser.getUserMeta().getPictureURL());
-                        intent.putExtra("myGeneration", myCurrentUser.getUserMeta().getGeneration());
-                        intent.putExtra("myUserKey", myCurrentUser.getUserMeta().getUserKey());
+                        intent.putExtra("userMe", myCurrentUser.getUserMeta());
                     }
                     view.getContext().startActivity(intent);
                 }

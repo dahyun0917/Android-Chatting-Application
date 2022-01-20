@@ -22,8 +22,8 @@ public class JoinUserListActivity extends AppCompatActivity {
     private Dialog dialog;
     private User userOther = new User();
     private User userMe;
-    private ChatRoomUser userList = new ChatRoomUser();
-    private ArrayList<ChatRoomUser> joinUser = new ArrayList<>();
+    private HashMap<String,ChatRoomUser> userList = new HashMap<>();
+    private ArrayList<User> joinUser = new ArrayList<>();
 
 
     @Override
@@ -42,27 +42,30 @@ public class JoinUserListActivity extends AppCompatActivity {
 
         /*userList.add(userMe);
         userList.add(userOther);*/
-        userList = (ChatRoomUser)getIntent().getSerializableExtra("userlist");
+        userList = (HashMap<String,ChatRoomUser>)getIntent().getSerializableExtra("userlist");
 
+
+        for (String i : userList.keySet()) {
+            joinUser.add(userList.get(i).getUserMeta());
+        }
 
 
 
         JoinUserListAdapter joinUserListAdapter;
-        //joinUserListAdapter = new JoinUserListAdapter(userList);
-       // binding.listview.setAdapter(joinUserListAdapter);
+        joinUserListAdapter = new JoinUserListAdapter(joinUser);
+        binding.listview.setAdapter(joinUserListAdapter);
 
-        /*binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+                userOther=joinUser.get(i);
                 userProFile();
-            });
-        }*/
+            }
+        });
     }
 
     private void userProFile(){
         Intent intent = new Intent(this, UserProfileActivity.class);
-
         //선택한 사용자 정보 전송
         intent.putExtra("userOther", userOther);
         //로그인된 사용자 정보 전송

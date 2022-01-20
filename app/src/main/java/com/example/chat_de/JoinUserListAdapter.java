@@ -43,7 +43,7 @@ public class JoinUserListAdapter extends BaseAdapter {
 
         if(view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.item_list_chat_room, viewGroup,false);
+            view = inflater.inflate(R.layout.item_list_join_user, viewGroup,false);
         }
         itemListJoinUserBinding = ItemListJoinUserBinding.bind(view);
         itemListJoinUserBinding.alertDialogItemTextView.setText(item.getName());

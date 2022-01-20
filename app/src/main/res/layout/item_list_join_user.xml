@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:layout_margin="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/alertDialogItemImageView"
+        android:layout_width="28dp"
+        android:layout_height="35dp"
+        android:layout_gravity="top"
+        android:layout_marginTop="7dp"
+        android:src="@drawable/knu_mark" />
+
+    <TextView
+        android:id="@+id/alertDialogItemTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
+

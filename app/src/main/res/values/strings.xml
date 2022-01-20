@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">chat_de</string>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar"> <!-- 액션바(타이틀바) 제거 -->
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#da2127</item> <!-- 액션바(타이틀바)의 색상 -->
+        <item name="colorPrimaryDark">#da2127</item> <!-- 상태바(네비게이션바)의 색상 -->
+        <!--  <item name="android:windowFullscreen">true</item>  상태바 없애기 -->
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
 </resources>

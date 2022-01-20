@@ -11,4 +11,5 @@
     <color name="backgroundChatRoom">#D7F1C2D2</color>
     <color name="backgroundUserList">#FFFFFF</color>
     <color name="colorGray">#665A5555</color>
+    <color name="colorAccent">#D81B60</color>
 </resources>

@@ -63,16 +63,15 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         Intent intent = getIntent();
         mode = intent.getIntExtra("tag",0);
         userKeySet = (HashSet<String>)intent.getSerializableExtra("userList");
-
+        setSupportActionBar(binding.toolbarUserList);
+        getSupportActionBar().setTitle("");
         if(mode== NEW_CHAT){
             //채팅방 만들기
-            ActionBar ab = getSupportActionBar() ;
-            ab.setTitle("새 채팅방 만들기") ;
+            binding.userListMode.setText("새 채팅방 만들기"); ;
         }
         else if(mode==INVITE_CHAT){
             //초대하기
-            ActionBar ab = getSupportActionBar() ;
-            ab.setTitle("초대하기") ;
+            binding.userListMode.setText("초대하기") ;
             chatRoomKey = intent.getStringExtra("where");
         }
         else{
@@ -142,6 +141,24 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         /*검색 기능 추가*/
         binding.searchText.addTextChangedListener(this);
 
+        /*취소, 완료 설정*/
+        binding.cancel.setOnClickListener(view -> finish());
+        binding.complete.setOnClickListener(view -> {
+            if(returnChoose().size()==0){
+                Toast.makeText(UserListActivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
+            }
+            else{
+                if(mode== NEW_CHAT){
+                    //채팅방 만들기
+                    showNewChatDialog();
+                }
+                else if(mode==INVITE_CHAT){
+                    //초대하기
+                    inviteChatRoom();
+                }
+            }
+        });
+
         /*텍스트뷰 내용 지우기*/
         binding.searchButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -205,40 +222,6 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.meun_user_list,menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        //액션바의 "완료" 클릭했을 때
-        int curId = item.getItemId();
-        switch(curId){
-            case R.id.action_complete:
-                if(returnChoose().size()==0){
-                    Toast.makeText(UserListActivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    if(mode== NEW_CHAT){
-                        //채팅방 만들기
-                        showNewChatDialog();
-                    }
-                    else if(mode==INVITE_CHAT){
-                        //초대하기
-                        inviteChatRoom();
-                    }
-                }
-                break;
-            case R.id.action_cancel:
-                finish();
-                break;
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
     @Override
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
     @Override

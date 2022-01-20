@@ -11,13 +11,15 @@ public class User implements Serializable {
     protected String pictureURL;
     protected int generation;
     protected String userKey;
+//    protected boolean admin;
 
     public User() { }
-    public User(String name, String pictureURL, int generation, String userKey) {
+    public User(String name, String pictureURL, int generation, String userKey/*, boolean admin*/) {
         setName(name);
         setPictureURL(pictureURL);
         setGeneration(generation);
         setUserKey(userKey);
+//        setAdmin(admin);
     }
     //Copy constructor
     public User(User original) {
@@ -31,12 +33,14 @@ public class User implements Serializable {
     public String getPictureURL()   { return pictureURL; }
     public int getGeneration()      { return generation; }
     public String getUserKey()      { return userKey; }
+//    public boolean getAdmin()       { return admin; }
     public User userMeta()          { return this; }
 
     public void setName(String name)                { this.name = name; }
     public void setPictureURL(String pictureURL)    { this.pictureURL = pictureURL; }
     public void setGeneration(int generation)       { this.generation = generation; }
     public void setUserKey(String userKey)          { this.userKey = userKey; }
+//    public void setAdmin(boolean admin)             { this.admin = admin; }
 
     @Override
     public String toString() {
@@ -45,4 +49,5 @@ public class User implements Serializable {
                 ", generation: " + generation +
                 ", userKey: " + userKey + " }";
     }
+
 }

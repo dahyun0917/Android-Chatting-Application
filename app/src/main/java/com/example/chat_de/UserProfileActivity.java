@@ -10,8 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ActivityUserProfileBinding;
-import com.example.chat_de.datas.ChatRoom;
-import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;

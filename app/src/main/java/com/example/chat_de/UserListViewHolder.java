@@ -1,17 +1,12 @@
 package com.example.chat_de;
 
-import static java.lang.String.valueOf;
 
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import com.example.chat_de.databinding.ItemRecyclerUserListBinding;
 
 public class UserListViewHolder extends RecyclerView.ViewHolder {

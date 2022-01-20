@@ -12,27 +12,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chat_de.databinding.ActivityVideoFrameBinding;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.HttpDataSource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class VideoFrameActivity extends AppCompatActivity {
@@ -50,10 +40,13 @@ public class VideoFrameActivity extends AppCompatActivity {
 
     private int downPushed =0;
     ProgressDialog loading;
-    Uri videoUri=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
-    Uri sample=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
 
-    //PlayerView videoView;
+    Uri videoUri;
+
+    //임의의 동영상 url
+    //Uri videoUri=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
+    //Uri sample=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
+
     //실제 비디오를 플레이하는 객체의 참조 변수
 
     ExoPlayer player;
@@ -81,7 +74,7 @@ public class VideoFrameActivity extends AppCompatActivity {
 
         downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
 
-        //테스트해보기
+        //TODO:누르기 개선
         binding.videoView.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -124,13 +117,12 @@ public class VideoFrameActivity extends AppCompatActivity {
     }
 
     public void downVideo(){
-        String filename;
-
         Toast.makeText(this, "다운로드 시작되었습니다.",Toast.LENGTH_SHORT).show();
+
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        loading.setCanceledOnTouchOutside(false);
-        //loading.setCancelable(false);
+        loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
+        //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
         loading.show();
 
         //파일 이름 :날짜_시간
@@ -138,8 +130,8 @@ public class VideoFrameActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
 
         String extension = getExtension(videoViewUrl);
-        Log.d("extension",extension);
-        filename = String.valueOf(sdf.format(day))+"."+ extension;
+        //Log.d("extension",extension);
+        String filename = String.valueOf(sdf.format(day))+"."+ extension;
 
 
         String localPath = "/KNU_AMP/video/" + filename;
@@ -147,10 +139,10 @@ public class VideoFrameActivity extends AppCompatActivity {
         urlToDownload = Uri.parse(videoViewUrl);
         request = new DownloadManager.Request(videoUri);
         request.setTitle(filename); //제목
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //알림창에 다운로드 중 , 다운로드 완료 창이 보이게 설정
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,localPath); //다운로드한 파일을 저장할 경로를 지정
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs(); //디렉토리가 존재하지 않을 경우 디렉토리를 생성하도록 구현
-        latestId = downloadManager.enqueue(request);
+        latestId = downloadManager.enqueue(request); //latestID : 다운로드매니저 큐에 잘 들어갔는지 확인하는 변수로 사용하는 것으로 추정
 
 
 
@@ -159,10 +151,12 @@ public class VideoFrameActivity extends AppCompatActivity {
     //파일 확장자 가져오기
     public static String getExtension(String fileStr){
         //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
+        //uri 스트링의 마지막 . 뒤부터 마지막 ? 까지의 스트링을 받아옴
         String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
         return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
     }
 
+    //다운로드 완료되었을 때 작동
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 
         @Override
@@ -189,12 +183,14 @@ public class VideoFrameActivity extends AppCompatActivity {
 
         player.setMediaItem(mediaItem);
         player.prepare();
-        //player.play();
+
         //로딩이 완료되어 준비가 되었을 때
         //자동 실행되도록..
         player.setPlayWhenReady(true);
 
-        player.addListener(new Player.Listener() {
+
+        //웹 주소 에러 관련 리스너
+        /*player.addListener(new Player.Listener() {
 
             @Override
             public void onPlayerError(PlaybackException error) {
@@ -216,9 +212,8 @@ public class VideoFrameActivity extends AppCompatActivity {
                         Log.d("Dahyun","no");
                     }
                 }
-                //Log.d("Dahyun","dahyun");
             }
-        });
+        });*/
     }
 
     //화면에 안보일 때..

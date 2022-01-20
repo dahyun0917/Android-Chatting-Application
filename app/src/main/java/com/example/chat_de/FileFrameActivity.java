@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -41,9 +42,9 @@ public class FileFrameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityFileFrameBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE); //메뉴바 안뜨게
         setContentView(view);
-        ActionBar ab = getSupportActionBar() ;
-        ab.setTitle("");
+
 
         Intent getIntent = getIntent();
         fileUrl = getIntent.getStringExtra("file");

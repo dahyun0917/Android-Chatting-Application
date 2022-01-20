@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -50,13 +52,16 @@ public class ImageFrameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityImageFrameBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE); //메뉴바 안뜨게
         setContentView(view);
-        ActionBar ab = getSupportActionBar() ;
-        ab.setTitle("");
+
+
         Intent getIntent = getIntent();
         fromName = getIntent.getStringExtra("fromName");
         passDate = getIntent.getStringExtra("passDate");
         imageViewUrl = getIntent.getStringExtra("imageView");
+
+
 
         downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
 
@@ -84,6 +89,20 @@ public class ImageFrameActivity extends AppCompatActivity {
             }
         });
 
+        binding.downloads.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+                if(downPushed ==0){
+                    downPushed =1;
+                    downImage();
+                }
+                else
+                    Toast.makeText(getApplicationContext(),"다운로드중입니다.",Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
         /*String extension = getExtension(imageViewUrl);
         Log.d("extension",imageViewUrl);
         Log.d("extension",extension);*/
@@ -96,36 +115,11 @@ public class ImageFrameActivity extends AppCompatActivity {
     }
 
 
-    //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_down_file, menu);
-        return true;
-    }
-
-    //유저 추가 메뉴바 설정
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int curId = item.getItemId();
-        switch (curId) {
-            case R.id.down_file:
-                if(downPushed ==0){
-                    downPushed =1;
-                    downImage();
-                }
-                else
-                    Toast.makeText(this, "다운로드중입니다.",Toast.LENGTH_SHORT).show();
-                break;
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     public void downImage() {
         String filename;
 
+        Toast.makeText(this, "다운로드 시작되었습니다.",Toast.LENGTH_SHORT).show();
 
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -163,6 +157,7 @@ public class ImageFrameActivity extends AppCompatActivity {
         return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
     }
 
+    //TODO: 토스트 메세지 수정
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 
         @Override

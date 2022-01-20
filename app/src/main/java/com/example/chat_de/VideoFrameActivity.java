@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -62,11 +63,10 @@ public class VideoFrameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityVideoFrameBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
-        //supportRequestWindowFeature(Window.FEATURE_NO_TITLE); //메뉴바 안뜨게
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE); //메뉴바 안뜨게
         setContentView(view);
 
-        ActionBar ab = getSupportActionBar() ;
-        ab.setTitle("");
+
 
         Intent getIntent = getIntent();
         fromName = getIntent.getStringExtra("fromName");
@@ -98,35 +98,23 @@ public class VideoFrameActivity extends AppCompatActivity {
             }
         });
 
-       /* String extension = getExtension(videoViewUrl);
-        Log.d("extension",videoViewUrl);
-        Log.d("extension",extension);*/
+        binding.downloads.setOnClickListener(new View.OnClickListener(){
 
-    }
-    //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_down_file, menu);
-        return true;
-    }
-    //유저 추가 메뉴바 설정
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int curId = item.getItemId();
-        switch(curId){
-            case R.id.down_file:
+            @Override
+            public void onClick(View view) {
                 if(downPushed ==0){
                     downPushed =1;
                     downVideo();
                 }
                 else
-                    Toast.makeText(this, "다운로드중입니다.",Toast.LENGTH_SHORT).show();
-                break;
-            default:
-                break;
-        }
+                    Toast.makeText(getApplicationContext(),"다운로드중입니다.",Toast.LENGTH_SHORT).show();
 
-        return super.onOptionsItemSelected(item);
+            }
+        });
+       /* String extension = getExtension(videoViewUrl);
+        Log.d("extension",videoViewUrl);
+        Log.d("extension",extension);*/
+
     }
     @Override
     public void onResume(){

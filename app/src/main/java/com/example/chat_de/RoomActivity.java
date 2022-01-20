@@ -322,7 +322,7 @@ public class RoomActivity extends AppCompatActivity {
 
         //사용자 정보 전송
         intent.putExtra("userlist", userList);
-        intent.putExtra("userMe",currentUser);
+        intent.putExtra("userMe",currentUser.getUserMeta());
         startActivity(intent);
     }
 

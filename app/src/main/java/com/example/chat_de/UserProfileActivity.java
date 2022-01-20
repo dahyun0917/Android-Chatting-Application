@@ -19,7 +19,6 @@ public class UserProfileActivity extends AppCompatActivity {
     private Dialog dialog;
     private User userOther = new User();
     private User userMe;
-    private ArrayList<User> userList = new ArrayList<>();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,8 +33,6 @@ public class UserProfileActivity extends AppCompatActivity {
         //로그인된 사용자 정보 전송
         userMe = (User)getIntent().getSerializableExtra("userMe");
 
-        userList.add(userMe);
-        userList.add(userOther);
 
         //프로필 사진 설정
         Glide

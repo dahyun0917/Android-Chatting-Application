@@ -3,27 +3,16 @@ package com.example.chat_de;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
-
 import com.example.chat_de.databinding.FragmentChatRoomListBinding;
-import com.example.chat_de.datas.ChatRoomMeta;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class ChatRoomListFragment extends Fragment {
 
@@ -61,6 +50,14 @@ public class ChatRoomListFragment extends Fragment {
                 enterChatRoom(chatRoomList.get(i).getChatRoomKey());
             }
         });
+
+        binding.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selelctUser();
+            }
+        });
+
         return view;
     }
 
@@ -82,6 +79,16 @@ public class ChatRoomListFragment extends Fragment {
     private void enterChatRoom(String chatRoomKey){
         Intent intent = new Intent(getActivity(), RoomActivity.class);
         intent.putExtra("chatRoomKey", chatRoomKey);
+        getActivity().startActivity(intent);
+    }
+
+    private void selelctUser(){
+        //RoomActivity로 넘어간 뒤, 종료
+        Intent intent = new Intent(getActivity(), UserListActivity.class);
+        intent.putExtra("tag",1);
+        HashSet<String> set = new HashSet<>();
+        set.add(userKey);
+        intent.putExtra("userList", set);
         getActivity().startActivity(intent);
     }
 

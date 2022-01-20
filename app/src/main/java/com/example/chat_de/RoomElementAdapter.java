@@ -28,7 +28,6 @@ import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.ViewType;
-import com.google.android.exoplayer2.C;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;

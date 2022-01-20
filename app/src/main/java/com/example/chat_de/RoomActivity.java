@@ -2,13 +2,11 @@ package com.example.chat_de;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -16,29 +14,23 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
-import com.example.chat_de.datas.User;
-import com.google.android.exoplayer2.C;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -53,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {

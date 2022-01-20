@@ -44,6 +44,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
 
     implementation 'androidx.appcompat:appcompat:1.4.0'
+    //플로팅 버튼 그래들 설정
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'com.google.firebase:firebase-database:20.0.3'

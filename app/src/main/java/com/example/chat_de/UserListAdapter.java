@@ -11,7 +11,6 @@ import android.widget.Filterable;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.chat_de.databinding.ItemRecyclerUserListBinding;
 
 import java.util.ArrayList;
 

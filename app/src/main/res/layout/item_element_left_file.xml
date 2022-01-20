@@ -11,7 +11,15 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:gravity="center_vertical">
-
+        <!--        <ImageView-->
+        <!--            xmlns:app="http://schemas.android.com/apk/res-auto"-->
+        <!--            android:layout_width="35dp"-->
+        <!--            android:layout_height="35dp"-->
+        <!--            android:layout_gravity="top"-->
+        <!--            android:src="@drawable/knu_mark"-->
+        <!--            android:id="@+id/imgv"-->
+        <!--            app:civ_border_color="#FF000000"-->
+        <!--            app:civ_border_width="1dp"></ImageView>-->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/imgv"
             android:layout_width="28dp"
@@ -19,6 +27,8 @@
             android:layout_gravity="top"
             android:layout_marginTop="7dp"
             android:src="@drawable/knu_mark" />
+        <!-- app:civ_border_color="#da2127"
+         app:civ_border_width="1dp"-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,7 +46,6 @@
                     android:id="@+id/textv_nicname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#ffffff"
                     android:layout_marginRight="5dp"
                     android:text="닉네임"
                     android:textColor="#000000"

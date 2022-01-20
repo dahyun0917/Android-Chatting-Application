@@ -26,6 +26,7 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
@@ -47,7 +48,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 public class RoomActivity extends AppCompatActivity {
     private final int SYSTEM_MESSAGE = -2;
@@ -70,7 +73,7 @@ public class RoomActivity extends AppCompatActivity {
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
     private IndexDeque<Chat> dataList = new IndexDeque<>();
-    private HashMap<String, ChatRoomUser> userList = new HashMap<>(); //
+    private HashMap<String, ChatRoomUser> userList = new HashMap<>();
 
     private int lastIndex = -1;
     private boolean isLoading = false;
@@ -295,15 +298,32 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void showJoinedUserList() {
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
+        /*final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("참가자"); //제목
+        List<Map<String, Object>> dialogItemList = new ArrayList<>();
         for (String i : userList.keySet()) {
-            adapter.add(userList.get(i).getUserMeta().getName());
+            Map<String,Object> itemMap = new HashMap<>();
+            itemMap.put("image",userList.get(i).getUserMeta().getPictureURL());
+            itemMap.put("text",userList.get(i).getUserMeta().getName());
+            //Glide.with(this).load(imageViewUrl).into(binding.photoView);
+            dialogItemList.add(itemMap);
+            //adapter.add(userList.get(i).getUserMeta().getName());
         }
-        dlg.setAdapter(adapter, null);
+        SimpleAdapter simpleAdapter = new SimpleAdapter(RoomActivity.this, dialogItemList,R.layout.item_list_join_user,
+                new String[]{"image", "text"},
+                new int[]{R.id.alertDialogItemImageView, R.id.alertDialogItemTextView});
+        dlg.setAdapter(simpleAdapter, null);
+        //dlg.setAdapter(adapter, null);
         dlg.setPositiveButton("확인", null);
-        dlg.show();
+        dlg.show();*/
+
+        Intent intent = new Intent(this, JoinUserListActivity.class);
+
+        //사용자 정보 전송
+        intent.putExtra("userlist", userList);
+        intent.putExtra("userMe",currentUser);
+        startActivity(intent);
     }
 
     private void floatOldMessage(ArrayList<Chat> chatList) {

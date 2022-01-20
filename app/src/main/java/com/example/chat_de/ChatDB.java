@@ -46,6 +46,10 @@ public class ChatDB {
             currentUserKey = userKey;
         }
     }
+    public static void setRootPath(@NonNull String root) {
+        removeEventListenerBindOnThis();
+        ref = FirebaseDatabase.getInstance().getReference(root);
+    }
     public static DatabaseReference getReference() {
         return ref;
     }
@@ -55,6 +59,29 @@ public class ChatDB {
     //TODO : intent로 본인의 키를 넘겨주는 부분 있으면 전부 이쪽으로 바꿔야 함
     public static String getCurrentUserKey() {
         return currentUserKey;
+    }
+
+    public static void checkUserExist(String userKey, IEventListener<Boolean> listener) {
+        ref.child(makePath(USERS, userKey)).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                if(task.getResult().getValue() != null) {
+                    listener.eventListener(true);
+                } else {
+                    listener.eventListener(false);
+                }
+            } else {
+                Log.e("FRD", "Can not access database");
+            }
+        });
+    }
+    public static void setUser(String userKey, User user, IEventListener<String> listener){
+        ref.child(makePath(USERS, userKey)).setValue(user, (error, rf) -> {
+            if(error == null) {
+                Log.i("FRD", "User data update success");
+            } else {
+                Log.e("FRD", "User data update fail: " + error);
+            }
+        });
     }
 
     public static void getUsersCompleteEventListener(IEventListener<HashMap<String, User>> listener) {
@@ -172,7 +199,7 @@ public class ChatDB {
         });
     }
 
-    public static void userReadLatestMessage(String chatRoomKey, String userKey) {
+    public static void userReadLastMessage(String chatRoomKey, String userKey) {
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 ref.child(makePath(CHAT_ROOM_JOINED, chatRoomKey, userKey, LAST_READ_INDEX)).setValue(task.getResult().getValue(Integer.class));

@@ -2,7 +2,6 @@ package com.example.chat_de;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,7 +33,6 @@ import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
-import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -116,7 +114,7 @@ public class RoomActivity extends AppCompatActivity {
                 userList.put(changedUserKey, changedUser);
             });
         });
-        ChatDB.userReadLatestMessage(chatRoomKey, ChatDB.getCurrentUserKey());
+        ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
     }
 
     @Override

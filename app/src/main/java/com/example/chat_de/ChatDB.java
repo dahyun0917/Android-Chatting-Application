@@ -56,7 +56,6 @@ public class ChatDB {
     public static String getCurrentUserKey() {
         return currentUserKey;
     }
-
     public static void getUsersCompleteEventListener(IEventListener<HashMap<String, User>> listener) {
         ref.child(USERS).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

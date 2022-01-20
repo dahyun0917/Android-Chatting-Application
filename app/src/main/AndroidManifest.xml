@@ -21,6 +21,9 @@
             android:name=".UserListActivity"
             android:exported="false" />
         <activity
+            android:name=".UserListActivity2"
+            android:exported="false" />
+        <activity
             android:name=".ImageFrameActivity"
             android:exported="false" />
         <activity

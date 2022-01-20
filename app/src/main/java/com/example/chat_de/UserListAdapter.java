@@ -18,6 +18,25 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
     Context context;
     private ArrayList<UserListItem> filteredUsers = new ArrayList<>(); //필터링된 리스트 -> 보여줄 리스트
     private ArrayList<UserListItem> unFilteredUsers = new ArrayList<>(); //필터링되지않은 리스트
+
+    //생성자
+    public UserListAdapter(Context context, ArrayList<UserListItem>[] userList) {
+        super();
+        this.context = context;
+        ArrayList<UserListItem> list = new ArrayList<>();
+        for(ArrayList<UserListItem> i : userList)
+            list.addAll(i);
+        this.unFilteredUsers = list;
+        this.filteredUsers = list;
+    }
+
+    public UserListAdapter(Context context, ArrayList<UserListItem> list){
+        super();
+        this.context = context;
+        this.unFilteredUsers = list;
+        this.filteredUsers = list;
+    }
+
     //뷰홀더가 생성 됐을 때
     @NonNull
     @Override
@@ -69,16 +88,6 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
         for(ArrayList<UserListItem> i : userList)
             list.addAll(i);
         setUserList(list);
-    }
-    //생성자
-    public UserListAdapter(Context context, ArrayList<UserListItem>[] userList) {
-        super();
-        this.context = context;
-        ArrayList<UserListItem> list = new ArrayList<>();
-        for(ArrayList<UserListItem> i : userList)
-            list.addAll(i);
-        this.unFilteredUsers = list;
-        this.filteredUsers = list;
     }
 
     @Override

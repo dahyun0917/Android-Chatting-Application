@@ -71,30 +71,12 @@ public class ChatDB {
             }
         });
     }
-    public static void setChatRoom(String chatRoomName, ArrayList<UserListItem> userList, String callUserName, IEventListener<String> listener) {
+    public static void setChatRoomCompleteListener(String chatRoomName, ArrayList<User> userList, User userMe, IEventListener<String> listener) {
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER,"");
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
             if (error == null) {
-                final String chatRoomKey = rf.getKey();
-                HashMap<String, Object> result = new HashMap<>();
-                for (UserListItem item : userList) {
-                    // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
-                    result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, item.getUserKey()), new ChatRoomUser(item.getUserMeta()));
-                    // userJoined의 userKey들에 새로운 chatRoom 추가
-                    result.put(makePath(USER_JOINED, item.getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
-                }
-                // 종합한 값들을 최종적으로 update
-                ref.updateChildren(result).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        String message = callUserName + "님이 새 채팅방을 생성하셨습니다.";
-                        uploadMessage(message, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM", new HashMap<>());
-                    } else {
-                        Log.e("FRD", "Can not update data of users and the new chat room");
-                    }
-                });
-
-                listener.eventListener(chatRoomKey);
+                inviteUserListCompleteListener(rf.getKey(), chatRoomMeta, userList, userMe, listener);
             } else {
                 Log.e("FRD", "Make chat room error: " + error.toString());
             }
@@ -130,6 +112,32 @@ public class ChatDB {
                 Log.e("FDB", "Make chat room error: " + error.toString());
             }
         });
+    }
+    public static void inviteUserListCompleteListener(String chatRoomKey, ChatRoomMeta chatRoomMeta, ArrayList<User> userList, User userMe, IEventListener<String> listener) {
+        HashMap<String, Object> result = new HashMap<>();
+        for (User item : userList) {
+            // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
+            result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, item.getUserKey()), new ChatRoomUser(item.userMeta()));
+            // userJoined의 userKey들에 새로운 chatRoom 추가
+            result.put(makePath(USER_JOINED, item.getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
+        }
+        // 종합한 값들을 최종적으로 update
+        ref.updateChildren(result).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                StringBuilder builder = new StringBuilder(userMe.getName() + "님이 ");
+                for(User user: userList) {
+                    if(!user.getUserKey().equals(userMe.getUserKey())) {
+                        builder.append(user.getName()).append("님, ");
+                    }
+                }
+                String message = builder.substring(0, builder.length() - 2) + "을 초대하셨습니다.";
+                uploadMessage(message, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM", new HashMap<>());
+            } else {
+                Log.e("FRD", "Can not update data of users and the new chat room");
+            }
+        });
+
+        listener.eventListener(chatRoomKey);
     }
 
     public static void uploadMessage(String message, int index, Chat.Type messageType, String chatRoomKey, String userKey, HashMap<String, ChatRoomUser> chatRoomUserList) {

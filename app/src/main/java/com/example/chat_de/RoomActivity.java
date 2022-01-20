@@ -2,10 +2,12 @@ package com.example.chat_de;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
@@ -20,6 +22,7 @@ import android.util.Log;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.view.inputmethod.InputMethodManager;
@@ -31,6 +34,7 @@ import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
+import com.example.chat_de.datas.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -74,6 +78,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean isLoading = false;
     private boolean autoScroll = true;
     private boolean isFirstRun = true;
+    private boolean isActionMove = false;
     private ChatRoomMeta chatRoomMeta;
     private Uri filePath;
 
@@ -124,6 +129,7 @@ public class RoomActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void setUpRoomActivity() {
         //리사이클러뷰 설정
         initRecyclerView();
@@ -157,8 +163,15 @@ public class RoomActivity extends AppCompatActivity {
         binding.fab.setOnClickListener(view -> binding.recyclerView.scrollToPosition(dataList.size() - 1));
 
         binding.recyclerView.setOnTouchListener((view, motionEvent) -> {
-            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(binding.chatEdit.getWindowToken(), 0);
+            if(motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                isActionMove = true;
+            } else if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                if(!isActionMove) {
+                    InputMethodManager imm = (InputMethodManager) RoomActivity.this.getSystemService(INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(binding.chatEdit.getWindowToken(), 0);
+                }
+                isActionMove = false;
+            }
             return false;
         });
     }
@@ -361,7 +374,8 @@ public class RoomActivity extends AppCompatActivity {
     private void inviteUser() {
         Intent intent = new Intent(this, UserListActivity.class);
         intent.putExtra("tag", 2);
-        intent.putExtra("where", chatRoomKey);
+        intent.putExtra("chatRoomKey", chatRoomKey);
+        intent.putExtra("chatRoomMeta", chatRoomMeta);
         intent.putExtra("myUserKey", currentUser.getUserMeta().getUserKey());
         HashSet<String> set = new HashSet<>(userList.size());
         set.addAll(userList.keySet());

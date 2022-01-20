@@ -30,6 +30,7 @@ import android.webkit.MimeTypeMap;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
@@ -84,7 +85,6 @@ public class RoomActivity extends AppCompatActivity {
     private boolean isFirstRun = true;
     private ChatRoomMeta chatRoomMeta;
     private Uri filePath;
-    private ActionBar ab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,8 +143,8 @@ public class RoomActivity extends AppCompatActivity {
         getChatRoomMeta();
 
         //액션바 타이틀 바 이름 설정
-        ab = getSupportActionBar();
-        ab.setTitle("");
+        setSupportActionBar(binding.toolbarRoom);
+        getSupportActionBar().setTitle("");
 
         // 메시지 전송 버튼에 대한 클릭 리스너 지정
         binding.chatSent.setOnClickListener(new View.OnClickListener() {
@@ -351,7 +351,7 @@ public class RoomActivity extends AppCompatActivity {
     private void getChatRoomMeta() {
         ChatDB.getChatRoomMeta(chatRoomKey, item -> {
             chatRoomMeta = item;
-            ab.setTitle(chatRoomMeta.getName());
+            binding.chatTitle.setText(chatRoomMeta.getName());
         });
     }
 

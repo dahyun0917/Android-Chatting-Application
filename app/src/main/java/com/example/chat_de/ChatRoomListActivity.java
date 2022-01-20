@@ -7,21 +7,29 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+
+import com.example.chat_de.databinding.ActivityChatRoomListBinding;
 
 import java.util.HashSet;
 
 public class ChatRoomListActivity extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
-
     //private String CHAT_NAME;
     private final String USER_KEY = "user2";
     private String userKey;
+    private ActivityChatRoomListBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatDB.setReference("pre_2", USER_KEY);
-        setContentView(R.layout.activity_chat_room_list);
+        ChatDB.setReference("pre_3", USER_KEY);
+        binding = ActivityChatRoomListBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
+
+        setSupportActionBar(binding.toolbarChatRoomList);
+        setTitle("");
 
         userKey = ChatDB.getCurrentUserKey();
 

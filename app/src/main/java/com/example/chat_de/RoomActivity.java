@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -16,10 +16,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 
 import android.view.Menu;
@@ -37,7 +35,6 @@ import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.example.chat_de.datas.User;
-import com.google.android.exoplayer2.C;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -52,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {
@@ -82,6 +78,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean isLoading = false;
     private boolean autoScroll = true;
     private boolean isFirstRun = true;
+    private boolean isActionMove = false;
     private ChatRoomMeta chatRoomMeta;
     private Uri filePath;
     private ActionBar ab;
@@ -133,6 +130,7 @@ public class RoomActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void setUpRoomActivity() {
         //리사이클러뷰 설정
         initRecyclerView();
@@ -166,8 +164,15 @@ public class RoomActivity extends AppCompatActivity {
         binding.fab.setOnClickListener(view -> binding.recyclerView.scrollToPosition(dataList.size() - 1));
 
         binding.recyclerView.setOnTouchListener((view, motionEvent) -> {
-            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(binding.chatEdit.getWindowToken(), 0);
+            if(motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                isActionMove = true;
+            } else if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                if(!isActionMove) {
+                    InputMethodManager imm = (InputMethodManager) RoomActivity.this.getSystemService(INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(binding.chatEdit.getWindowToken(), 0);
+                }
+                isActionMove = false;
+            }
             return false;
         });
     }

@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityUserListBinding;
+import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private int mode=0;
     private User userMe;
     private String chatRoomKey = null;
+    private ChatRoomMeta chatRoomMeta = null;
     private String myUserKey;
     private String chatRoomName="";
     private HashSet<String> userKeySet;
@@ -73,7 +75,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             //초대하기
             ActionBar ab = getSupportActionBar() ;
             ab.setTitle("초대하기") ;
-            chatRoomKey = intent.getStringExtra("where");
+            chatRoomKey = intent.getStringExtra("chatRoomKey");
+            chatRoomMeta = (ChatRoomMeta)intent.getSerializableExtra("chatRoomMeta");
         }
         else{
             Log.e("ERROR MODE","Mode값은 1또는 2만 가능합니다.");
@@ -112,7 +115,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 }
             }
             userMe = item.get(myUserKey);
-            userListAdapter = new UserListAdapter(getApplicationContext(),userList);
+            userListAdapter = new UserListAdapter(getApplicationContext(), userList);
             binding.recyclerUserList.setAdapter(userListAdapter);
             binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
             //스피너 설정
@@ -150,55 +153,52 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             }
         });
     }
-    private ArrayList<UserListItem> returnChoose(){
-        ArrayList<UserListItem> choose = new ArrayList<>();
+    private ArrayList<User> returnChoose(){
+        ArrayList<User> choose = new ArrayList<>();
         for(ArrayList<UserListItem> list : userList) {
             for (UserListItem i : list) {
-                if (i.getChecked() || (mode == NEW_CHAT && i.getUserKey().equals(myUserKey)))
+                if (i.getChecked()) {
                     choose.add(i);
+                }
             }
         }
         return choose;
     }
     private void createChatRoom(){
         //체크박스로 표시된 유저 정보를 받아옴.
-        ArrayList<UserListItem> list = returnChoose();
+        ArrayList<User> list = returnChoose();
+        list.add(userMe);
         //채팅방 만들기 누른 유저 정보 : callUserName
         //새 ChatRoom 생성
         //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
         //list의 user의 userJoined에 생성된 채팅방 정보 추가
         //생성메세지(message) 현재 채팅방에 시스템 메세지로 추가
-        ChatDB.setChatRoom(chatRoomName, list, userMe.getName(), chatRoomKey -> {
+        ChatDB.setChatRoomCompleteListener(chatRoomName, list, userMe, generatedKey -> {
             Intent intent = new Intent(this, RoomActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("chatRoomKey", chatRoomKey);
+            intent.putExtra("chatRoomKey", generatedKey);
             startActivity(intent);
             finish(); //액티비티 종료
         });
     }
     private void inviteChatRoom(){
         //체크박스로 표시된 유저 정보를 받아옴
-        ArrayList<UserListItem> list = returnChoose();
+        ArrayList<User> list = returnChoose();
         //초대하기 누른 유저 정보 : callUserName
-        //changeToString : 유저리스트를 ~님, 형식으로 바꿔줌.
-        String message = userMe.getName() +"님이 "+changeToString(list,true)+"님을 초대하셨습니다.";
-        //TODO : 초대한 유저를 해당 채팅방에 추가
-        //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
-        //list의 user의 userJoined에 현재 채팅방 정보 추가->receivedKey 사용
-        //초대메세지(message) 현재 채탕방에 시스템 메세지로 추가.
-        finish();
+
+        ChatDB.inviteUserListCompleteListener(chatRoomKey, chatRoomMeta, list, userMe, dummyKey -> finish());
     }
-    private String changeToString(ArrayList<UserListItem> list, boolean formal){
+    private String changeToString(ArrayList<User> list, boolean formal){
         //유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.
         StringBuilder result = new StringBuilder();
         if(formal){
-            for(UserListItem i : list){
+            for(User i : list){
                 result.append(i.getName()).append("님, ");
             }
             return result.substring(0, result.length() - 3);
         }
         else {
-            for (UserListItem i : list) {
+            for (User i : list) {
                 result.append(i.getName()).append(", ");
             }
             return result.substring(0, result.length() - 2);

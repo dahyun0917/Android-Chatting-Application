@@ -28,10 +28,9 @@
                 android:layout_gravity="left"
                 android:background="@drawable/knulogo" />
 
-<!--
         <TextView
             android:layout_toEndOf="@id/knu_logo"
-            android:id="@+id/textview"
+            android:id="@+id/text_mode"
             android:layout_width="27dp"
             android:layout_height="25dp"
             android:layout_gravity="center"
@@ -41,14 +40,13 @@
             android:textColor="#FFFFFF"
             android:textSize="13dp"
             app:autoSizeTextType="uniform" />
--->
 
             <ImageView
                 android:layout_width="25dp"
                 android:layout_height="30dp"
                 android:layout_gravity="center"
                 android:layout_marginStart="15dp"
-                android:layout_toEndOf="@id/knu_logo"
+                android:layout_toEndOf="@id/text_mode"
                 android:background="@drawable/amp_arrow_up"
                 android:gravity="left" />
         </RelativeLayout>
@@ -58,8 +56,8 @@
         android:id="@+id/main_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar_chat_room_list"
-        android:layout_above="@id/temp_navigation_bar"/>
+        android:layout_above="@id/temp_navigation_bar"
+        android:layout_below="@id/toolbar_chat_room_list" />
 
     <TextView
         android:id="@+id/temp_navigation_bar"

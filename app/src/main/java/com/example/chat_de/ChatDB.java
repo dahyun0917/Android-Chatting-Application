@@ -40,11 +40,16 @@ public class ChatDB {
     private static String currentUserKey = null;
 
     public static void setReference(String root, String userKey) { // 앱 시작할때 딱 1번만 호출할 것
-        if (ref == null) {
+        ref = null;
+        ref = FirebaseDatabase.getInstance().getReference(root);
+        rootPath = root;
+        currentUserKey = userKey;
+
+        /*if (ref == null) { //TODO 혹시 이렇게 여러번 설정하게 되면 오류나는건지
             ref = FirebaseDatabase.getInstance().getReference(root);
             rootPath = root;
             currentUserKey = userKey;
-        }
+        }*/
     }
     public static DatabaseReference getReference() {
         return ref;

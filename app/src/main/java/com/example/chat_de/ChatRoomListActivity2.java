@@ -1,34 +1,35 @@
 package com.example.chat_de;
 
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.chat_de.databinding.ActivityChatRoomList2Binding;
 import com.example.chat_de.databinding.ActivityChatRoomListBinding;
 
 
-public class ChatRoomListActivity extends AppCompatActivity {
+public class ChatRoomListActivity2 extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
     private final String USER_KEY = "user2";
-    private ActivityChatRoomListBinding binding;
+    private ActivityChatRoomList2Binding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatDB.setReference("pre_2", USER_KEY);
-        binding = ActivityChatRoomListBinding.inflate(getLayoutInflater());
+        ChatDB.setReference("pre_3", USER_KEY);
+        binding = ActivityChatRoomList2Binding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
 
         binding.toolbaTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ChatRoomListActivity.this, ChatRoomListActivity2.class);
-                ChatMode.groupMode();
+                Intent intent = new Intent(ChatRoomListActivity2.this, ChatRoomListActivity.class);
                 startActivity(intent);
+                ChatMode.generalMode();
                 finish();
             }
         });

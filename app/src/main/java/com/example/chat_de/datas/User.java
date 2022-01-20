@@ -7,10 +7,10 @@ import java.util.HashMap;
 
 @IgnoreExtraProperties
 public class User implements Serializable {
-    private String name;
-    private String pictureURL;
-    private int generation;
-    private String userKey;
+    protected String name;
+    protected String pictureURL;
+    protected int generation;
+    protected String userKey;
 
     public User() { }
     public User(String name, String pictureURL, int generation, String userKey) {
@@ -31,6 +31,7 @@ public class User implements Serializable {
     public String getPictureURL()   { return pictureURL; }
     public int getGeneration()      { return generation; }
     public String getUserKey()      { return userKey; }
+    public User userMeta()          { return this; }
 
     public void setName(String name)                { this.name = name; }
     public void setPictureURL(String pictureURL)    { this.pictureURL = pictureURL; }

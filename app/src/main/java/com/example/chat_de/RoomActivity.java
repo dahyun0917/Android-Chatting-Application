@@ -375,7 +375,8 @@ public class RoomActivity extends AppCompatActivity {
     private void inviteUser() {
         Intent intent = new Intent(this, UserListActivity.class);
         intent.putExtra("tag", 2);
-        intent.putExtra("where", chatRoomKey);
+        intent.putExtra("chatRoomKey", chatRoomKey);
+        intent.putExtra("chatRoomMeta", chatRoomMeta);
         intent.putExtra("myUserKey", currentUser.getUserMeta().getUserKey());
         HashSet<String> set = new HashSet<>(userList.size());
         set.addAll(userList.keySet());

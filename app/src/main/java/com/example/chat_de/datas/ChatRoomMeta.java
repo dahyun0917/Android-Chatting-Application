@@ -44,13 +44,14 @@ public class ChatRoomMeta implements Serializable {
     public void setLastMessageIndex(int lastMessageIndex)   { this.lastMessageIndex = lastMessageIndex; }
     public void setType(Type type)                          { this.type = type; }
     public void setLastMessageTime(long lastMessageTime)    { this.lastMessageTime = lastMessageTime; }
-    public void setPictureURL(String pictureURL)            { this.pictureURL = pictureURL; }     { this.pictureURL = pictureURL; }
+    public void setPictureURL(String pictureURL)            { this.pictureURL = pictureURL; }
 
     @Override
     public String toString() {
         return  "{ name: " + name +
                 ", lastMessageIndex: " + lastMessageIndex +
                 ", type: " + type +
-                ", lastMessageTime: " + lastMessageTime + " }";
+                ", lastMessageTime: " + lastMessageTime +
+                ", pictureURL: " + pictureURL + " }";
     }
 }

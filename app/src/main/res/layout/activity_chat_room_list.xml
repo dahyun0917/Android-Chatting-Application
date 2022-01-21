@@ -56,8 +56,8 @@
         android:id="@+id/main_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar_chat_room_list"
-        android:layout_above="@id/temp_navigation_bar"/>
+        android:layout_above="@id/temp_navigation_bar"
+        android:layout_below="@id/toolbar_chat_room_list" />
 
     <TextView
         android:id="@+id/temp_navigation_bar"

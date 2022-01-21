@@ -37,19 +37,23 @@ public class ChatDB {
     private static final ArrayList<Pair<String, ChildEventListener>> eventListeners = new ArrayList<>();
     private static String rootPath;
     private static String currentUserKey = null;
+    private static User currentUser = null;
     private static boolean admin;
 
     public static void setReference(String root, String userKey) { // 앱 시작할때 딱 1번만 호출할 것
-        ref = null;
         ref = FirebaseDatabase.getInstance().getReference(root);
         rootPath = root;
         currentUserKey = userKey;
-
-        /*if (ref == null) { //TODO 혹시 이렇게 여러번 설정하게 되면 오류나는건지
-            ref = FirebaseDatabase.getInstance().getReference(root);
-            rootPath = root;
-            currentUserKey = userKey;
-        }*/
+        ref.child(makePath(USERS, userKey)).get().addOnCompleteListener(task -> {
+           if(task.isSuccessful()) {
+               currentUser = task.getResult().getValue(User.class);
+           } else {
+               Log.e("FRD", "Can not get user data of: " + userKey);
+           }
+        });
+    }
+    public static void setCurrentUser(User user) {
+        currentUser = user;
     }
     public static void setRootPath(@NonNull String root) {
         removeEventListenerBindOnThis();
@@ -64,6 +68,10 @@ public class ChatDB {
     //TODO : intent로 본인의 키를 넘겨주는 부분 있으면 전부 이쪽으로 바꿔야 함
     public static String getCurrentUserKey() {
         return currentUserKey;
+    }
+    //TODO : intent로 본인의 데이터를 넘겨주는 부분 있으면 가급적 이쪽으로 바꿔주는게 좋음
+    public static User getCurrentUser() {
+        return currentUser;
     }
 
     public static void checkUserExist(String userKey, IEventListener<Boolean> listener) {

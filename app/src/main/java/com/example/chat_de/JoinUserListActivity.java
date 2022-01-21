@@ -22,7 +22,7 @@ public class JoinUserListActivity extends AppCompatActivity {
     private Dialog dialog;
     private User userOther = new User();
     private User userMe;
-    private HashMap<String,ChatRoomUser> userList = new HashMap<>();
+    private HashMap<String, ChatRoomUser> userList = new HashMap<>();
     private ArrayList<User> joinUser = new ArrayList<>();
 
 
@@ -46,10 +46,8 @@ public class JoinUserListActivity extends AppCompatActivity {
 
 
         for (String i : userList.keySet()) {
-            joinUser.add(userList.get(i).getUserMeta());
+            joinUser.add(userList.get(i).userMeta());
         }
-
-
 
         JoinUserListAdapter joinUserListAdapter;
         joinUserListAdapter = new JoinUserListAdapter(joinUser);

@@ -84,10 +84,12 @@ public class VideoFrameActivity extends AppCompatActivity {
                     screenTouchNum =1;
                     binding.fromName.setVisibility(View.GONE);
                     binding.passDate.setVisibility(View.GONE);
+                    binding.toolbar.setVisibility(View.GONE);
                 } else {
                     screenTouchNum =0;
                     binding.fromName.setVisibility(View.VISIBLE);
                     binding.passDate.setVisibility(View.VISIBLE);
+                    binding.toolbar.setVisibility(View.VISIBLE);
                 }
             }
         });

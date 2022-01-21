@@ -11,6 +11,8 @@ import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -37,19 +39,21 @@ public class ChatDB {
     private static final ArrayList<Pair<String, ChildEventListener>> eventListeners = new ArrayList<>();
     private static String rootPath;
     private static String currentUserKey = null;
+    private static boolean adminMode = false;
 
-    public static void setReference(String root, String userKey) { // 앱 시작할때 딱 1번만 호출할 것
+    public static void setReference(String root, String userKey, boolean adminMode) { // 앱 시작할때 딱 1번만 호출할 것
         ref = null;
         ref = FirebaseDatabase.getInstance().getReference(root);
         rootPath = root;
         currentUserKey = userKey;
-
-        /*if (ref == null) { //TODO 혹시 이렇게 여러번 설정하게 되면 오류나는건지
-            ref = FirebaseDatabase.getInstance().getReference(root);
-            rootPath = root;
-            currentUserKey = userKey;
-        }*/
+        ChatDB.adminMode = adminMode;
     }
+
+
+    public static boolean getAdminMode() {
+        return adminMode;
+    }
+
     public static void setRootPath(@NonNull String root) {
         removeEventListenerBindOnThis();
         ref = FirebaseDatabase.getInstance().getReference(root);
@@ -67,8 +71,8 @@ public class ChatDB {
 
     public static void checkUserExist(String userKey, IEventListener<Boolean> listener) {
         ref.child(makePath(USERS, userKey)).get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()) {
-                if(task.getResult().getValue() != null) {
+            if (task.isSuccessful()) {
+                if (task.getResult().getValue() != null) {
                     listener.eventListener(true);
                 } else {
                     listener.eventListener(false);

@@ -165,6 +165,7 @@ public class RoomActivity extends AppCompatActivity {
         //floating 버튼에 대한 클릭 리스너 지정
         binding.fab.setOnClickListener(view -> binding.recyclerView.scrollToPosition(dataList.size() - 1));
 
+        //리사이클러뷰 터치리스너(키보드 내려가게)
         binding.recyclerView.setOnTouchListener((view, motionEvent) -> {
             if(motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
                 isActionMove = true;
@@ -177,6 +178,26 @@ public class RoomActivity extends AppCompatActivity {
             }
             return false;
         });
+
+        //유저 목록 보기 버튼에 대한 클릭 리스너 지정
+        binding.userListButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showJoinedUserList();
+            }
+        });
+
+        //초대하기 버튼에 대한 클릭 리스너 지정
+        if(!ChatDB.getAdminMode()) //adminmode가 아니면
+            binding.addUserButton.setVisibility(View.GONE);
+        else{
+            binding.addUserButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    inviteUser();
+                }
+            });
+        }
     }
 
     private void initScrollListener() {
@@ -260,31 +281,6 @@ public class RoomActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         binding.recyclerView.clearOnScrollListeners();
-    }
-
-    //현재 액티비티의 메뉴바를 메뉴바.xml과 붙이기
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_chatting_addfr, menu);
-        return true;
-    }
-
-    //유저 추가 메뉴바 설정
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int curId = item.getItemId();
-        switch (curId) {
-            case R.id.add_fr:
-                inviteUser();
-                break;
-            case R.id.user_list:
-                showJoinedUserList();
-                break;
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public void initRecyclerView() {

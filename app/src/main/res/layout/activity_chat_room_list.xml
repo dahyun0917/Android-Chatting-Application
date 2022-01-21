@@ -28,27 +28,25 @@
                 android:layout_gravity="left"
                 android:background="@drawable/knulogo" />
 
-<!--
-        <TextView
-            android:layout_toEndOf="@id/knu_logo"
-            android:id="@+id/textview"
-            android:layout_width="27dp"
-            android:layout_height="25dp"
-            android:layout_gravity="center"
-            android:layout_marginStart="15dp"
-            android:gravity="center"
-            android:text="기수"
-            android:textColor="#FFFFFF"
-            android:textSize="13dp"
-            app:autoSizeTextType="uniform" />
--->
+            <TextView
+                android:id="@+id/text_mode"
+                android:layout_width="27dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="15dp"
+                android:layout_toEndOf="@id/knu_logo"
+                android:gravity="center"
+                android:text="기수"
+                android:textColor="#FFFFFF"
+                android:textSize="13dp"
+                app:autoSizeTextType="uniform" />
 
             <ImageView
                 android:layout_width="25dp"
                 android:layout_height="30dp"
                 android:layout_gravity="center"
                 android:layout_marginStart="15dp"
-                android:layout_toEndOf="@id/knu_logo"
+                android:layout_toEndOf="@id/text_mode"
                 android:background="@drawable/amp_arrow_up"
                 android:gravity="left" />
         </RelativeLayout>

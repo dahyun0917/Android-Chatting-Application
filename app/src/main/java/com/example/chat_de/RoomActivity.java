@@ -99,6 +99,7 @@ public class RoomActivity extends AppCompatActivity {
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, joinedUserList -> {
             userList.putAll(joinedUserList);
             currentUser = joinedUserList.get(ChatDB.getCurrentUserKey());
+            ChatDB.setCurrentUser(currentUser);
             roomElementAdapter.setCurrentUser(currentUser);
             ChatDB.getLastChatCompleteListener(chatRoomKey, (chatKey, chatValue) -> {
                 lastChatKey = frontChatKey = chatKey;
@@ -473,7 +474,7 @@ public class RoomActivity extends AppCompatActivity {
             }
         });*/
 
-        dlg.setNegativeButton("cancle", null);
+        dlg.setNegativeButton("cancel", null);
 
         dlg.show();
 

@@ -43,13 +43,16 @@ public class ChatRoomListFragment extends Fragment {
                 enterChatRoom(chatRoomList.get(i).getChatRoomKey());
             }
         });
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selelctUser();
-            }
-        });
+        if(!ChatDB.getAdminMode())
+            binding.fab.hide();
+        else {
+            binding.fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    selelctUser();
+                }
+            });
+        }
 
         return view;
     }

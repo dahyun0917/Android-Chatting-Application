@@ -1,10 +1,13 @@
 package com.example.chat_de;
 
 
+import static com.example.chat_de.ChatMode.getChatMode;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.example.chat_de.databinding.ActivityChatRoomListBinding;
@@ -12,30 +15,34 @@ import com.example.chat_de.databinding.ActivityChatRoomListBinding;
 
 public class ChatRoomListActivity extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
-    private final String USER_KEY = "user2";
+    private final String USER_KEY = "user1";
     private ActivityChatRoomListBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatDB.setReference("pre_1", USER_KEY);
         binding = ActivityChatRoomListBinding.inflate(getLayoutInflater());
+        int mode = getIntent().getIntExtra("mode",0);
+        if(mode == 0) {
+            binding.textMode.setVisibility(View.GONE);
+            ChatDB.setReference("pre_1", USER_KEY,true);
+        }
+        else {
+            ChatDB.setReference("pre_2", USER_KEY,true);
+        }
         View view = binding.getRoot();
         setContentView(view);
 
-        binding.toolbaTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ChatRoomListActivity.this, ChatRoomListActivity2.class);
-                ChatMode.groupMode();
-                startActivity(intent);
-                finish();
-            }
+        binding.toolbaTitle.setOnClickListener(view1 -> {
+            Intent intent = new Intent(ChatRoomListActivity.this, ChatRoomListActivity.class);
+            ChatMode.changeMode();
+            intent.putExtra("mode",ChatMode.getChatMode());
+            startActivity(intent);
+            finish();
         });
 
         setSupportActionBar(binding.toolbarChatRoomList);
         setTitle("");
-
 
         mainFragment = new ChatRoomListFragment();
 

@@ -36,18 +36,19 @@
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:layout_alignParentTop="true"
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:src="@drawable/knu_mark" />
 
     <FrameLayout
         android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <com.google.android.exoplayer2.ui.PlayerView
-            android:id="@+id/video_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/toolbar"
-            android:background="@color/black"
-            android:src="@drawable/knu_mark" />
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

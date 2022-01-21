@@ -18,7 +18,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatDB.setReference("pre_2", USER_KEY);
+        ChatDB.setReference("pre_1", USER_KEY);
         binding = ActivityChatRoomListBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);

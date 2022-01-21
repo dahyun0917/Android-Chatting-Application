@@ -299,7 +299,7 @@ public class RoomActivity extends AppCompatActivity {
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("참가자"); //제목
         for (String i : userList.keySet()) {
-            adapter.add(userList.get(i).getUserMeta().getName());
+            adapter.add(userList.get(i).userMeta().getName());
         }
         dlg.setAdapter(adapter, null);
         dlg.setPositiveButton("확인", null);
@@ -320,6 +320,9 @@ public class RoomActivity extends AppCompatActivity {
                 dataList.pushFront(daySystemChat);
                 cnt++;
             }
+            if(lastIndex < chat.getIndex()) {
+                lastIndex = chat.getIndex();
+            }
             dataList.pushFront(chat);
         }
         if (cnt != 0)
@@ -327,23 +330,25 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     //파이어베이스에 메세지가 추가되었을때, 메세지를 화면에 띄워줌.(기존 addMessage)
-    private void floatNewMessage(Chat dataItem) {
+    private void floatNewMessage(Chat chat) {
         int cnt = 1;
 
         if (dataList.size() != 0) {
             //이전 메시지와 비교해서 날짜가 달라지면 시스템 메시지로 현재 날짜를 추가해주는 부분
             final SimpleDateFormat SDF = new SimpleDateFormat("yyyy년 MM월 dd일");
-            final String DAY = SDF.format(dataItem.normalDate());
+            final String DAY = SDF.format(chat.normalDate());
             if (!SDF.format(dataList.getBack().normalDate()).equals(DAY)) {
                 Chat daySystemChat = new Chat(DAY, SYSTEM_MESSAGE, "SYSTEM", Chat.Type.SYSTEM);
-                daySystemChat.setDate(dataItem.unixTime());
+                daySystemChat.setDate(chat.unixTime());
                 dataList.pushBack(daySystemChat);
                 cnt++;
             }
         }
 
-        lastIndex = dataItem.getIndex();
-        dataList.pushBack(new Chat(dataItem));
+        if(lastIndex < chat.getIndex()) {
+            lastIndex = chat.getIndex();
+        }
+        dataList.pushBack(new Chat(chat));
         roomElementAdapter.notifyItemRangeInserted(dataList.size() - cnt + 1, cnt);
         if (autoScroll)
             binding.recyclerView.scrollToPosition(dataList.size() - 1);
@@ -363,7 +368,7 @@ public class RoomActivity extends AppCompatActivity {
         if (binding.chatEdit.getText().toString().equals(""))
             return;
 
-        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++lastIndex, messageType, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
+        ChatDB.uploadMessage(binding.chatEdit.getText().toString(), ++lastIndex, messageType, chatRoomKey, currentUser.userMeta().getUserKey(), userList);
         binding.chatEdit.setText(""); //입력창 초기화
         autoScroll = true;
     }
@@ -380,7 +385,7 @@ public class RoomActivity extends AppCompatActivity {
         intent.putExtra("tag", 2);
         intent.putExtra("chatRoomKey", chatRoomKey);
         intent.putExtra("chatRoomMeta", chatRoomMeta);
-        intent.putExtra("myUserKey", currentUser.getUserMeta().getUserKey());
+        intent.putExtra("myUserKey", currentUser.userMeta().getUserKey());
         HashSet<String> set = new HashSet<>(userList.size());
         set.addAll(userList.keySet());
         intent.putExtra("userList", set);
@@ -518,7 +523,7 @@ public class RoomActivity extends AppCompatActivity {
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
         //TODO:파일에 맞는 확장자 추가
-        String filename = sdf.format(new Date()) + "_" + currentUser.getUserMeta().getUserKey()+"."+extension;
+        String filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+extension;
 
         //uploads라는 폴더가 없으면 자동 생성
         //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각 pre_2빼
@@ -534,7 +539,7 @@ public class RoomActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Uri uri) {
                         //userKey="user2";
-                        ChatDB.uploadMessage(uri.toString(), ++lastIndex, messageType, chatRoomKey, currentUser.getUserMeta().getUserKey(), userList);
+                        ChatDB.uploadMessage(uri.toString(), ++lastIndex, messageType, chatRoomKey, currentUser.userMeta().getUserKey(), userList);
                         progressDialog.dismiss();
                         //Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
                     }

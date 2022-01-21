@@ -11,7 +11,6 @@ import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.User;
-import com.example.chat_de.datas.UserChatRoom;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -126,8 +125,8 @@ public class ChatDB {
                 result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userMe.getUserKey()), new ChatRoomUser(userMe));
                 result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userOther.getUserKey()), new ChatRoomUser(userOther));
                 // userJoined의 userKey들에 새로운 chatRoom 추가
-                result.put(makePath(USER_JOINED, userMe.getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
-                result.put(makePath(USER_JOINED, userOther.getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
+                result.put(makePath(USER_JOINED, userMe.getUserKey(), chatRoomKey), chatRoomMeta);
+                result.put(makePath(USER_JOINED, userOther.getUserKey(), chatRoomKey), chatRoomMeta);
 
                 // 종합한 값들을 최종적으로 update
                 ref.updateChildren(result).addOnCompleteListener(task -> {
@@ -151,7 +150,7 @@ public class ChatDB {
             // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
             result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, item.getUserKey()), new ChatRoomUser(item.userMeta()));
             // userJoined의 userKey들에 새로운 chatRoom 추가
-            result.put(makePath(USER_JOINED, item.getUserKey(), chatRoomKey), new UserChatRoom(chatRoomMeta));
+            result.put(makePath(USER_JOINED, item.getUserKey(), chatRoomKey), chatRoomMeta);
         }
         // 종합한 값들을 최종적으로 update
         ref.updateChildren(result).addOnCompleteListener(task -> {
@@ -192,8 +191,8 @@ public class ChatDB {
                     result.put(makePath(CHAT_ROOMS, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_TIME), serverTime);
                     // update last message index and time of all users in the chat room
                     for (String key : chatRoomUserList.keySet()) {
-                        result.put(makePath(USER_JOINED, key, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_INDEX), index);
-                        result.put(makePath(USER_JOINED, key, chatRoomKey, CHAT_ROOM_META, LAST_MESSAGE_TIME), serverTime);
+                        result.put(makePath(USER_JOINED, key, chatRoomKey, LAST_MESSAGE_INDEX), index);
+                        result.put(makePath(USER_JOINED, key, chatRoomKey, LAST_MESSAGE_TIME), serverTime);
                     }
                     // update
                     ref.updateChildren(result);
@@ -266,7 +265,7 @@ public class ChatDB {
     }
 
     public static void messageAddedEventListener(String chatRoomKey, String lastChatKey, IKeyValueEventListener<String, Chat> listener) {
-        class myChildEventListener implements ChildEventListener {
+        class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 listener.eventListener(snapshot.getKey(), snapshot.getValue(Chat.class));
@@ -292,7 +291,7 @@ public class ChatDB {
 
             }
         }
-        myChildEventListener myListener = new myChildEventListener();
+        MyChildEventListener myListener = new MyChildEventListener();
         String path = makePath(CHAT_ROOMS, chatRoomKey, CHATS);
 
         if (lastChatKey != null) {   // 빈 채팅방이 아닐 때
@@ -303,8 +302,7 @@ public class ChatDB {
         eventListeners.add(new Pair<>(path, myListener));
     }
     public static void userListChangedEventListener(String chatRoomKey, IKeyValueEventListener<String, ChatRoomUser> listener) {
-        String path = makePath(CHAT_ROOM_JOINED, chatRoomKey);
-        ref.child(path).addChildEventListener(new ChildEventListener() {
+        class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 listener.eventListener(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class));
@@ -329,19 +327,24 @@ public class ChatDB {
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        }
+        MyChildEventListener myListener = new MyChildEventListener();
+        String path = makePath(CHAT_ROOM_JOINED, chatRoomKey);
+
+        ref.child(path).addChildEventListener(myListener);
+        //eventListeners.add(new Pair<>(path, myListener));
     }
     public static void chatRoomListChangedEventListener(String userKey, ChatRoomListAdapter chatRoomListAdapter) {
-        ref.child(makePath(USER_JOINED, userKey)).addChildEventListener(new ChildEventListener() {
+        class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                ChatRoomMeta chatRoomMeta = snapshot.getChildren().iterator().next().getValue(ChatRoomMeta.class);
+                ChatRoomMeta chatRoomMeta = snapshot.getValue(ChatRoomMeta.class);
                 chatRoomListAdapter.addChatRoom(snapshot.getKey(), chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                ChatRoomMeta chatRoomMeta = snapshot.getChildren().iterator().next().getValue(ChatRoomMeta.class);
+                ChatRoomMeta chatRoomMeta = snapshot.getValue(ChatRoomMeta.class);
                 chatRoomListAdapter.changeChatRoom(snapshot.getKey(), chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
             }
 
@@ -359,7 +362,12 @@ public class ChatDB {
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        }
+        MyChildEventListener myListener = new MyChildEventListener();
+        String path = makePath(USER_JOINED, userKey);
+
+        ref.child(path).addChildEventListener(myListener);
+        eventListeners.add(new Pair<>(path, myListener));
     }
 
     public static void getChatRoomMeta(String chatRoomKey, IEventListener<ChatRoomMeta> listener) {

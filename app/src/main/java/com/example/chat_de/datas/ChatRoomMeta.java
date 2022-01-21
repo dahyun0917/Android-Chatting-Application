@@ -9,13 +9,12 @@ import java.io.Serializable;
 // DB에서 chatRoomMeta들 전부 수정될때까지는 pictureURL에 관련된 주석 풀지 말 것
 @IgnoreExtraProperties
 public class ChatRoomMeta implements Serializable {
-
     public enum Type { BY_COLLEGE, BY_YEAR, BY_USER }
-    private String name;
-    private int lastMessageIndex;
-    private Type type;
-    private long lastMessageTime;
-    private String pictureURL;
+    protected String name;
+    protected int lastMessageIndex;
+    protected Type type;
+    protected long lastMessageTime;
+    protected String pictureURL;
 
     public ChatRoomMeta() { }
     public ChatRoomMeta(String name, Type type, String pictureURL) {
@@ -39,6 +38,7 @@ public class ChatRoomMeta implements Serializable {
     public Type getType()               { return type; }
     public long getLastMessageTime()    { return lastMessageTime; }
     public String getPictureURL()       { return pictureURL; }
+    public ChatRoomMeta chatRoomMeta()  { return this; }
 
     public void setName(String name)                        { this.name = name; }
     public void setLastMessageIndex(int lastMessageIndex)   { this.lastMessageIndex = lastMessageIndex; }

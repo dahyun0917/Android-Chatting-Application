@@ -7,9 +7,8 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import java.io.Serializable;
 
 @IgnoreExtraProperties
-public class ChatRoomUser implements Serializable {
+public class ChatRoomUser extends User {
     private int lastReadIndex;
-    private User userMeta;
 
     public ChatRoomUser() { }
     public ChatRoomUser(int lastReadIndex, User userMeta) {
@@ -23,26 +22,25 @@ public class ChatRoomUser implements Serializable {
     //Copy constructor
     public ChatRoomUser(@NonNull ChatRoomUser original) {
         setLastReadIndex(original.getLastReadIndex());
-        setUserMeta(new User(original.getUserMeta()));
+        setUserMeta(original.userMeta());
     }
 
     public int getLastReadIndex()   { return lastReadIndex; }
-    public User getUserMeta()       { return userMeta; }
-    public String takeName()        { return userMeta.getName(); }
-    public String takePictureURL()  { return userMeta.getPictureURL(); }
-    public int takeGeneration()     { return userMeta.getGeneration(); }
-    public String takeUserKey()     { return userMeta.getUserKey(); }
 
     public void setLastReadIndex(int lastReadIndex) { this.lastReadIndex = lastReadIndex; }
-    public void setUserMeta(User userMeta)          { this.userMeta = userMeta; }
-    public void setName(String name)                { this.userMeta.setName(name); }
-    public void setPictureURL(String pictureURL)    { this.userMeta.setPictureURL(pictureURL); }
-    public void setGeneration(int generation)       { this.userMeta.setGeneration(generation); }
-    public void setUserKey(String userKey)          { this.userMeta.setUserKey(userKey); }
+    public void setUserMeta(User userMeta) {
+        name = userMeta.getName();
+        pictureURL = userMeta.getPictureURL();
+        generation = userMeta.getGeneration();
+        userKey = userMeta.getUserKey();
+    }
 
     @Override
     public String toString() {
         return  "{ lastReadIndex: " + lastReadIndex +
-                ", userMeta: " + userMeta.toString() + " }";
+                ", name: " + name +
+                ", pictureURL: " + pictureURL +
+                ", generation: " + generation +
+                ", userKey: " + userKey + " }";
     }
 }

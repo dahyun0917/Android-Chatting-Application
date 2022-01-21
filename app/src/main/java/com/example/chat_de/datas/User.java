@@ -3,7 +3,6 @@ package com.example.chat_de.datas;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.io.Serializable;
-import java.util.HashMap;
 
 @IgnoreExtraProperties
 public class User implements Serializable {
@@ -49,5 +48,4 @@ public class User implements Serializable {
                 ", generation: " + generation +
                 ", userKey: " + userKey + " }";
     }
-
 }

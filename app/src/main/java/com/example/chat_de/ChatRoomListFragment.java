@@ -15,13 +15,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class ChatRoomListFragment extends Fragment {
-
-   private FragmentChatRoomListBinding binding;
-
-
-
+    private FragmentChatRoomListBinding binding;
+    private ChatRoomListAdapter chatRoomListAdapter;
     private String userKey;
-
     private ArrayList<ChatRoomListItem> chatRoomList = new ArrayList<>();
 
     @Override
@@ -39,11 +35,8 @@ public class ChatRoomListFragment extends Fragment {
         binding = FragmentChatRoomListBinding.inflate(inflater,container,false);
         View view = binding.getRoot();
 
-
         userKey = ChatDB.getCurrentUserKey();
 
-
-        showChatRoomList();
         binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -68,12 +61,22 @@ public class ChatRoomListFragment extends Fragment {
     }
     private void showChatRoomList() {
         // 리스트 어댑터 생성 및 세팅
-        ChatRoomListAdapter chatRoomListAdapter;
+        chatRoomList.clear();
         chatRoomListAdapter = new ChatRoomListAdapter(chatRoomList);
         binding.listview.setAdapter(chatRoomListAdapter);
-
-        // TODO LOGIN : userKey를 실제 로그인된 사용자의 키로 변경해야함.
         ChatDB.chatRoomListChangedEventListener(userKey, chatRoomListAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        showChatRoomList();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ChatDB.removeEventListenerBindOnThis();
     }
 
     private void enterChatRoom(String chatRoomKey){

@@ -14,7 +14,6 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -45,7 +44,6 @@ public class ImageFrameActivity extends AppCompatActivity {
 
     private int downPushed =0;
 
-    ProgressDialog loading_down;
     ProgressDialog loading;
 
 
@@ -106,10 +104,12 @@ public class ImageFrameActivity extends AppCompatActivity {
                     touchnum = 1;
                     binding.fromName.setVisibility(View.GONE);
                     binding.passDate.setVisibility(View.GONE);
+                    binding.toolbar.setVisibility(View.GONE);
                 } else {
                     touchnum = 0;
                     binding.fromName.setVisibility(View.VISIBLE);
                     binding.passDate.setVisibility(View.VISIBLE);
+                    binding.toolbar.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -146,11 +146,6 @@ public class ImageFrameActivity extends AppCompatActivity {
 
         Toast.makeText(this, "다운로드 시작되었습니다.",Toast.LENGTH_SHORT).show();
 
-        loading_down = new ProgressDialog(this);
-        loading_down.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        loading_down.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
-        //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
-        loading_down.show();
 
         //파일 이름 :날짜_시간_확장자
         Date day = new Date();
@@ -191,7 +186,6 @@ public class ImageFrameActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "download/KNU_AMP에 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
             downPushed =0;
-            loading.dismiss();
         }
 
     };

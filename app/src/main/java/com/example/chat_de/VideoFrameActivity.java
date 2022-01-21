@@ -41,7 +41,6 @@ public class VideoFrameActivity extends AppCompatActivity {
     private long latestId = -1;
 
     private int downPushed =0;
-    ProgressDialog loading_down;
     ProgressDialog loading;
     Uri videoUri;
 
@@ -121,11 +120,6 @@ public class VideoFrameActivity extends AppCompatActivity {
     public void downVideo(){
         Toast.makeText(this, "다운로드 시작되었습니다.",Toast.LENGTH_SHORT).show();
 
-        loading_down = new ProgressDialog(this);
-        loading_down.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        loading_down.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
-        //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
-        loading_down.show();
 
         //파일 이름 :날짜_시간
         Date day = new Date();
@@ -164,7 +158,6 @@ public class VideoFrameActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "download/KNU_AMP에 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
-            loading_down.dismiss();
             downPushed =0;
         }
 

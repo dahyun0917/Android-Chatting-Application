@@ -29,7 +29,9 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
 
     private ArrayList<UserListItem>[] userList = new ArrayList[9];
+    private ArrayList<User> selectedList = new ArrayList<>();
     private UserListAdapter userListAdapter;
+    private SelectedListAdapter selectedListAdapter;
 
     private final int NEW_CHAT = 1;
     private final int INVITE_CHAT = 2;
@@ -166,6 +168,32 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 binding.searchText.setText(null);
             }
         });
+
+        /*선택된 유저 뜨는 리사이클러뷰 설정*/
+        selectedList.add(new User("양선아","",3,"user1",false));
+        selectedList.add(new User("이다현","",3,"user2",true));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        /*selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));
+        selectedList.add(new User("김규래","",3,"user3",false));*/
+
+        selectedListAdapter = new SelectedListAdapter(UserListActivity.this,selectedList);
+        binding.selectedList.setAdapter(selectedListAdapter);
+        binding.selectedList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL,false));
+        Log.d("TAG",String.valueOf(selectedListAdapter.getItemCount()));
+
     }
     private ArrayList<User> returnChoose(){
         ArrayList<User> choose = new ArrayList<>();

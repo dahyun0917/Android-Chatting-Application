@@ -19,7 +19,7 @@ public class UserListViewHolder extends RecyclerView.ViewHolder {
     }
 
     //데이터와 뷰를 묶음
-    void bind(UserListItem userListItem){
+    void bind(UserListItem userListItem) {
 
         itemBinding.userNameText.setText(userListItem.getName());
         itemBinding.userGenerationText.setText(String.valueOf(userListItem.getGeneration()));

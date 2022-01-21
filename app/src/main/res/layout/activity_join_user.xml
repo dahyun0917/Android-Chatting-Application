@@ -14,16 +14,19 @@
         >
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="30dip"
+            android:layout_height="35dip"
             android:padding="1dip"
             android:layout_gravity="center"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/list_title"
+                android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="참가자"
+                android:textStyle="bold"
+                android:textSize="20dp"
                 />
         </LinearLayout>
         <LinearLayout
@@ -33,7 +36,7 @@
             android:orientation="vertical">
             <ListView
                 android:id="@+id/listview"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
         </LinearLayout>

@@ -21,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.chat_de.databinding.ActivityVideoFrameBinding;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -40,7 +42,6 @@ public class VideoFrameActivity extends AppCompatActivity {
 
     private int downPushed =0;
     ProgressDialog loading;
-
     Uri videoUri;
 
     //임의의 동영상 url
@@ -83,10 +84,12 @@ public class VideoFrameActivity extends AppCompatActivity {
                     screenTouchNum =1;
                     binding.fromName.setVisibility(View.GONE);
                     binding.passDate.setVisibility(View.GONE);
+                    binding.toolbar.setVisibility(View.GONE);
                 } else {
                     screenTouchNum =0;
                     binding.fromName.setVisibility(View.VISIBLE);
                     binding.passDate.setVisibility(View.VISIBLE);
+                    binding.toolbar.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -119,11 +122,6 @@ public class VideoFrameActivity extends AppCompatActivity {
     public void downVideo(){
         Toast.makeText(this, "다운로드 시작되었습니다.",Toast.LENGTH_SHORT).show();
 
-        loading = new ProgressDialog(this);
-        loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
-        //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
-        loading.show();
 
         //파일 이름 :날짜_시간
         Date day = new Date();
@@ -162,7 +160,6 @@ public class VideoFrameActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "download/KNU_AMP에 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
-            loading.dismiss();
             downPushed =0;
         }
 
@@ -172,6 +169,12 @@ public class VideoFrameActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        loading = new ProgressDialog(this);
+        loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
+        //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
+        loading.show();
 
         player = new ExoPlayer.Builder(this).build();
         //플레이어뷰에게 플레이어 설정
@@ -183,13 +186,26 @@ public class VideoFrameActivity extends AppCompatActivity {
 
         player.setMediaItem(mediaItem);
         player.prepare();
+        player.addListener(new Player.Listener() {
+           @Override
+           public void onPlaybackStateChanged(int playbackState) {
+               if(playbackState==Player.STATE_READY){
+                   loading.dismiss();
+                   player.play();
+               }
+           }
+       });
+                //player.play();
+                //로딩이 완료되어 준비가 되었을 때
+                //자동 실행되도록..
+                //player.setPlayWhenReady(true);
 
-        //로딩이 완료되어 준비가 되었을 때
-        //자동 실행되도록..
-        player.setPlayWhenReady(true);
+        /*if(player.setPlayWhenReady()) {
+            loading.dismiss();
+            player.play();
+        }*/
 
-
-        //웹 주소 에러 관련 리스너
+                //웹 주소 에러 관련 리스너
         /*player.addListener(new Player.Listener() {
 
             @Override

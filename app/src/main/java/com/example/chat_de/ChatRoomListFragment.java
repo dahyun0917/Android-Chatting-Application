@@ -52,7 +52,7 @@ public class ChatRoomListFragment extends Fragment {
             binding.fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    selelctUser();
+                    selectUser();
                 }
             });
         }

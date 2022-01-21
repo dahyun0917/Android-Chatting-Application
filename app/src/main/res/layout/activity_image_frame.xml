@@ -42,7 +42,7 @@
             android:background="@color/black"
             android:id="@+id/photo_view"
             android:src="@drawable/knu_mark"
-            android:scaleType="fitCenter"
+            android:scaleType="centerInside"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -15,9 +16,14 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.chat_de.databinding.ActivityImageFrameBinding;
 
 import java.text.SimpleDateFormat;
@@ -39,6 +45,7 @@ public class ImageFrameActivity extends AppCompatActivity {
     private int downPushed =0;
 
     ProgressDialog loading;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +69,30 @@ public class ImageFrameActivity extends AppCompatActivity {
        /* SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
         String str= passDateFormat.format(passDate);  //TODO : 수정해야함*/
 
-        Glide.with(this).load(imageViewUrl).thumbnail(Glide.with(this).load(R.drawable.loading)).into(binding.photoView);
+        loading = new ProgressDialog(this);
+        loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
+        //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩바 취소되지 않음
+        loading.show();
+
+        Glide.with(this)
+                .load(imageViewUrl)
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        loading.dismiss();
+                        return false;
+                    }
+                })
+                .into(binding.photoView)
+        ;
+
+
         binding.fromName.setText(fromName);
         binding.passDate.setText(passDate);
 
@@ -74,10 +104,12 @@ public class ImageFrameActivity extends AppCompatActivity {
                     touchnum = 1;
                     binding.fromName.setVisibility(View.GONE);
                     binding.passDate.setVisibility(View.GONE);
+                    binding.toolbar.setVisibility(View.GONE);
                 } else {
                     touchnum = 0;
                     binding.fromName.setVisibility(View.VISIBLE);
                     binding.passDate.setVisibility(View.VISIBLE);
+                    binding.toolbar.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -114,11 +146,6 @@ public class ImageFrameActivity extends AppCompatActivity {
 
         Toast.makeText(this, "다운로드 시작되었습니다.",Toast.LENGTH_SHORT).show();
 
-        loading = new ProgressDialog(this);
-        loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
-        //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
-        loading.show();
 
         //파일 이름 :날짜_시간_확장자
         Date day = new Date();
@@ -159,7 +186,6 @@ public class ImageFrameActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "download/KNU_AMP에 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
             downPushed =0;
-            loading.dismiss();
         }
 
     };

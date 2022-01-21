@@ -8,8 +8,8 @@ public class UserListItem extends User {
     private boolean checked;
 
     public UserListItem() { }
-    public UserListItem(String name, String pictureURL, int generation, String userKey) {
-        super(name, pictureURL, generation, userKey);
+    public UserListItem(String name, String pictureURL, int generation, String userKey, boolean admin) {
+        super(name, pictureURL, generation, userKey, admin);
         setChecked(false);
     }
     //유저클래스로 생성

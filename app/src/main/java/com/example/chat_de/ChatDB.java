@@ -37,6 +37,7 @@ public class ChatDB {
     private static final ArrayList<Pair<String, ChildEventListener>> eventListeners = new ArrayList<>();
     private static String rootPath;
     private static String currentUserKey = null;
+    private static boolean admin;
 
     public static void setReference(String root, String userKey) { // 앱 시작할때 딱 1번만 호출할 것
         ref = null;
@@ -202,7 +203,6 @@ public class ChatDB {
             }
         });
     }
-
     public static void userReadLastMessage(String chatRoomKey, String userKey) {
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -377,6 +377,26 @@ public class ChatDB {
                 listener.eventListener(dataSnapshot.getValue(ChatRoomMeta.class));
             } else {
                 Log.e("FRD", "Can not get meta data of the" + chatRoomKey);
+            }
+        });
+    }
+
+    public static void exitChatRoomCompleteListener(String chatRoomKey, @NonNull ArrayList<User> userList, IVoidEventListener listener) {
+        HashMap<String, Object> result = new HashMap<>();
+        StringBuilder builder = new StringBuilder();
+        for(User user: userList) {
+            String userKey = user.getUserKey();
+            result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userKey), null);
+            result.put(makePath(USER_JOINED, userKey, chatRoomKey), null);
+            builder.append(user.getName()).append("님, ");
+        }
+        final String exitMessage = builder.substring(0, builder.length() - 2) + "이 채팅방을 나가셨습니다.";
+        ref.updateChildren(result, (error, rf) -> {
+            if(error == null) {
+                uploadMessage(exitMessage, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM", new HashMap<>());
+                listener.eventListener();
+            } else {
+                Log.e("FRD", "Can not delete data: " + error);
             }
         });
     }

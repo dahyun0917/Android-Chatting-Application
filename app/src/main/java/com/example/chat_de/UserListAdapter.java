@@ -19,7 +19,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
     private ArrayList<UserListItem> filteredUsers = new ArrayList<>(); //필터링된 리스트 -> 보여줄 리스트
     private ArrayList<UserListItem> unFilteredUsers = new ArrayList<>(); //필터링되지않은 리스트
 
-    //생성자
+    //생성자1
     public UserListAdapter(Context context, ArrayList<UserListItem>[] userList) {
         super();
         this.context = context;
@@ -29,7 +29,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
         this.unFilteredUsers = list;
         this.filteredUsers = list;
     }
-
+    //생성자2
     public UserListAdapter(Context context, ArrayList<UserListItem> list){
         super();
         this.context = context;

@@ -382,12 +382,8 @@ public class RoomActivity extends AppCompatActivity {
     //초대하기->유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser() {
         Intent intent;
-        if(ChatMode.getChatMode() > 0) {
-            intent = new Intent(this, UserListActivity2.class);
-        }
-        else {
-            intent = new Intent(this, UserListActivity.class);
-        }
+        intent = new Intent(this, UserListActivity.class);
+
         intent.putExtra("tag", 2);
         intent.putExtra("chatRoomKey", chatRoomKey);
         intent.putExtra("chatRoomMeta", chatRoomMeta);

@@ -25,7 +25,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
             ChatDB.setReference("pre_1", USER_KEY,true);
         }
         else {
-            ChatDB.setReference("pre_2", USER_KEY,true);
+            ChatDB.setReference("pre_1", USER_KEY,true);
         }
         View view = binding.getRoot();
         setContentView(view);

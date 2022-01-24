@@ -88,7 +88,13 @@ public class RoomActivity extends AppCompatActivity {
         setContentView(view);
         //화면 기본 설정
         setUpRoomActivity();
-        // 처음 CHAT_LIMIT + 1개의 채팅 불러오고 리스너 설정
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        /*리스너 설정*/
+        // 처음 CHAT_LIMIT + 1개의 채팅 불러오고 채팅에 대한 리스너 설정
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, joinedUserList -> {
             userList.putAll(joinedUserList);
             currentUser = joinedUserList.get(ChatDB.getCurrentUserKey());
@@ -115,26 +121,19 @@ public class RoomActivity extends AppCompatActivity {
             });
         });
         ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
-    }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+        //리사이클러뷰 스크롤 리스너 설정
+        initScrollListener();
     }
 
     @SuppressLint("ClickableViewAccessibility")
     public void setUpRoomActivity() {
+        /*view, 변수 할당, click listener 등 한번만 설정되는 화면 구성 설정*/
         //플로팅버튼 숨기기
         binding.fab.setVisibility(View.GONE);
 
         //리사이클러뷰 설정
         initRecyclerView();
-        initScrollListener();
 
         //채팅방 설정
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
@@ -144,7 +143,7 @@ public class RoomActivity extends AppCompatActivity {
         setSupportActionBar(binding.toolbarRoom);
         getSupportActionBar().setTitle("");
 
-        // 메시지 전송 버튼에 대한 클릭 리스너 지정
+        //메시지 전송 버튼에 대한 클릭 리스너 지정
         binding.chatSent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -197,12 +196,13 @@ public class RoomActivity extends AppCompatActivity {
             });
         }
 
-        //빙글빙글
+        //채팅방 이름이 길 경우, 회전하도록 설정
         binding.chatTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
         binding.chatTitle.setSelected(true);
     }
 
     private void initScrollListener() {
+        /*리사이클러뷰(채팅창)의 스크롤 리스너 설정*/
         binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -217,12 +217,12 @@ public class RoomActivity extends AppCompatActivity {
                 if (!recyclerView.canScrollVertically(1)) { //최하단에 닿았을 때
                     Log.d("TAG", String.valueOf(autoScroll));
                     autoScroll = true;
+                    //binding.fab.hide();
                     if(binding.fab.getVisibility() == View.VISIBLE) {
                         Animation animation = AnimationUtils.loadAnimation(RoomActivity.this, R.anim.scale_down);
                         binding.fab.startAnimation(animation);
                         binding.fab.setVisibility(View.GONE);
                     }
-                    //binding.fab.hide();
                 } else if (!recyclerView.canScrollVertically(-1)) { //최상단에 닿았을 때
                     if (!isLoading) {
                         if (frontChatKey != null) {
@@ -230,12 +230,12 @@ public class RoomActivity extends AppCompatActivity {
                             isLoading = true;
                         }
                         autoScroll = false;
+                        //binding.fab.show();
                         if(binding.fab.getVisibility() != View.VISIBLE) {
                             Animation animation = AnimationUtils.loadAnimation(RoomActivity.this, R.anim.scale_up);
                             binding.fab.startAnimation(animation);
                             binding.fab.setVisibility(View.VISIBLE);
                         }
-                        //binding.fab.show();
                     }
                 } else {
                     autoScroll = false;
@@ -251,6 +251,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void loadMore() {
+        /*최상단에 닿았을때, 데이터를 더 가져오는 함수*/
         binding.recyclerView.post(new Runnable() {
             public void run() {
                 dataList.pushFront(null);
@@ -313,6 +314,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void showJoinedUserList() {
+        /*채팅방 참가자 목록 보는 액티비티로 넘어가는 함수*/
         Intent intent = new Intent(this, JoinUserListActivity.class);
 
         //사용자 정보 전송
@@ -322,6 +324,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void floatOldMessage(ArrayList<Chat> chatList) {
+        /*불러와진 예전 메세지를 화면에 보여주는 함수*/
         ListIterator i = chatList.listIterator(chatList.size());
         int cnt = chatList.size();
 
@@ -344,8 +347,8 @@ public class RoomActivity extends AppCompatActivity {
             roomElementAdapter.notifyItemRangeInserted(0, cnt);
     }
 
-    //파이어베이스에 메세지가 추가되었을때, 메세지를 화면에 띄워줌.(기존 addMessage)
     private void floatNewMessage(Chat chat) {
+        /*새 채팅 보냇을 때, 또는 새 채팅을 받았을때, 메세지를 화면에 보여주는 함수*/
         int cnt = 1;
 
         if (dataList.size() != 0) {
@@ -369,16 +372,16 @@ public class RoomActivity extends AppCompatActivity {
             binding.recyclerView.scrollToPosition(dataList.size() - 1);
     }
 
-    //채팅방 정보 불러옴
     private void getChatRoomMeta() {
+        /*채팅방 정보(ChatRoomMeta)를 불러오는 함수*/
         ChatDB.getChatRoomMeta(chatRoomKey, item -> {
             chatRoomMeta = item;
             binding.chatTitle.setText(chatRoomMeta.getName());
         });
     }
 
-    //사용자가 send 버튼 눌렀을때, 메세지를 보내고 메세지 내용 파이어베이스에 저장
     private void sendMessage() {
+        /*사용자가 send 버튼을 눌렀을 때 동작하는 함수로, 메세지 내용을 파이어베이스에 저장*/
         messageType = Chat.Type.TEXT;
         if (binding.chatEdit.getText().toString().equals(""))
             return;
@@ -388,8 +391,8 @@ public class RoomActivity extends AppCompatActivity {
         autoScroll = true;
     }
 
-    //초대하기->유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser() {
+        /*초대하기->유저추가 액티비티로 보낼 데이터 저장 후 intent*/
         Intent intent;
         intent = new Intent(this, UserListActivity.class);
 
@@ -409,8 +412,8 @@ public class RoomActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    //사용자 갤러리로 접근
     private void galleryAccess() {
+        /*사진 전송시 사용자 갤러리로 접근하는 함수*/
         /*final int[] image = {R.drawable.image_red,R.drawable.video_red};*/
         final String[] fileKind = {"image", "video","file"};
 
@@ -483,10 +486,9 @@ public class RoomActivity extends AppCompatActivity {
 
     }
 
-
-    //갤러리 액티비티에서 결과값을 제대로 받았는지 확인
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        /*갤러리 액티비티에서 결과값을 제대로 받았는지 확인*/
         super.onActivityResult(requestCode, resultCode, data);
         if ((requestCode == IMAGE_CODE || requestCode == VIDEO_CODE || requestCode == FILE_CODE) && resultCode == RESULT_OK) {
             filePath = data.getData();
@@ -512,9 +514,8 @@ public class RoomActivity extends AppCompatActivity {
         }
     }
 
-    // 파일명 찾기
-    private String getName(Uri uri)
-    {
+    private String getName(Uri uri) {
+        /*파일명 찾기*/
         String[] projection = { MediaStore.Images.ImageColumns.DISPLAY_NAME };
         Cursor cursor = managedQuery(uri, projection, null, null, null);
         int column_index = cursor
@@ -523,10 +524,8 @@ public class RoomActivity extends AppCompatActivity {
         return cursor.getString(column_index);
     }
 
-
-
-    //파일 확장자 가져오기
     public static String getMimeType(Context context, Uri uri) {
+        /*파일 확장자 가져오기*/
         String extension;
 
         if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
@@ -534,15 +533,13 @@ public class RoomActivity extends AppCompatActivity {
             extension = mime.getExtensionFromMimeType(context.getContentResolver().getType(uri));
         } else {
             extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(uri.getPath())).toString());
-
         }
 
         return extension;
     }
 
-
-    //firebase storage에 업로드하기
     public void uploadFile(int requestCode,String FileNameOrExtension) {
+        /*firebase storage에 파일(이미지, 비디오, 파일)을 업로드 하는 함수*/
         //Todo: 파이어베이스에 올리는 코드 수정 (node에서 링크 받아오기)
 
         final ProgressDialog progressDialog = new ProgressDialog(this);

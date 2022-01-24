@@ -60,7 +60,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         setContentView(view);
 
         myUserKey = ChatDB.getCurrentUserKey();
-        setView();
+        setUpUserListActivity();
         Log.d("TAG","hello");
     }
     @Override
@@ -74,8 +74,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         userListAdapter.setOnCheckBoxClickListener(null);
     }
 
-    public void setView() {
-
+    public void setUpUserListActivity() {
+    /*view, 변수 할당, click listener 등 한번만 설정되는 화면 구성 설정*/
         userList = new ArrayList[generationCountPerTen];
         for(int i = 0; i <generationCountPerTen; ++i) {
             userList[i] = new ArrayList<>();
@@ -83,21 +83,21 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         selectedList = new ArrayList<>();
         userDictionary = new HashMap<>();
 
-        /*유저리스트 리사이클러뷰 설정*/
+        //유저리스트 리사이클러뷰 설정
         userListAdapter = new UserListAdapter(getApplicationContext(), userList);
         binding.recyclerUserList.setAdapter(userListAdapter);
         binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
-        /*선택된 유저 뜨는 리사이클러뷰 설정*/
+        //선택된 유저 뜨는 리사이클러뷰 설정
         selectedListAdapter = new SelectedListAdapter(UserListActivity.this,selectedList);
         binding.selectedList.setAdapter(selectedListAdapter);
         binding.selectedList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL,false));
 
         binding.selectedList.setVisibility(View.GONE);
         setActionBar();
-        /*검색 기능 추가*/
+        //검색 기능 추가
         binding.searchText.addTextChangedListener(this);
 
-        /*취소, 완료 설정*/
+        //취소, 완료 설정
         binding.cancel.setOnClickListener(view -> finish());
         binding.complete.setOnClickListener(view -> {
             if(returnChoose().size()==0){
@@ -115,7 +115,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             }
         });
 
-        /*텍스트뷰 내용 지우기*/
+        //텍스트뷰 내용 지우기
         binding.searchButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -123,7 +123,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             }
         });
 
-        /*모두 선택 버튼 설정*/
+        //모두 선택 버튼 설정
         binding.checkedAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -224,7 +224,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     }
                 }
             });
-            /*스피너 설정*/
+            //스피너 설정
             if(ChatMode.getChatMode()>0){
                 binding.spinner.setVisibility(View.GONE);
                 //TODO : 나중에 allUsers가 아니라 해당 기수만 뜨도록.(현재 chatMode에 기수 정보 담으면 용도에 맞게 실행됨)

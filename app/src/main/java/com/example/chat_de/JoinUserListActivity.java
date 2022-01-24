@@ -51,7 +51,7 @@ public class JoinUserListActivity extends AppCompatActivity {
         }
 
         JoinUserListAdapter joinUserListAdapter;
-        joinUserListAdapter = new JoinUserListAdapter(joinUser);
+        joinUserListAdapter = new JoinUserListAdapter(joinUser, userMe);
         binding.listview.setAdapter(joinUserListAdapter);
 
         binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {

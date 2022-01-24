@@ -3,7 +3,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:gravity="center_horizontal"
+    android:gravity="start"
     android:layout_margin="20dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -13,17 +13,27 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="top"
-        android:layout_marginLeft="30dp"
         android:layout_marginTop="7dp"
         android:src="@drawable/knu_mark" />
 
+
     <TextView
         android:id="@+id/alertDialogItemTextView"
-        android:layout_marginLeft="15dp"
-        android:textSize="15dp"
+        android:layout_marginStart="10dp"
+        android:textSize="15sp"
         android:layout_gravity="center"
-        android:layout_width="match_parent"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/me"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="(나)"
+        android:textSize="15sp"
+        android:layout_gravity="center"
+        ></TextView>
+
+
 
 </LinearLayout>
 

@@ -14,10 +14,12 @@ import java.util.ArrayList;
 
 public class JoinUserListAdapter extends BaseAdapter {
     private ArrayList<User> myUserList;
+    private User userMe;
 
     // 생성할 클래스
-    JoinUserListAdapter(ArrayList<User> userList){
+    JoinUserListAdapter(ArrayList<User> userList, User user){
         myUserList=userList;
+        userMe=user;
     }
 
     @Override
@@ -46,6 +48,9 @@ public class JoinUserListAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.item_list_join_user, viewGroup,false);
         }
         itemListJoinUserBinding = ItemListJoinUserBinding.bind(view);
+
+        itemListJoinUserBinding.me.setVisibility(View.VISIBLE);
+
         itemListJoinUserBinding.alertDialogItemTextView.setText(item.getName());
 
         Glide
@@ -54,6 +59,9 @@ public class JoinUserListAdapter extends BaseAdapter {
                 .circleCrop()
                 .error(R.drawable.knu_mark)
                 .into(itemListJoinUserBinding.alertDialogItemImageView);
+
+        //사용자 자신을 알려주는 '(나)' text를 보이지 않도록 설정
+        if(!item.getUserKey().equals(userMe.getUserKey())) {itemListJoinUserBinding.me.setVisibility(View.GONE);}
 
         return view;
     }

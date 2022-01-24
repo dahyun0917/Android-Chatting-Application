@@ -8,15 +8,16 @@ import android.widget.BaseAdapter;
 
 import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ItemListJoinUserBinding;
+import com.example.chat_de.datas.AUser;
 import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;
 
 public class JoinUserListAdapter extends BaseAdapter {
-    private ArrayList<User> myUserList;
+    private ArrayList<AUser> myUserList;
 
     // 생성할 클래스
-    JoinUserListAdapter(ArrayList<User> userList){
+    JoinUserListAdapter(ArrayList<AUser> userList){
         myUserList=userList;
     }
 
@@ -38,7 +39,7 @@ public class JoinUserListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
         final Context context = viewGroup.getContext();
-        User item = myUserList.get(position);
+        AUser item = myUserList.get(position);
         ItemListJoinUserBinding itemListJoinUserBinding;
 
         if(view == null) {

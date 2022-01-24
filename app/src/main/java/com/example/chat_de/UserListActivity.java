@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.chat_de.databinding.ActivityUserListBinding;
+import com.example.chat_de.datas.AUser;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.User;
 
@@ -167,8 +168,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             }
         });
     }
-    private ArrayList<User> returnChoose(){
-        ArrayList<User> choose = new ArrayList<>();
+    private ArrayList<AUser> returnChoose(){
+        ArrayList<AUser> choose = new ArrayList<>();
         for(ArrayList<UserListItem> list : userList) {
             for (UserListItem i : list) {
                 if (i.getChecked()) {
@@ -180,7 +181,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     }
     private void createChatRoom(){
         //체크박스로 표시된 유저 정보를 받아옴.
-        ArrayList<User> list = returnChoose();
+        ArrayList<AUser> list = returnChoose();
         list.add(userMe);
         //채팅방 만들기 누른 유저 정보 : callUserName
         //새 ChatRoom 생성
@@ -197,22 +198,22 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     }
     private void inviteChatRoom(){
         //체크박스로 표시된 유저 정보를 받아옴
-        ArrayList<User> list = returnChoose();
+        ArrayList<AUser> list = returnChoose();
         //초대하기 누른 유저 정보 : callUserName
 
         ChatDB.inviteUserListCompleteListener(chatRoomKey, chatRoomMeta, list, userMe, dummyKey -> finish());
     }
-    private String changeToString(ArrayList<User> list, boolean formal){
+    private String changeToString(ArrayList<AUser> list, boolean formal){
         //유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.
         StringBuilder result = new StringBuilder();
         if(formal){
-            for(User i : list){
+            for(AUser i : list){
                 result.append(i.getName()).append("님, ");
             }
             return result.substring(0, result.length() - 3);
         }
         else {
-            for (User i : list) {
+            for (AUser i : list) {
                 result.append(i.getName()).append(", ");
             }
             return result.substring(0, result.length() - 2);

@@ -1,17 +1,13 @@
 package com.example.chat_de;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -19,6 +15,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chat_de.databinding.ActivityUserListBinding;
 import com.example.chat_de.datas.ChatRoomMeta;
@@ -183,7 +184,13 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private void showUserList() {
         //초기화 및 데이터 불러오기
 //        getAllUserList();
-        //TODO : 로딩시작
+
+        ProgressDialog loading = new ProgressDialog(this);
+        loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
+        //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
+        loading.show();
+
         ChatDB.getUsersCompleteEventListener(item -> {
             for(Map.Entry<String, User> i: item.entrySet()) {
                 if(!userKeySet.contains(i.getKey())) {
@@ -246,7 +253,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     }
                 });
             }
-            //TODO : 로딩끝
+
+            loading.dismiss();
         });
     }
     private ArrayList<User> returnChoose(){

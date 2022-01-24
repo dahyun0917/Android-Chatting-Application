@@ -245,6 +245,9 @@ public class VideoFrameActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+
+
+
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
@@ -254,7 +257,6 @@ public class VideoFrameActivity extends AppCompatActivity {
         player = new ExoPlayer.Builder(this).build();
         //플레이어뷰에게 플레이어 설정
         binding.videoView.setPlayer(player);
-
 
 
         MediaItem mediaItem = MediaItem.fromUri(videoUri);
@@ -268,7 +270,20 @@ public class VideoFrameActivity extends AppCompatActivity {
                    loading.dismiss();
                    player.play();
                }
+               if(binding.videoView.getControllerAutoShow()){
+                   screenTouchNum =0;
+                   binding.fromName.setVisibility(View.VISIBLE);
+                   binding.passDate.setVisibility(View.VISIBLE);
+                   binding.toolbar.setVisibility(View.VISIBLE);
+               }
+               if(playbackState==Player.STATE_ENDED){
+                   screenTouchNum =0;
+                   binding.fromName.setVisibility(View.VISIBLE);
+                   binding.passDate.setVisibility(View.VISIBLE);
+                   binding.toolbar.setVisibility(View.VISIBLE);
+               }
            }
+
        });
                 //player.play();
                 //로딩이 완료되어 준비가 되었을 때

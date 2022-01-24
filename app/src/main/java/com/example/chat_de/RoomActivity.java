@@ -1,11 +1,5 @@
 package com.example.chat_de;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -19,8 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -539,8 +531,7 @@ public class RoomActivity extends AppCompatActivity {
         String filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+extension;
 
         //uploads라는 폴더가 없으면 자동 생성
-        //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각 pre_2빼
-        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+chatRoomKey+"/" + filename);
+        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+chatRoomMeta.getName()+"/" + filename);
 
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);

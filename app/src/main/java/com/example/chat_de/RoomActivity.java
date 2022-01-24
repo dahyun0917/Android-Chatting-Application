@@ -3,6 +3,8 @@ package com.example.chat_de;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,6 +16,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -35,6 +38,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -406,6 +410,7 @@ public class RoomActivity extends AppCompatActivity {
             dialogItemList.add(itemMap);
         }*/
 
+
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("파일 종류") //제목
@@ -466,13 +471,17 @@ public class RoomActivity extends AppCompatActivity {
         if ((requestCode == IMAGE_CODE || requestCode == VIDEO_CODE || requestCode == FILE_CODE) && resultCode == RESULT_OK) {
             filePath = data.getData();
 
-            //String extension =getMimeType(this,filePath);
+            String extension =getMimeType(this,filePath);
             String fileName = getName(filePath);
             Log.d("filePath", String.valueOf(filePath));
-            //Log.d("확장자", getMimeType(this,filePath));
+            Log.d("확장자", getMimeType(this,filePath));
             Log.d("filename",fileName);
-            if (filePath != null)
-                uploadFile(requestCode,fileName);
+            if (filePath != null){
+                if(requestCode==FILE_CODE)
+                    uploadFile(requestCode,fileName);
+                else
+                    uploadFile(requestCode,extension);
+            }
             try {
                 InputStream in = getContentResolver().openInputStream(filePath);
                 //Bitmap img = BitmapFactory.decodeStream(in);
@@ -496,7 +505,7 @@ public class RoomActivity extends AppCompatActivity {
 
 
 
-    /*//파일 확장자 가져오기
+    //파일 확장자 가져오기
     public static String getMimeType(Context context, Uri uri) {
         String extension;
 
@@ -509,11 +518,11 @@ public class RoomActivity extends AppCompatActivity {
         }
 
         return extension;
-    }*/
+    }
 
 
     //firebase storage에 업로드하기
-    public void uploadFile(int requestCode,String originalFileName) {
+    public void uploadFile(int requestCode,String FileNameOrExtension) {
         //Todo: 파이어베이스에 올리는 코드 수정 (node에서 링크 받아오기)
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
@@ -531,10 +540,13 @@ public class RoomActivity extends AppCompatActivity {
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
         //TODO:파일에 맞는 확장자 추가
-        String filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey() +"_"+ originalFileName;
-
+        String filename;
+        if(requestCode==FILE_CODE)
+            filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey() +"_"+ FileNameOrExtension;
+        else
+            filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+FileNameOrExtension;
         //uploads라는 폴더가 없으면 자동 생성
-        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+chatRoomMeta.getName()+"/" + filename);
+        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+ChatDB.getRootPath()+"/"+chatRoomMeta.getName()+"/" + filename);
 
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);

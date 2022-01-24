@@ -12,8 +12,6 @@ import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ActivityUserProfileBinding;
 import com.example.chat_de.datas.User;
 
-import java.util.ArrayList;
-
 public class UserProfileActivity extends AppCompatActivity {
     private ActivityUserProfileBinding binding;
     private Dialog dialog;
@@ -42,6 +40,9 @@ public class UserProfileActivity extends AppCompatActivity {
                 .into(binding.profileImage);
         //이름 설정
         binding.userName.setText(userOther.getName());
+
+        if(userMe.userMeta().getUserKey().equals(userOther.userMeta().getUserKey()))
+            binding.makeChat.setVisibility(View.GONE);
         //채팅방 만들기 버튼 설정
         binding.makeChat.setOnClickListener(new View.OnClickListener() {
             @Override

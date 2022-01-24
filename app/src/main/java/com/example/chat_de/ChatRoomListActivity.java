@@ -1,21 +1,18 @@
 package com.example.chat_de;
 
 
-import static com.example.chat_de.ChatMode.getChatMode;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chat_de.databinding.ActivityChatRoomListBinding;
 
 
 public class ChatRoomListActivity extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
-    private final String USER_KEY = "user1";
+    private final String USER_KEY = "user2";
     private ActivityChatRoomListBinding binding;
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.chat_de;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.chat_de.databinding.FragmentChatRoomListBinding;
+import com.example.chat_de.datas.User;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -49,10 +52,18 @@ public class ChatRoomListFragment extends Fragment {
             binding.fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    selelctUser();
+                    selectUser();
                 }
             });
         }
+
+        binding.listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                chatRoomSettingDialog(chatRoomList.get(i).getChatRoomKey(), chatRoomList.get(i).getChatRoomName());
+                return true;
+            }
+        });
 
         return view;
     }
@@ -88,7 +99,30 @@ public class ChatRoomListFragment extends Fragment {
         getActivity().startActivity(intent);
     }
 
-    private void selelctUser(){
+    private void chatRoomSettingDialog(String chatRoomKey, String chatRoomName) {
+        String[] settings;
+        //TODO: !false부분 admin권한 보게 바꿔야함
+        if(!false) {
+            settings = new String[]{"채팅방 나가기"};
+        } else {
+            settings = new String[]{"채팅방 나가기", "채팅방 이름 바꾸기"};
+        }
+        AlertDialog.Builder dlg = new AlertDialog.Builder(getActivity());
+        dlg.setTitle(chatRoomName).setItems(settings, (dialogInterface, position) -> {
+            switch(position) {
+                case 0: //채팅방 나가기
+                    ArrayList<User> user = new ArrayList<>();
+                    user.add(ChatDB.getCurrentUser());
+                    ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {});
+                    break;
+                case 1: // 채팅방 이름 바꾸기
+                    //TODO: 채팅방 이름 바꾸기
+                    break;
+            }
+        }).show();
+    }
+
+    private void selectUser(){
         //RoomActivity로 넘어간 뒤, 종료
         Intent intent = new Intent(getActivity(), UserListActivity.class);
         intent.putExtra("tag",1);

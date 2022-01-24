@@ -1,7 +1,6 @@
 package com.example.chat_de;
 
 import android.app.DownloadManager;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,14 +32,15 @@ public class VideoFrameActivity extends AppCompatActivity {
     private String fromName;
     private String passDate;
     private String videoViewUrl;
-    private int screenTouchNum =0;
+    private int screenTouchNum =0;  //Todo: 스크린 터치 나중에 추가적으로 더 필요없으면 boolean으로 수정
+    private boolean downloadCancle = false;
 
     private DownloadManager downloadManager;
     private DownloadManager.Request request;
     private Uri urlToDownload;
     private long latestId = -1;
 
-    private int downPushed =0;
+    //private int downPushed =0;
     ProgressDialog loading;
     Uri videoUri;
 
@@ -98,13 +98,29 @@ public class VideoFrameActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                if(downPushed ==0){
+                /*if(downPushed ==0){
                     downPushed =1;
+                    binding.downloads.setVisibility(View.GONE);
+                    binding.downloadCancle.setVisibility(View.VISIBLE);
                     downVideo();
                 }
                 else
-                    Toast.makeText(getApplicationContext(),"다운로드중입니다.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"다운로드중입니다.",Toast.LENGTH_SHORT).show();*/
+                binding.downloads.setVisibility(View.GONE);
+                binding.downloadCancle.setVisibility(View.VISIBLE);
+                downVideo();
 
+            }
+        });
+
+        binding.downloadCancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                binding.downloads.setVisibility(View.VISIBLE);
+                binding.downloadCancle.setVisibility(View.GONE);
+                downloadCancle =true;
+                //Toast.makeText(view.getContext(), "다운로드 취소",Toast.LENGTH_SHORT).show();
+                downloadManager.remove(latestId);
             }
         });
        /* String extension = getExtension(videoViewUrl);
@@ -113,8 +129,8 @@ public class VideoFrameActivity extends AppCompatActivity {
 
     }
     @Override
-    public void onResume(){
-        super.onResume();
+    public void onPostResume(){
+        super.onPostResume();
         IntentFilter completeFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         registerReceiver(completeReceiver, completeFilter);
     }
@@ -145,6 +161,44 @@ public class VideoFrameActivity extends AppCompatActivity {
 
 
     }
+    /*// 다운로드 상태조회
+    private BroadcastReceiver downloadCompleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long reference = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+            if(latestId == reference){
+                DownloadManager.Query query = new DownloadManager.Query();  // 다운로드 항목 조회에 필요한 정보 포함
+                query.setFilterById(reference);
+                Cursor cursor = downloadManager.query(query);
+
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                int columnReason = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
+
+                int status = cursor.getInt(columnIndex);
+                int reason = cursor.getInt(columnReason);
+
+                cursor.close();
+
+                switch (status) {
+                    case DownloadManager.STATUS_SUCCESSFUL :
+                        binding.downloads.setVisibility(View.VISIBLE);
+                        binding.downloadCancle.setVisibility(View.GONE);
+                        Toast.makeText(context, "download/KNU_AMP에 다운로드를 완료하였습니다.", Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case DownloadManager.STATUS_PAUSED :
+                        Toast.makeText(context, "다운로드가 중단되었습니다.", Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case DownloadManager.STATUS_FAILED :
+                        Toast.makeText(context, "다운로드가 취소되었습니다.", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        }
+    };*/
 
     //파일 확장자 가져오기
     public static String getExtension(String fileStr){
@@ -154,21 +208,45 @@ public class VideoFrameActivity extends AppCompatActivity {
         return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
     }
 
-    //다운로드 완료되었을 때 작동
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context, "download/KNU_AMP에 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
-            downPushed =0;
+            binding.downloads.setVisibility(View.VISIBLE);
+            binding.downloadCancle.setVisibility(View.GONE);
+            if(!downloadCancle) Toast.makeText(context, "다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
+            else if( downloadCancle ) {
+                downloadCancle =false;
+                Toast.makeText(context, "다운로드 취소.",Toast.LENGTH_SHORT).show();
+            }
         }
 
     };
+
+
+    /*@Override
+    protected void onPostResume() {
+        super.onPostResume();
+
+        // 브로드캐스트 리시버 등록
+        // ACTION_DOWNLOAD_COMPLETE : 다운로드가 완료되었을 때 전달
+        IntentFilter completeFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        registerReceiver(downloadCompleteReceiver, completeFilter);
+    }*/
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        unregisterReceiver(completeReceiver);
+    }
 
     //화면에 보이기 시작할때!!
     @Override
     protected void onStart() {
         super.onStart();
+
+
+
 
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -179,7 +257,6 @@ public class VideoFrameActivity extends AppCompatActivity {
         player = new ExoPlayer.Builder(this).build();
         //플레이어뷰에게 플레이어 설정
         binding.videoView.setPlayer(player);
-
 
 
         MediaItem mediaItem = MediaItem.fromUri(videoUri);
@@ -193,7 +270,20 @@ public class VideoFrameActivity extends AppCompatActivity {
                    loading.dismiss();
                    player.play();
                }
+               if(binding.videoView.getControllerAutoShow()){
+                   screenTouchNum =0;
+                   binding.fromName.setVisibility(View.VISIBLE);
+                   binding.passDate.setVisibility(View.VISIBLE);
+                   binding.toolbar.setVisibility(View.VISIBLE);
+               }
+               if(playbackState==Player.STATE_ENDED){
+                   screenTouchNum =0;
+                   binding.fromName.setVisibility(View.VISIBLE);
+                   binding.passDate.setVisibility(View.VISIBLE);
+                   binding.toolbar.setVisibility(View.VISIBLE);
+               }
            }
+
        });
                 //player.play();
                 //로딩이 완료되어 준비가 되었을 때

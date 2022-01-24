@@ -15,6 +15,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
@@ -127,6 +129,9 @@ public class RoomActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     public void setUpRoomActivity() {
+        //플로팅버튼 숨기기
+        binding.fab.setVisibility(View.GONE);
+
         //리사이클러뷰 설정
         initRecyclerView();
         initScrollListener();
@@ -212,7 +217,12 @@ public class RoomActivity extends AppCompatActivity {
                 if (!recyclerView.canScrollVertically(1)) { //최하단에 닿았을 때
                     Log.d("TAG", String.valueOf(autoScroll));
                     autoScroll = true;
-                    binding.fab.hide();
+                    if(binding.fab.getVisibility() == View.VISIBLE) {
+                        Animation animation = AnimationUtils.loadAnimation(RoomActivity.this, R.anim.scale_down);
+                        binding.fab.startAnimation(animation);
+                        binding.fab.setVisibility(View.GONE);
+                    }
+                    //binding.fab.hide();
                 } else if (!recyclerView.canScrollVertically(-1)) { //최상단에 닿았을 때
                     if (!isLoading) {
                         if (frontChatKey != null) {
@@ -220,11 +230,21 @@ public class RoomActivity extends AppCompatActivity {
                             isLoading = true;
                         }
                         autoScroll = false;
-                        binding.fab.show();
+                        if(binding.fab.getVisibility() != View.VISIBLE) {
+                            Animation animation = AnimationUtils.loadAnimation(RoomActivity.this, R.anim.scale_up);
+                            binding.fab.startAnimation(animation);
+                            binding.fab.setVisibility(View.VISIBLE);
+                        }
+                        //binding.fab.show();
                     }
                 } else {
                     autoScroll = false;
-                    binding.fab.show();
+                    //binding.fab.show();
+                    if(binding.fab.getVisibility() != View.VISIBLE) {
+                        Animation animation = AnimationUtils.loadAnimation(RoomActivity.this, R.anim.scale_up);
+                        binding.fab.startAnimation(animation);
+                        binding.fab.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         });

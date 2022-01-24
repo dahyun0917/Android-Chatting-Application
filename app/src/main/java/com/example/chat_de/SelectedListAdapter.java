@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ItemRecyclerSelectedUserBinding;
+import com.example.chat_de.datas.AUser;
 import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;
@@ -51,10 +52,9 @@ public class SelectedListAdapter extends RecyclerView.Adapter<SelectedListAdapte
             super(itemView);
             itemBinding = ItemRecyclerSelectedUserBinding.bind(itemView);
         }
-        void bind(User user) {
+        void bind(AUser user) {
             itemBinding.selectedUserName.setText(user.getName());
-            Glide
-                    .with(this.itemView.getContext())
+            Glide.with(this.itemView.getContext())
                     .load(user.getPictureURL())
                     .circleCrop()
                     .placeholder(R.drawable.knu_mark)

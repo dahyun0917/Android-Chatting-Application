@@ -41,6 +41,7 @@ public class ImageFrameActivity extends AppCompatActivity {
     private DownloadManager.Request request;
     private Uri urlToDownload;
     private long latestId = -1;
+    private boolean downloadCancle = false;
 
     private int downPushed =0;
 
@@ -118,13 +119,21 @@ public class ImageFrameActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                if(downPushed ==0){
-                    downPushed =1;
-                    downImage();
-                }
-                else
-                    Toast.makeText(getApplicationContext(),"다운로드중입니다.",Toast.LENGTH_SHORT).show();
+                binding.downloads.setVisibility(View.GONE);
+                binding.downloadCancle.setVisibility(View.VISIBLE);
+                downImage();
 
+            }
+        });
+
+        binding.downloadCancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                binding.downloads.setVisibility(View.VISIBLE);
+                binding.downloadCancle.setVisibility(View.GONE);
+                downloadCancle =true;
+                //Toast.makeText(view.getContext(), "다운로드 취소",Toast.LENGTH_SHORT).show();
+                downloadManager.remove(latestId);
             }
         });
 
@@ -178,14 +187,17 @@ public class ImageFrameActivity extends AppCompatActivity {
         return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
     }
 
-    //다운로드 완료되었을 때 작동
-    //TODO: 토스트 메세지 수정 상의하기
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context, "download/KNU_AMP에 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
-            downPushed =0;
+            binding.downloads.setVisibility(View.VISIBLE);
+            binding.downloadCancle.setVisibility(View.GONE);
+            if(!downloadCancle) Toast.makeText(context, "다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
+            else if( downloadCancle ) {
+                downloadCancle =false;
+                Toast.makeText(context, "다운로드 취소.",Toast.LENGTH_SHORT).show();
+            }
         }
 
     };

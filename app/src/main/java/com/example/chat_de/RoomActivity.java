@@ -19,20 +19,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
 import com.example.chat_de.datas.Chat;
@@ -61,11 +53,10 @@ public class RoomActivity extends AppCompatActivity {
     private ActivityRoomBinding binding;
     private RoomElementAdapter roomElementAdapter;
     private LinearLayoutManager manager;
-    //private ListView chat_view;
 
-    private int IMAGE_CODE = 10;
-    private int VIDEO_CODE = 20;
-    private int FILE_CODE = 30;
+    private final int IMAGE_CODE = 10;
+    private final int VIDEO_CODE = 20;
+    private final int FILE_CODE = 30;
     private String chatRoomKey;
 
     private ChatRoomUser currentUser; //TODO LOGIN : 현재 로그인된 사용자
@@ -302,21 +293,11 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void showJoinedUserList() {
-        /*final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
-        AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
-        dlg.setTitle("참가자"); //제목
-        for (String i : userList.keySet()) {
-            adapter.add(userList.get(i).getUserMeta().getName());
-        }
-        dlg.setAdapter(adapter, null);
-        dlg.setPositiveButton("확인", null);
-        dlg.show();*/
-
         Intent intent = new Intent(this, JoinUserListActivity.class);
 
         //사용자 정보 전송
-        intent.putExtra("userlist", userList);
-        intent.putExtra("userMe",currentUser.userMeta());
+        intent.putExtra("userList", userList);
+        intent.putExtra("userMe", currentUser.userMeta());
         startActivity(intent);
     }
 
@@ -400,8 +381,13 @@ public class RoomActivity extends AppCompatActivity {
         intent.putExtra("chatRoomKey", chatRoomKey);
         intent.putExtra("chatRoomMeta", chatRoomMeta);
         intent.putExtra("myUserKey", currentUser.userMeta().getUserKey());
-        HashSet<String> set = new HashSet<>(userList.size());
-        set.addAll(userList.keySet());
+        //TODO: 현재 채팅방에 있는 유저리스트를 항상 새로 만들지 않게 변경 필요
+        HashSet<String> set = new HashSet<>();
+        for(ChatRoomUser e : userList.values()) {
+            if(e.getExist()) {
+                set.add(e.getUserKey());
+            }
+        }
         intent.putExtra("userList", set);
 
         startActivity(intent);

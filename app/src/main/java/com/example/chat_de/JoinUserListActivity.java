@@ -1,10 +1,7 @@
 package com.example.chat_de;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -19,12 +16,10 @@ import java.util.HashMap;
 
 public class JoinUserListActivity extends AppCompatActivity {
     private ActivityJoinUserBinding binding;
-    private Dialog dialog;
     private User userOther = new User();
     private User userMe;
     private HashMap<String, ChatRoomUser> userList = new HashMap<>();
     private ArrayList<User> joinUser = new ArrayList<>();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,11 +37,12 @@ public class JoinUserListActivity extends AppCompatActivity {
 
         /*userList.add(userMe);
         userList.add(userOther);*/
-        userList = (HashMap<String,ChatRoomUser>)getIntent().getSerializableExtra("userlist");
+        userList = (HashMap<String,ChatRoomUser>)getIntent().getSerializableExtra("userList");
 
-
-        for (String i : userList.keySet()) {
-            joinUser.add(userList.get(i).userMeta());
+        for (ChatRoomUser e : userList.values()) {
+            if(e.getExist()) {
+                joinUser.add(e);
+            }
         }
 
         JoinUserListAdapter joinUserListAdapter;
@@ -70,7 +66,4 @@ public class JoinUserListActivity extends AppCompatActivity {
         intent.putExtra("userMe", userMe);
         startActivity(intent);
     }
-
-
-
 }

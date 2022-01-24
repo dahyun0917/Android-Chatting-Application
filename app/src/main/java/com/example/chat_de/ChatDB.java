@@ -40,20 +40,24 @@ public class ChatDB {
     private static String rootPath;
     private static String currentUserKey = null;
     private static boolean adminMode = false;
+    private static User currentUser = null;
 
     public static void setReference(String root, String userKey, boolean adminMode) { // 앱 시작할때 딱 1번만 호출할 것
-        ref = null;
         ref = FirebaseDatabase.getInstance().getReference(root);
         rootPath = root;
         currentUserKey = userKey;
         ChatDB.adminMode = adminMode;
+        ref.child(makePath(USERS, userKey)).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                currentUser = task.getResult().getValue(User.class);
+            } else {
+                Log.e("FRD", "Can not get user data of: " + userKey);
+            }
+        });
     }
-
-
-    public static boolean getAdminMode() {
-        return adminMode;
+    public static void setCurrentUser(User user) {
+        currentUser = user;
     }
-
     public static void setRootPath(@NonNull String root) {
         removeEventListenerBindOnThis();
         ref = FirebaseDatabase.getInstance().getReference(root);
@@ -64,9 +68,16 @@ public class ChatDB {
     public static String getRootPath() {
         return rootPath;
     }
+    public static boolean getAdminMode() {
+        return adminMode;
+    }
     //TODO : intent로 본인의 키를 넘겨주는 부분 있으면 전부 이쪽으로 바꿔야 함
     public static String getCurrentUserKey() {
         return currentUserKey;
+    }
+    //TODO : intent로 본인의 데이터를 넘겨주는 부분 있으면 가급적 이쪽으로 바꿔주는게 좋음
+    public static User getCurrentUser() {
+        return currentUser;
     }
 
     public static void checkUserExist(String userKey, IEventListener<Boolean> listener) {
@@ -206,7 +217,6 @@ public class ChatDB {
             }
         });
     }
-
     public static void userReadLastMessage(String chatRoomKey, String userKey) {
         ref.child(CHAT_ROOMS).child(chatRoomKey).child(CHAT_ROOM_META).child(LAST_MESSAGE_INDEX).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -381,6 +391,26 @@ public class ChatDB {
                 listener.eventListener(dataSnapshot.getValue(ChatRoomMeta.class));
             } else {
                 Log.e("FRD", "Can not get meta data of the" + chatRoomKey);
+            }
+        });
+    }
+
+    public static void exitChatRoomCompleteListener(String chatRoomKey, @NonNull ArrayList<User> userList, IVoidEventListener listener) {
+        HashMap<String, Object> result = new HashMap<>();
+        StringBuilder builder = new StringBuilder();
+        for(User user: userList) {
+            String userKey = user.getUserKey();
+            result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userKey), null);
+            result.put(makePath(USER_JOINED, userKey, chatRoomKey), null);
+            builder.append(user.getName()).append("님, ");
+        }
+        final String exitMessage = builder.substring(0, builder.length() - 2) + "이 채팅방을 나가셨습니다.";
+        ref.updateChildren(result, (error, rf) -> {
+            if(error == null) {
+                uploadMessage(exitMessage, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM", new HashMap<>());
+                listener.eventListener();
+            } else {
+                Log.e("FRD", "Can not delete data: " + error);
             }
         });
     }

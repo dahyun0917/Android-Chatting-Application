@@ -6,6 +6,7 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.chat_de.datas.AUser;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomMeta;
@@ -41,7 +42,7 @@ public class ChatDB {
     private static String rootPath;
     private static String currentUserKey = null;
     private static boolean adminMode = false;
-    private static User currentUser = null;
+    private static AUser currentUser = null;
 
     public static void setReference(String root, String userKey, boolean adminMode) { // 앱 시작할때 딱 1번만 호출할 것
         ref = FirebaseDatabase.getInstance().getReference(root);
@@ -56,7 +57,7 @@ public class ChatDB {
             }
         });
     }
-    public static void setCurrentUser(User user) {
+    public static void setCurrentUser(AUser user) {
         currentUser = user;
     }
     public static void setRootPath(@NonNull String root) {
@@ -77,7 +78,7 @@ public class ChatDB {
         return currentUserKey;
     }
     //TODO : intent로 본인의 데이터를 넘겨주는 부분 있으면 가급적 이쪽으로 바꿔주는게 좋음
-    public static User getCurrentUser() {
+    public static AUser getCurrentUser() {
         return currentUser;
     }
 
@@ -118,7 +119,7 @@ public class ChatDB {
             }
         });
     }
-    public static void setChatRoomCompleteListener(String chatRoomName, ArrayList<User> userList, User userMe, IEventListener<String> listener) {
+    public static void setChatRoomCompleteListener(String chatRoomName, ArrayList<AUser> userList, User userMe, IEventListener<String> listener) {
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER,"");
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
@@ -160,9 +161,9 @@ public class ChatDB {
             }
         });
     }
-    public static void inviteUserListCompleteListener(String chatRoomKey, ChatRoomMeta chatRoomMeta, ArrayList<User> userList, User userMe, IEventListener<String> listener) {
+    public static void inviteUserListCompleteListener(String chatRoomKey, ChatRoomMeta chatRoomMeta, ArrayList<AUser> userList, User userMe, IEventListener<String> listener) {
         HashMap<String, Object> result = new HashMap<>();
-        for (User item : userList) {
+        for (AUser item : userList) {
             // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
             result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, item.getUserKey()), new ChatRoomUser(item.userMeta()));
             // userJoined의 userKey들에 새로운 chatRoom 추가
@@ -172,7 +173,7 @@ public class ChatDB {
         ref.updateChildren(result).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 StringBuilder builder = new StringBuilder(userMe.getName() + "님이 ");
-                for(User user: userList) {
+                for(AUser user: userList) {
                     if(!user.getUserKey().equals(userMe.getUserKey())) {
                         builder.append(user.getName()).append("님, ");
                     }
@@ -396,10 +397,10 @@ public class ChatDB {
         });
     }
 
-    public static void exitChatRoomCompleteListener(String chatRoomKey, @NonNull ArrayList<User> userList, IVoidEventListener listener) {
+    public static void exitChatRoomCompleteListener(String chatRoomKey, @NonNull ArrayList<AUser> userList, IVoidEventListener listener) {
         HashMap<String, Object> result = new HashMap<>();
         StringBuilder builder = new StringBuilder();
-        for(User user: userList) {
+        for(AUser user: userList) {
             String userKey = user.getUserKey();
             result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userKey, EXIST), false);
             result.put(makePath(USER_JOINED, userKey, chatRoomKey), null);

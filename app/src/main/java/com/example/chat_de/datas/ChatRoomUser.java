@@ -4,10 +4,8 @@ import androidx.annotation.NonNull;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.io.Serializable;
-
 @IgnoreExtraProperties
-public class ChatRoomUser extends User {
+public class ChatRoomUser extends AUser {
     private int lastReadIndex;
     private boolean exist;
 
@@ -17,7 +15,7 @@ public class ChatRoomUser extends User {
         setExist(exist);
         setUserMeta(userMeta);
     }
-    public ChatRoomUser(User userMeta) {
+    public ChatRoomUser(AUser userMeta) {
         setLastReadIndex(-1);
         setExist(true);
         setUserMeta(userMeta);
@@ -34,7 +32,7 @@ public class ChatRoomUser extends User {
 
     public void setLastReadIndex(int lastReadIndex) { this.lastReadIndex = lastReadIndex; }
     public void setExist(boolean exist)             { this.exist = exist; }
-    public void setUserMeta(@NonNull User userMeta) {
+    public void setUserMeta(@NonNull AUser userMeta) {
         name = userMeta.getName();
         pictureURL = userMeta.getPictureURL();
         generation = userMeta.getGeneration();

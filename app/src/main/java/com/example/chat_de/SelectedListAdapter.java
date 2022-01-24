@@ -16,18 +16,13 @@ import java.util.ArrayList;
 
 public class SelectedListAdapter extends RecyclerView.Adapter<SelectedListAdapter.SelectedListViewHolder> {
     Context context;
-    private ArrayList<User> selectedUsers;
+    private ArrayList<UserListItem> selectedUsers;
 
     //생성자
-    public SelectedListAdapter(Context context, ArrayList<User> userList) {
+    public SelectedListAdapter(Context context, ArrayList<UserListItem> userList) {
         super();
         this.context = context;
         this.selectedUsers = userList;
-    }
-
-    public void setSelectedUsers(ArrayList<User> selectedUsers) {
-        this.selectedUsers = selectedUsers;
-        this.notifyDataSetChanged();
     }
 
     @NonNull

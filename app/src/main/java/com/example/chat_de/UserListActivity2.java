@@ -23,13 +23,17 @@ import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
 public class UserListActivity2 extends AppCompatActivity implements TextWatcher {
 
     private ArrayList<UserListItem> userList = new ArrayList();
+    private ArrayList<UserListItem> selectedList = new ArrayList<>();
     private UserListAdapter userListAdapter;
+    private SelectedListAdapter selectedListAdapter;
+    private HashMap<String, UserListItem> userDictionary = new HashMap<>();
 
     private final int NEW_CHAT = 1;
     private final int INVITE_CHAT = 2;
@@ -49,10 +53,42 @@ public class UserListActivity2 extends AppCompatActivity implements TextWatcher 
         View view = binding.getRoot();
         setContentView(view);
         myUserKey = ChatDB.getCurrentUserKey();
-        setActionBar();
+        setView();
+    }
+    protected void onStart() {
+        super.onStart();
         showUserList();
     }
+    public void setView() {
+        setActionBar();
+        /*검색 기능 추가*/
+        binding.searchText.addTextChangedListener(this);
 
+        /*취소, 완료 설정*/
+        binding.cancel.setOnClickListener(view -> finish());
+        binding.complete.setOnClickListener(view -> {
+            if(returnChoose().size()==0){
+                Toast.makeText(UserListActivity2.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
+            }
+            else{
+                if(mode== NEW_CHAT){
+                    //채팅방 만들기
+                    showNewChatDialog();
+                }
+                else if(mode==INVITE_CHAT){
+                    //초대하기
+                    inviteChatRoom();
+                }
+            }
+        });
+        /*텍스트뷰 내용 지우기*/
+        binding.searchButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                binding.searchText.setText(null);
+            }
+        });
+    }
     public void setActionBar(){
         //인텐트로 mode값 , 초대/생성하는 User 정보 받아오기기
         Intent intent = getIntent();
@@ -102,38 +138,28 @@ public class UserListActivity2 extends AppCompatActivity implements TextWatcher 
                     userList.add(new UserListItem(i.getValue()));
                 }
             }
+            //유저 리스트 리사이클러뷰 설정
             userMe = item.get(myUserKey);
             userListAdapter = new UserListAdapter(getApplicationContext(), userList);
             binding.recyclerUserList.setAdapter(userListAdapter);
             binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
-        });
-        /*검색 기능 추가*/
-        binding.searchText.addTextChangedListener(this);
-
-        /*취소, 완료 설정*/
-        binding.cancel.setOnClickListener(view -> finish());
-        binding.complete.setOnClickListener(view -> {
-            if(returnChoose().size()==0){
-                Toast.makeText(UserListActivity2.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
-            }
-            else{
-                if(mode== NEW_CHAT){
-                    //채팅방 만들기
-                    showNewChatDialog();
+            /*선택된 유저 뜨는 리사이클러뷰 설정*/
+            selectedListAdapter = new SelectedListAdapter(UserListActivity2.this,selectedList);
+            binding.selectedList2.setAdapter(selectedListAdapter);
+            binding.selectedList2.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL,false));
+            userListAdapter.setOnCheckBoxClickListener(new CheckBoxClickListener() {
+                @Override
+                public void onCheckedClick(String userID) {
+                    selectedList.add(userDictionary.get(userID));
+                    selectedListAdapter.notifyDataSetChanged();
                 }
-                else if(mode==INVITE_CHAT){
-                    //초대하기
-                    inviteChatRoom();
-                }
-            }
-        });
 
-        /*텍스트뷰 내용 지우기*/
-        binding.searchButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                binding.searchText.setText(null);
-            }
+                @Override
+                public void onUnCheckedClick(String userID) {
+                    selectedList.remove(userDictionary.get(userID));
+                    selectedListAdapter.notifyDataSetChanged();
+                }
+            });
         });
     }
     private ArrayList<User> returnChoose(){

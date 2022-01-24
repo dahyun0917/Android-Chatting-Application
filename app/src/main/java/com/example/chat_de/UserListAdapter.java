@@ -101,6 +101,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
         this.listener = listener;
     }
 
+    public ArrayList<UserListItem> getFilterUserList(){
+        return filteredUsers;
+    }
+
     @Override
     public Filter getFilter() {
         return new Filter() {

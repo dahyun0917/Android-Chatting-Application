@@ -13,6 +13,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -34,7 +36,6 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private ArrayList<UserListItem> selectedList = new ArrayList<>();
     private UserListAdapter userListAdapter;
     private SelectedListAdapter selectedListAdapter;
-    //private HashMap<String, Pair<Integer, Integer>> userDictionary = new HashMap<>();
     private HashMap<String, UserListItem> userDictionary = new HashMap<>();
 
     private final int NEW_CHAT = 1;
@@ -66,6 +67,12 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         super.onStart();
         showUserList();
     }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        userListAdapter.setOnCheckBoxClickListener(null);
+    }
+
     public void setView() {
         binding.selectedList.setVisibility(View.GONE);
         setActionBar();
@@ -97,6 +104,30 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 binding.searchText.setText(null);
             }
         });
+
+        /*모두 선택 버튼 설정*/
+        binding.checkedAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                binding.selectedList.setVisibility(View.VISIBLE);
+                for(UserListItem i: userListAdapter.getFilterUserList()){
+                    i.setChecked(true);
+                    if(!selectedList.contains(userDictionary.get(i.getUserKey())))
+                        selectedList.add(userDictionary.get(i.getUserKey()));
+                }
+                selectedListAdapter.notifyDataSetChanged();
+                userListAdapter.notifyDataSetChanged();
+            }
+        });
+
+        /*유저리스트 리사이클러뷰 설정*/
+        userListAdapter = new UserListAdapter(getApplicationContext(), userList);
+        binding.recyclerUserList.setAdapter(userListAdapter);
+        binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
+        /*선택된 유저 뜨는 리사이클러뷰 설정*/
+        selectedListAdapter = new SelectedListAdapter(UserListActivity.this,selectedList);
+        binding.selectedList.setAdapter(selectedListAdapter);
+        binding.selectedList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL,false));
     }
     public void setActionBar(){
         //인텐트로 mode값 , 초대/생성하는 User 정보 받아오기기
@@ -151,21 +182,18 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     classifyAdd(new UserListItem(i.getValue()));
                 }
             }
-            //유저 리스트 리사이클러뷰 설정
             userMe = item.get(myUserKey);
-            userListAdapter = new UserListAdapter(getApplicationContext(), userList);
-            binding.recyclerUserList.setAdapter(userListAdapter);
-            binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
-            /*선택된 유저 뜨는 리사이클러뷰 설정*/
-            selectedListAdapter = new SelectedListAdapter(UserListActivity.this,selectedList);
-            binding.selectedList.setAdapter(selectedListAdapter);
-            binding.selectedList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL,false));
             userListAdapter.setOnCheckBoxClickListener(new CheckBoxClickListener() {
                 @Override
                 public void onCheckedClick(String userID) {
                     selectedList.add(userDictionary.get(userID));
                     selectedListAdapter.notifyDataSetChanged();
-                    binding.selectedList.setVisibility(View.VISIBLE);
+                    if(selectedList.size()==1){
+                        Animation animation = new AlphaAnimation(0, 1);
+                        animation.setDuration(200);
+                        binding.selectedList.setVisibility(View.VISIBLE);
+                        binding.selectedList.setAnimation(animation);
+                    }
                 }
 
                 @Override
@@ -173,11 +201,14 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     selectedList.remove(userDictionary.get(userID));
                     selectedListAdapter.notifyDataSetChanged();
                     if(selectedList.size() == 0){
+                        Animation animation = new AlphaAnimation(1, 0);
+                        animation.setDuration(80);
                         binding.selectedList.setVisibility(View.GONE);
+                        binding.selectedList.setAnimation(animation);
                     }
                 }
             });
-            //스피너 설정
+            /*스피너 설정*/
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,items);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
             binding.spinner.setAdapter(adapter);

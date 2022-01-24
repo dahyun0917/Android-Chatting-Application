@@ -99,12 +99,18 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/clear_button" />
         </RelativeLayout>
+        <Button
+            android:id="@+id/checked_all"
+            android:layout_below="@id/search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="모두 선택"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerUserList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/search_bar"
+            android:layout_below="@id/checked_all"
             android:background="@color/backgroundUserList" />
     </RelativeLayout>
 

@@ -67,6 +67,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         showUserList();
     }
     public void setView() {
+        binding.selectedList.setVisibility(View.GONE);
         setActionBar();
         /*검색 기능 추가*/
         binding.searchText.addTextChangedListener(this);
@@ -164,12 +165,16 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 public void onCheckedClick(String userID) {
                     selectedList.add(userDictionary.get(userID));
                     selectedListAdapter.notifyDataSetChanged();
+                    binding.selectedList.setVisibility(View.VISIBLE);
                 }
 
                 @Override
                 public void onUnCheckedClick(String userID) {
                     selectedList.remove(userDictionary.get(userID));
                     selectedListAdapter.notifyDataSetChanged();
+                    if(selectedList.size() == 0){
+                        binding.selectedList.setVisibility(View.GONE);
+                    }
                 }
             });
             //스피너 설정
@@ -247,7 +252,6 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             return result.substring(0, result.length() - 2);
         }
     }
-
     @Override
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
     @Override

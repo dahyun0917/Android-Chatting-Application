@@ -1,11 +1,5 @@
 package com.example.chat_de;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -371,12 +365,8 @@ public class RoomActivity extends AppCompatActivity {
     //초대하기->유저추가 액티비티로 보낼 데이터 저장 후 intent
     private void inviteUser() {
         Intent intent;
-        if(ChatMode.getChatMode() > 0) {
-            intent = new Intent(this, UserListActivity2.class);
-        }
-        else {
-            intent = new Intent(this, UserListActivity.class);
-        }
+        intent = new Intent(this, UserListActivity.class);
+
         intent.putExtra("tag", 2);
         intent.putExtra("chatRoomKey", chatRoomKey);
         intent.putExtra("chatRoomMeta", chatRoomMeta);
@@ -526,8 +516,7 @@ public class RoomActivity extends AppCompatActivity {
         String filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+extension;
 
         //uploads라는 폴더가 없으면 자동 생성
-        //TODO : chatroom key로 폴더명을 바꾸는 것이 좋을 것으로 생각 pre_2빼
-        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+chatRoomKey+"/" + filename);
+        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+chatRoomMeta.getName()+"/" + filename);
 
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);

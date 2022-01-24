@@ -1,10 +1,12 @@
 package com.example.chat_de;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chat_de.databinding.ActivityJoinUserBinding;
@@ -40,8 +42,10 @@ public class JoinUserListActivity extends AppCompatActivity {
         userList.add(userOther);*/
         userList = (HashMap<String, ChatRoomUser>)getIntent().getSerializableExtra("userList");
 
+
+        joinUser.add(userList.get(userMe.getUserKey()).userMeta());
         for (ChatRoomUser e : userList.values()) {
-            if(e.getExist()) {
+            if(e.getExist() && !e.getUserKey().equals(userMe.getUserKey())) {
                 joinUser.add(e);
             }
         }
@@ -54,7 +58,10 @@ public class JoinUserListActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 userOther = joinUser.get(i);
-                userProFile();
+                //current user를 제외한 다른 사용자을 클릭 시 일대일 채팅을 할 수 있도록 설정
+                if(!userMe.getUserKey().equals(userOther.getUserKey())) {
+                    userProFile();
+                }
             }
         });
     }

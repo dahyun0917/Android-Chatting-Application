@@ -154,6 +154,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             userMe = item.get(myUserKey);
             userListAdapter = new UserListAdapter(getApplicationContext(), userList);
             binding.recyclerUserList.setAdapter(userListAdapter);
+            binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
             /*선택된 유저 뜨는 리사이클러뷰 설정*/
             selectedListAdapter = new SelectedListAdapter(UserListActivity.this,selectedList);
             binding.selectedList.setAdapter(selectedListAdapter);
@@ -171,10 +172,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     selectedListAdapter.notifyDataSetChanged();
                 }
             });
-            binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
             //스피너 설정
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,items);
-            //항목 선택시 보이는 별도창의 각 아이템을 위한 레이아웃 설정
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
             binding.spinner.setAdapter(adapter);
             binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

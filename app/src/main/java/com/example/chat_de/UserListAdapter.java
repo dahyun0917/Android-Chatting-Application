@@ -72,6 +72,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 //체크상태가 바뀌면 item의 checked값도 바뀜.
                 if(compoundButton.isChecked()){
+                    item.setChecked(compoundButton.isChecked());
                     listener.onCheckedClick(item.getUserKey());
                 }
                 else {

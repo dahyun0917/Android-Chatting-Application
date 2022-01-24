@@ -104,11 +104,11 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 Toast.makeText(UserListActivity.this,"초대할 사람을 선택해주세요.",Toast.LENGTH_SHORT).show();
             }
             else{
-                if(mode== NEW_CHAT){
+                if(mode == NEW_CHAT){
                     //채팅방 만들기
                     showNewChatDialog();
                 }
-                else if(mode==INVITE_CHAT){
+                else if(mode == INVITE_CHAT){
                     //초대하기
                     inviteChatRoom();
                 }
@@ -145,11 +145,11 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         userKeySet = (HashSet<String>)intent.getSerializableExtra("userList");
         setSupportActionBar(binding.toolbarUserList);
         getSupportActionBar().setTitle("");
-        if(mode== NEW_CHAT){
+        if(mode == NEW_CHAT){
             //채팅방 만들기
             binding.userListMode.setText("새 채팅방 만들기"); ;
         }
-        else if(mode==INVITE_CHAT){
+        else if(mode == INVITE_CHAT){
             //초대하기
             binding.userListMode.setText("초대하기");
             chatRoomKey = intent.getStringExtra("chatRoomKey");
@@ -254,7 +254,6 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     }
                 });
             }
-
             loading.dismiss();
         });
     }

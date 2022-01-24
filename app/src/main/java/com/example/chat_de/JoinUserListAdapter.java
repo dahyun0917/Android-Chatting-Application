@@ -8,18 +8,18 @@ import android.widget.BaseAdapter;
 
 import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ItemListJoinUserBinding;
-import com.example.chat_de.datas.User;
+import com.example.chat_de.datas.AUser;
 
 import java.util.ArrayList;
 
 public class JoinUserListAdapter extends BaseAdapter {
-    private ArrayList<User> myUserList;
-    private User userMe;
+    private ArrayList<AUser> myUserList;
+    private AUser userMe;
 
     // 생성할 클래스
-    JoinUserListAdapter(ArrayList<User> userList, User user){
-        myUserList=userList;
-        userMe=user;
+    JoinUserListAdapter(ArrayList<AUser> userList, AUser user){
+        myUserList = userList;
+        userMe = user;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class JoinUserListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
         final Context context = viewGroup.getContext();
-        User item = myUserList.get(position);
+        AUser item = myUserList.get(position);
         ItemListJoinUserBinding itemListJoinUserBinding;
 
         if(view == null) {
@@ -48,20 +48,19 @@ public class JoinUserListAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.item_list_join_user, viewGroup,false);
         }
         itemListJoinUserBinding = ItemListJoinUserBinding.bind(view);
-
         itemListJoinUserBinding.me.setVisibility(View.VISIBLE);
-
         itemListJoinUserBinding.alertDialogItemTextView.setText(item.getName());
 
-        Glide
-                .with(context)
+        Glide.with(context)
                 .load(item.getPictureURL())
                 .circleCrop()
                 .error(R.drawable.knu_mark)
                 .into(itemListJoinUserBinding.alertDialogItemImageView);
 
         //사용자 자신을 알려주는 '(나)' text를 보이지 않도록 설정
-        if(!item.getUserKey().equals(userMe.getUserKey())) {itemListJoinUserBinding.me.setVisibility(View.GONE);}
+        if(!item.getUserKey().equals(userMe.getUserKey())) {
+            itemListJoinUserBinding.me.setVisibility(View.GONE);
+        }
 
         return view;
     }

@@ -1,5 +1,6 @@
 package com.example.chat_de;
 
+import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,7 +23,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         int mode = getIntent().getIntExtra("mode",0);
         if(mode == 0) {
             binding.textMode.setVisibility(View.GONE);
-            ChatDB.setReference("pre_1", USER_KEY,true);
+            ChatDB.setReference("pre_4", USER_KEY,true);
         }
         else {
             ChatDB.setReference("pre_1", USER_KEY,true);
@@ -33,7 +34,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         binding.toolbaTitle.setOnClickListener(view1 -> {
             Intent intent = new Intent(ChatRoomListActivity.this, ChatRoomListActivity.class);
             ChatMode.changeMode();
-            intent.putExtra("mode",ChatMode.getChatMode());
+            intent.putExtra("mode", ChatMode.getChatMode());
             startActivity(intent);
             finish();
         });

@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
@@ -63,8 +64,11 @@ public class FileFrameActivity extends AppCompatActivity {
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
         String extension = getExtension(fileUrl);
+        String originalFileName = getFileName(fileUrl);
         // Log.d("extension",extension);
-        String filename = String.valueOf(sdf.format(day))+"."+ extension;
+        Log.d("name",originalFileName);
+        //String filename = String.valueOf(sdf.format(day))+"."+ extension;
+        String filename = String.valueOf(sdf.format(day))+"_"+originalFileName;
 
 
         String localPath = "/KNU_AMP/file/" + filename;
@@ -89,6 +93,14 @@ public class FileFrameActivity extends AppCompatActivity {
         String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
         return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
     }
+    //파일 이름 가져오기
+    public static String getFileName(String fileStr){
+        String fileName = null;
+        fileName = fileStr.substring(fileStr.lastIndexOf("_")+1);
+
+        return fileName;
+    }
+
 
     //다운로드 완료되었을 때 작동
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){

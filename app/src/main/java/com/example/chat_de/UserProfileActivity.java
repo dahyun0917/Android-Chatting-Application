@@ -10,13 +10,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ActivityUserProfileBinding;
-import com.example.chat_de.datas.User;
+import com.example.chat_de.datas.AUser;
 
 public class UserProfileActivity extends AppCompatActivity {
     private ActivityUserProfileBinding binding;
     private Dialog dialog;
-    private User userOther = new User();
-    private User userMe;
+    private AUser userOther;
+    private AUser userMe;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,11 +27,12 @@ public class UserProfileActivity extends AppCompatActivity {
         setContentView(view);
 
         //선택한 사용자 정보 전송
-        userOther = (User)getIntent().getSerializableExtra("userOther");
+        userOther = (AUser)getIntent().getSerializableExtra("userOther");
         //로그인된 사용자 정보 전송
-        userMe = (User)getIntent().getSerializableExtra("userMe");
+        userMe = (AUser)getIntent().getSerializableExtra("userMe");
 
 
+        binding.makeChat.setVisibility(View.VISIBLE);
         //프로필 사진 설정
         Glide
                 .with(this)

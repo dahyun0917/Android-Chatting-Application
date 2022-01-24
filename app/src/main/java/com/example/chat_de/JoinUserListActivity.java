@@ -1,6 +1,5 @@
 package com.example.chat_de;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -58,7 +57,7 @@ public class JoinUserListActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 userOther = joinUser.get(i);
-                //current user를 제외한 다른 사용자을 클릭 시 일대일 채팅을 할 수 있도록 설정
+                //current user를 제외한 다른 사용자를 클릭 시 일대일 채팅을 할 수 있도록 설정
                 if(!userMe.getUserKey().equals(userOther.getUserKey())) {
                     userProFile();
                 }

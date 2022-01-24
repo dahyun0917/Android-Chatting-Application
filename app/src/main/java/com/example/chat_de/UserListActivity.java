@@ -30,13 +30,14 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class UserListActivity extends AppCompatActivity implements TextWatcher {
-    String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
+    private final String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
+    private final int generationCountPerTen = 8;
 
-    private ArrayList<UserListItem>[] userList = new ArrayList[9];
-    private ArrayList<UserListItem> selectedList = new ArrayList<>();
+    private ArrayList<UserListItem>[] userList;
+    private ArrayList<UserListItem> selectedList;
     private UserListAdapter userListAdapter;
     private SelectedListAdapter selectedListAdapter;
-    private HashMap<String, UserListItem> userDictionary = new HashMap<>();
+    private HashMap<String, UserListItem> userDictionary;
 
     private final int NEW_CHAT = 1;
     private final int INVITE_CHAT = 2;
@@ -56,11 +57,9 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         View view = binding.getRoot();
         setContentView(view);
 
-        for(int i = 0; i < userList.length; ++i) {
-            userList[i] = new ArrayList<>();
-        }
         myUserKey = ChatDB.getCurrentUserKey();
         setView();
+        Log.d("TAG","hello");
     }
     @Override
     protected void onStart() {
@@ -74,6 +73,23 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     }
 
     public void setView() {
+
+        userList = new ArrayList[generationCountPerTen];
+        for(int i = 0; i <generationCountPerTen; ++i) {
+            userList[i] = new ArrayList<>();
+        }
+        selectedList = new ArrayList<>();
+        userDictionary = new HashMap<>();
+
+        /*유저리스트 리사이클러뷰 설정*/
+        userListAdapter = new UserListAdapter(getApplicationContext(), userList);
+        binding.recyclerUserList.setAdapter(userListAdapter);
+        binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
+        /*선택된 유저 뜨는 리사이클러뷰 설정*/
+        selectedListAdapter = new SelectedListAdapter(UserListActivity.this,selectedList);
+        binding.selectedList.setAdapter(selectedListAdapter);
+        binding.selectedList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL,false));
+
         binding.selectedList.setVisibility(View.GONE);
         setActionBar();
         /*검색 기능 추가*/
@@ -119,15 +135,6 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 userListAdapter.notifyDataSetChanged();
             }
         });
-
-        /*유저리스트 리사이클러뷰 설정*/
-        userListAdapter = new UserListAdapter(getApplicationContext(), userList);
-        binding.recyclerUserList.setAdapter(userListAdapter);
-        binding.recyclerUserList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false));
-        /*선택된 유저 뜨는 리사이클러뷰 설정*/
-        selectedListAdapter = new SelectedListAdapter(UserListActivity.this,selectedList);
-        binding.selectedList.setAdapter(selectedListAdapter);
-        binding.selectedList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL,false));
     }
     public void setActionBar(){
         //인텐트로 mode값 , 초대/생성하는 User 정보 받아오기기
@@ -176,6 +183,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private void showUserList() {
         //초기화 및 데이터 불러오기
 //        getAllUserList();
+        //TODO : 로딩시작
         ChatDB.getUsersCompleteEventListener(item -> {
             for(Map.Entry<String, User> i: item.entrySet()) {
                 if(!userKeySet.contains(i.getKey())) {
@@ -209,27 +217,36 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 }
             });
             /*스피너 설정*/
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,items);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-            binding.spinner.setAdapter(adapter);
-            binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                //아이템이 선택되면
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    // int i : item의 순서대로 0번부터 n-1번까지
-                    // userList[0]: 1-10기 ...
-                    if(i == 0) {
-                        userListAdapter.allUsersList(userList);
-                    } else {
-                        userListAdapter.setUserList(userList[i-1]);
+            if(ChatMode.getChatMode()>0){
+                binding.spinner.setVisibility(View.GONE);
+                //TODO : 나중에 allUsers가 아니라 해당 기수만 뜨도록.(현재 chatMode에 기수 정보 담으면 용도에 맞게 실행됨)
+                userListAdapter.setUserList(userList[(ChatMode.getChatMode()-1)/10]);
+            }
+            else {
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+                binding.spinner.setAdapter(adapter);
+                binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    //아이템이 선택되면
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        // int i : item의 순서대로 0번부터 n-1번까지
+                        // userList[0]: 1-10기 ...
+                        if (i == 0) {
+                            userListAdapter.allUsersList(userList);
+                        } else {
+                            userListAdapter.setUserList(userList[i - 1]);
+                        }
                     }
-                }
-                //스피너에서 아무것도 선택되지 않은 상태일때
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                    userListAdapter.allUsersList(userList);
-                }
-            });
+
+                    //스피너에서 아무것도 선택되지 않은 상태일때
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+                        userListAdapter.allUsersList(userList);
+                    }
+                });
+            }
+            //TODO : 로딩끝
         });
     }
     private ArrayList<User> returnChoose(){

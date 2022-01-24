@@ -12,8 +12,6 @@ import com.example.chat_de.datas.ChatRoom;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.User;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -130,7 +128,7 @@ public class ChatDB {
             }
         });
     }
-    public static void setPersonalChatRoom(User userMe, User userOther, IEventListener<String> listener) {
+    public static void setPersonalChatRoom(AUser userMe, AUser userOther, IEventListener<String> listener) {
         String chatRoomName = userMe.getName() + ", " + userOther.getName();
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER,"");
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);

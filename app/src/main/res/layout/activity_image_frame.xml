@@ -29,6 +29,14 @@
                 android:layout_width="23dp"
                 android:layout_height="25dp"
                 android:background="@drawable/download" />
+            <ImageButton
+                android:id="@+id/download_cancle"
+                android:layout_width="23dp"
+                android:layout_height="25dp"
+                android:layout_alignParentEnd="true"
+                android:visibility="gone"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/down_cancle"></ImageButton>
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 

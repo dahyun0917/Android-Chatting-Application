@@ -18,6 +18,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
     Context context;
     private ArrayList<UserListItem> filteredUsers = new ArrayList<>(); //필터링된 리스트 -> 보여줄 리스트
     private ArrayList<UserListItem> unFilteredUsers = new ArrayList<>(); //필터링되지않은 리스트
+    private CheckBoxClickListener listener;
 
     //생성자1
     public UserListAdapter(Context context, ArrayList<UserListItem>[] userList) {
@@ -70,7 +71,13 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 //체크상태가 바뀌면 item의 checked값도 바뀜.
-                item.setChecked(compoundButton.isChecked());
+                if(compoundButton.isChecked()){
+                    listener.onCheckedClick(item.getUserKey());
+                }
+                else {
+                    item.setChecked(compoundButton.isChecked());
+                    listener.onUnCheckedClick(item.getUserKey());
+                }
             }
         });
         holder.bind(this.filteredUsers.get(position));
@@ -88,6 +95,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
         for(ArrayList<UserListItem> i : userList)
             list.addAll(i);
         setUserList(list);
+    }
+
+    public void setOnCheckBoxClickListener(CheckBoxClickListener listener){
+        this.listener = listener;
     }
 
     @Override

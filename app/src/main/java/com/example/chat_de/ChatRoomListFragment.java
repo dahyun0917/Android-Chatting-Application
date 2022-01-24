@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.chat_de.databinding.FragmentChatRoomListBinding;
+import com.example.chat_de.datas.AUser;
 import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;
@@ -111,7 +112,7 @@ public class ChatRoomListFragment extends Fragment {
         dlg.setTitle(chatRoomName).setItems(settings, (dialogInterface, position) -> {
             switch(position) {
                 case 0: //채팅방 나가기
-                    ArrayList<User> user = new ArrayList<>();
+                    ArrayList<AUser> user = new ArrayList<>();
                     user.add(ChatDB.getCurrentUser());
                     ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {});
                     break;

@@ -2,14 +2,15 @@ package com.example.chat_de;
 
 import androidx.annotation.NonNull;
 
+import com.example.chat_de.datas.AUser;
 import com.example.chat_de.datas.User;
 
-public class UserListItem extends User {
+public class UserListItem extends AUser {
     private boolean checked;
 
     public UserListItem() { }
-    public UserListItem(String name, String pictureURL, int generation, String userKey, boolean admin) {
-        super(name, pictureURL, generation, userKey, admin);
+    public UserListItem(String name, String pictureURL, int generation, String userKey) {
+        super(name, pictureURL, generation, userKey);
         setChecked(false);
     }
     //유저클래스로 생성
@@ -18,8 +19,8 @@ public class UserListItem extends User {
         setChecked(false);
     }
     //Copy constructor
-    public UserListItem(UserListItem original) {
-        super(original);
+    public UserListItem(@NonNull UserListItem original) {
+        super(original.userMeta());
         setChecked(original.getChecked());
     }
 
@@ -31,5 +32,14 @@ public class UserListItem extends User {
         pictureURL = userMeta.getPictureURL();
         generation = userMeta.getGeneration();
         userKey = userMeta.getUserKey();
+    }
+
+    @Override
+    public String toString() {
+        return  "{ name: " + name +
+                ", pictureURL: " + pictureURL +
+                ", generation: " + generation +
+                ", userKey: " + userKey +
+                ", checked: " + checked + " }";
     }
 }

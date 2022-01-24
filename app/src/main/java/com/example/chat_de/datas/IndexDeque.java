@@ -1,15 +1,15 @@
 package com.example.chat_de.datas;
 
 import java.lang.reflect.Array;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
 // push:       O(1)
 // pop:        Amortized O(1)
-// get:        O(1)
 // getByIndex: O(1)
 
-public class IndexDeque<T> implements Cloneable {
+public class IndexDeque<T> extends AbstractList<T> implements Cloneable {
     @SuppressWarnings("unchecked")
     final private ArrayList<T>[] list = (ArrayList<T>[]) Array.newInstance(ArrayList.class, 2);
 
@@ -18,26 +18,24 @@ public class IndexDeque<T> implements Cloneable {
         list[1] = new ArrayList<>();
     }
 
-    public void add(T data)         { list[1].add(data); }
     public void pushFront(T data)   { list[0].add(data); }
     public void pushBack(T data)    { list[1].add(data); }
-    public void appendFront(ArrayList<T> dataList) {
+    public void appendFront(AbstractList<T> dataList) {
         if(dataList == null) {
             throw new NullPointerException();
         }
 
-        ListIterator<T> data = dataList.listIterator(dataList.size());
-        while(data.hasPrevious()) {
-            list[0].add(data.previous());
+        for(int i = dataList.size() - 1; i >= 0; i--) {
+            list[0].add(dataList.get(i));
         }
     }
-    public void appendBack(ArrayList<T> dataList) {
+    public void appendBack(AbstractList<T> dataList) {
         if(dataList == null) {
             throw new NullPointerException();
         }
 
-        for(T data: dataList) {
-            list[1].add(data);
+        for(int i = 0; i < dataList.size(); i++) {
+            list[1].add(dataList.get(i));
         }
     }
 
@@ -83,6 +81,7 @@ public class IndexDeque<T> implements Cloneable {
         list[where] = replace;
     }
 
+    @Override
     public T get(int position) {
         if(position < 0 || position >= size()) {
             throw new IndexOutOfBoundsException();
@@ -96,6 +95,7 @@ public class IndexDeque<T> implements Cloneable {
     }
     public T getFront() { return get(0); }
     public T getBack()  { return get(size() - 1); }
+    @Override
     public int size()   { return list[0].size() + list[1].size(); }
     
     public void clear() {

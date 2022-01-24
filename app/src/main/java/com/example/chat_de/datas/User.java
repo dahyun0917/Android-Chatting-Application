@@ -1,45 +1,27 @@
 package com.example.chat_de.datas;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.io.Serializable;
-
 @IgnoreExtraProperties
-public class User implements Serializable {
-    protected String name;
-    protected String pictureURL;
-    protected int generation;
-    protected String userKey;
+public class User extends AUser {
     protected boolean admin;
 
     public User() { }
     public User(String name, String pictureURL, int generation, String userKey, boolean admin) {
-        setName(name);
-        setPictureURL(pictureURL);
-        setGeneration(generation);
-        setUserKey(userKey);
+        super(name, pictureURL, generation, userKey);
         setAdmin(admin);
     }
     //Copy constructor
-    public User(User original) {
-        setName(original.getName());
-        setPictureURL(original.getPictureURL());
-        setGeneration(original.getGeneration());
-        setUserKey(original.getUserKey());
+    public User(@NonNull User original) {
+        super(original.userMeta());
+        setAdmin(admin);
     }
 
-    public String getName()         { return name; }
-    public String getPictureURL()   { return pictureURL; }
-    public int getGeneration()      { return generation; }
-    public String getUserKey()      { return userKey; }
-    public boolean getAdmin()       { return admin; }
-    public User userMeta()          { return this; }
+    public boolean getAdmin() { return admin; }
 
-    public void setName(String name)                { this.name = name; }
-    public void setPictureURL(String pictureURL)    { this.pictureURL = pictureURL; }
-    public void setGeneration(int generation)       { this.generation = generation; }
-    public void setUserKey(String userKey)          { this.userKey = userKey; }
-    public void setAdmin(boolean admin)             { this.admin = admin; }
+    public void setAdmin(boolean admin) { this.admin = admin; }
 
     @Override
     public String toString() {

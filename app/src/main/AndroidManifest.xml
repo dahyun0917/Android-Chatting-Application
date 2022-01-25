@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.chat_de">
+
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name="androidx.multidex.MultiDexApplication"
         android:allowBackup="true"
@@ -12,7 +14,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-
+        <activity
+            android:name=".CreateRoomMetaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustUnspecified"
+            android:label="create_room_meta_activity"
+            android:theme="@style/Theme.AppCompat.Light.Dialog"/>
         <activity
             android:name=".RoomActivity"
             android:exported="false"
@@ -31,17 +38,18 @@
             android:exported="false" />
         <activity
             android:name=".UserProfileActivity"
-            android:theme="@style/Theme.AppCompat.Dialog"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Dialog" />
         <activity
             android:name=".JoinUserListActivity"
-            android:theme="@style/Theme.AppCompat.Light.Dialog"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
             android:name=".ChatRoomListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

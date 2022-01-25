@@ -8,9 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.example.chat_de.databinding.FragmentChatRoomListBinding;
 import com.example.chat_de.datas.AUser;
 
@@ -104,7 +106,7 @@ public class ChatRoomListFragment extends Fragment {
         if(!ChatDB.getAdminMode()) {
             settings = new String[]{"채팅방 나가기"};
         } else {
-            settings = new String[]{"채팅방 나가기", "채팅방 이름 바꾸기"};
+            settings = new String[]{"채팅방 나가기", "채팅방 정보 바꾸기"};
         }
         AlertDialog.Builder dlg = new AlertDialog.Builder(getActivity());
         dlg.setTitle(chatRoomName).setItems(settings, (dialogInterface, position) -> {
@@ -115,7 +117,7 @@ public class ChatRoomListFragment extends Fragment {
                     ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {});
                     break;
                 case 1: // 채팅방 이름 바꾸기
-                    //TODO: 채팅방 이름 바꾸기
+                    //TODO: 채팅방 정보 바꾸기
                     break;
             }
         }).show();

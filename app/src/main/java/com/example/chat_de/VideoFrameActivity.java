@@ -9,8 +9,10 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
@@ -20,7 +22,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.chat_de.databinding.ActivityVideoFrameBinding;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.ui.PlayerControlView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,15 +36,15 @@ public class VideoFrameActivity extends AppCompatActivity {
     private String fromName;
     private String passDate;
     private String videoViewUrl;
-    private int screenTouchNum =0;  //Todo: 스크린 터치 나중에 추가적으로 더 필요없으면 boolean으로 수정
+    private boolean screenTouchNum =true; 
     private boolean downloadCancle = false;
+    private boolean fail = true;
 
     private DownloadManager downloadManager;
     private DownloadManager.Request request;
     private Uri urlToDownload;
     private long latestId = -1;
 
-    //private int downPushed =0;
     ProgressDialog loading;
     Uri videoUri;
 
@@ -75,18 +79,20 @@ public class VideoFrameActivity extends AppCompatActivity {
 
         downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
 
-        //TODO:누르기 개선
-        binding.videoView.setOnClickListener(new View.OnClickListener(){
-
+        //컨트롤바 바뀔때마다 이름, 날짜, 툴바도 보이도록 지정
+        binding.videoView.setControllerVisibilityListener(new PlayerControlView.VisibilityListener() {
             @Override
-            public void onClick(View view) {
-                if(screenTouchNum ==0) {
-                    screenTouchNum =1;
+            public void onVisibilityChange(int visibility) {
+                if(!screenTouchNum) {
+                    screenTouchNum =true;
                     binding.fromName.setVisibility(View.GONE);
                     binding.passDate.setVisibility(View.GONE);
                     binding.toolbar.setVisibility(View.GONE);
+                    //binding.videoView.setControllerAutoShow();
+                    //binding.videoView.hideController();
+
                 } else {
-                    screenTouchNum =0;
+                    screenTouchNum =false;
                     binding.fromName.setVisibility(View.VISIBLE);
                     binding.passDate.setVisibility(View.VISIBLE);
                     binding.toolbar.setVisibility(View.VISIBLE);
@@ -94,18 +100,13 @@ public class VideoFrameActivity extends AppCompatActivity {
             }
         });
 
+
+
+
         binding.downloads.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View view) {
-                /*if(downPushed ==0){
-                    downPushed =1;
-                    binding.downloads.setVisibility(View.GONE);
-                    binding.downloadCancle.setVisibility(View.VISIBLE);
-                    downVideo();
-                }
-                else
-                    Toast.makeText(getApplicationContext(),"다운로드중입니다.",Toast.LENGTH_SHORT).show();*/
                 binding.downloads.setVisibility(View.GONE);
                 binding.downloadCancle.setVisibility(View.VISIBLE);
                 downVideo();
@@ -245,9 +246,6 @@ public class VideoFrameActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-
-
-
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
@@ -255,6 +253,8 @@ public class VideoFrameActivity extends AppCompatActivity {
         loading.show();
 
         player = new ExoPlayer.Builder(this).build();
+
+
         //플레이어뷰에게 플레이어 설정
         binding.videoView.setPlayer(player);
 
@@ -263,28 +263,45 @@ public class VideoFrameActivity extends AppCompatActivity {
 
         player.setMediaItem(mediaItem);
         player.prepare();
+
+
         player.addListener(new Player.Listener() {
            @Override
            public void onPlaybackStateChanged(int playbackState) {
                if(playbackState==Player.STATE_READY){
+                   fail=false;
                    loading.dismiss();
                    player.play();
                }
-               if(binding.videoView.getControllerAutoShow()){
+               /*if(playbackState==Player.STATE_ENDED){
                    screenTouchNum =0;
                    binding.fromName.setVisibility(View.VISIBLE);
                    binding.passDate.setVisibility(View.VISIBLE);
                    binding.toolbar.setVisibility(View.VISIBLE);
-               }
-               if(playbackState==Player.STATE_ENDED){
-                   screenTouchNum =0;
-                   binding.fromName.setVisibility(View.VISIBLE);
-                   binding.passDate.setVisibility(View.VISIBLE);
-                   binding.toolbar.setVisibility(View.VISIBLE);
-               }
+                   //binding.videoView.setUseController(true);
+               }*/
+               //비디오 로딩 시간 측정 (현재 15초)
+               CountDownTimer countDownTimer = new CountDownTimer(5000, 1000) {
+                   public void onTick(long millisUntilFinished) {
+                   }
+
+                   public void onFinish() {
+                       if(fail){
+                       binding.downloads.setVisibility(View.GONE);
+                       failLoading();
+                       }
+                   }
+               }.start();
            }
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                Throwable cause = error.getCause();
+                Log.d("error", String.valueOf(error.errorCode));
+                //PlayerControlView.INVISIBLE;
+            }
 
        });
+
                 //player.play();
                 //로딩이 완료되어 준비가 되었을 때
                 //자동 실행되도록..
@@ -321,16 +338,29 @@ public class VideoFrameActivity extends AppCompatActivity {
             }
         });*/
     }
+    //로딩이 실패했을 경우 비디오, 로딩바 멈춤
+    private void failLoading(){
+        loading.dismiss();
+        //binding.videoView.setPlayer(null);
+        player.stop();
+        player=null;
+        Toast.makeText(VideoFrameActivity.this, "비디오 로딩 실패",Toast.LENGTH_SHORT).show();
+    }
 
     //화면에 안보일 때..
     @Override
     protected void onStop() {
         super.onStop();
         //플레이어뷰 및 플레이어 객체 초기화
+        if(!fail){
         binding.videoView.setPlayer(null);
         player.release();
         player=null;
+        }
+        fail=false;
+        //Toast.makeText(getApplication(), "비디오 로딩 실패",Toast.LENGTH_SHORT).show();
     }
+
 
 
 

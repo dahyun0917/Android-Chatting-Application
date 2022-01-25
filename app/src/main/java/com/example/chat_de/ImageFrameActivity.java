@@ -76,11 +76,17 @@ public class ImageFrameActivity extends AppCompatActivity {
         //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩바 취소되지 않음
         loading.show();
 
+
+
         Glide.with(this)
                 .load(imageViewUrl)
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        binding.downloads.setVisibility(View.GONE);
+                        loading.dismiss();
+                        Toast.makeText(ImageFrameActivity.this, "이미지 로딩 실패",Toast.LENGTH_SHORT).show();
+                       // Glide.with(ImageFrameActivity.this).load(R.drawable.no).into(binding.photoView);
                         return false;
                     }
 
@@ -90,8 +96,7 @@ public class ImageFrameActivity extends AppCompatActivity {
                         return false;
                     }
                 })
-                .into(binding.photoView)
-        ;
+                .into(binding.photoView);
 
 
         binding.fromName.setText(fromName);

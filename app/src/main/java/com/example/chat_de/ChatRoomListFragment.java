@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.chat_de.databinding.FragmentChatRoomListBinding;
 import com.example.chat_de.datas.AUser;
-import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,7 +52,7 @@ public class ChatRoomListFragment extends Fragment {
             binding.fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    selectUser();
+                    createChatRoom();
                 }
             });
         }
@@ -102,8 +101,7 @@ public class ChatRoomListFragment extends Fragment {
 
     private void chatRoomSettingDialog(String chatRoomKey, String chatRoomName) {
         String[] settings;
-        //TODO: !false부분 admin권한 보게 바꿔야함
-        if(!false) {
+        if(!ChatDB.getAdminMode()) {
             settings = new String[]{"채팅방 나가기"};
         } else {
             settings = new String[]{"채팅방 나가기", "채팅방 이름 바꾸기"};
@@ -123,8 +121,8 @@ public class ChatRoomListFragment extends Fragment {
         }).show();
     }
 
-    private void selectUser(){
-        //RoomActivity로 넘어간 뒤, 종료
+    private void createChatRoom(){
+        //UserListActivity로 넘어간 뒤, 종료
         Intent intent = new Intent(getActivity(), UserListActivity.class);
         intent.putExtra("tag",1);
         HashSet<String> set = new HashSet<>();

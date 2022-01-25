@@ -38,7 +38,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private AbstractList<Chat> myDataList;
     private HashMap<String, ChatRoomUser> myUserList;
     private ChatRoomUser myCurrentUser;
-    
+
     public RoomElementAdapter(AbstractList<Chat> dataList, HashMap<String, ChatRoomUser> chatRoomUser, ChatRoomUser currentUser) {
         myUserList = chatRoomUser;
         myDataList = dataList;
@@ -92,8 +92,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 view = inflater.inflate(R.layout.item_element_right_text, parent, false);
                 return new RightTextViewHolder(view);
         }
-
-
     }
 
     // 실제 각 뷰 홀더에 데이터를 연결해주는 함수
@@ -104,7 +102,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             showLoadingView((LoadingViewHolder) viewHolder, position);
         } else {
             Chat item = myDataList.get(position);
-
             //각 xml의 데이터 set
             if (viewHolder instanceof CenterViewHolder) {
                 ((CenterViewHolder) viewHolder).bind(item);
@@ -129,7 +126,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     public void showLoadingView(LoadingViewHolder holder, int position) {
-
     }
 
     // 리사이클러뷰안에서 들어갈 뷰 홀더의 개수
@@ -142,9 +138,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     // 이 메소드는 ViewType때문에 오버라이딩 했음(구별할려고)
     @Override
     public int getItemViewType(int position) {
-
         Chat item = myDataList.get(position);
-
         if (item == null)
             return ViewType.LOADING;
 
@@ -169,7 +163,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 return ViewType.LEFT_CONTENT_VIDEO;
             else if ((item.getType().equals(Chat.Type.FILE)))
                 return ViewType.LEFT_CONTENT_FILE;
-
         }
         return ViewType.RIGHT_CONTENT_TEXT;
     }
@@ -183,7 +176,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             itemElementLoadingBinding = ItemElementLoadingBinding.bind(itemView);
         }
     }
-
 
     public class CenterViewHolder extends RecyclerView.ViewHolder {
         ItemElementCenterSystemBinding centerSystemBinding;
@@ -303,7 +295,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
 
-
             Glide.with(itemView.getContext()).load(R.drawable.player).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftVideoBinding.imagevMsg);
             leftVideoBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftVideoBinding.textvTime.setText(chatDate);
@@ -363,7 +354,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
 
-
             Glide.with(itemView.getContext()).load(R.drawable.file_icon).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftFileBinding.imagevMsg);
             leftFileBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftFileBinding.textvTime.setText(chatDate);
@@ -401,7 +391,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
-
 
             leftTextBinding.textvMsg.setText(item.getText());
             leftTextBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
@@ -460,7 +449,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     intent.putExtra("passDate", passDate);
                     intent.putExtra("imageView", item.getText());
                     view.getContext().startActivity(intent);
-
                 }
             });
         }
@@ -492,7 +480,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     Intent intent = new Intent(itemView.getContext(), FileFrameActivity.class);
                     intent.putExtra("file", item.getText());
                     view.getContext().startActivity(intent);
-
                 }
             });
         }

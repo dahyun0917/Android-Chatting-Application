@@ -317,23 +317,21 @@ public class ChatDB {
         ref.child(path).addChildEventListener(myListener);
         //eventListeners.add(new Pair<>(path, myListener));
     }
-    public static void chatRoomListChangedEventListener(String userKey, ChatRoomListAdapter chatRoomListAdapter) {
+    public static void chatRoomListChangedEventListener(String userKey, IChatRoomListChangedListener chatRoomListChangedListener) {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                ChatRoomMeta chatRoomMeta = snapshot.getValue(ChatRoomMeta.class);
-                chatRoomListAdapter.addChatRoom(snapshot.getKey(), chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
+                chatRoomListChangedListener.ChatRoomAdded(snapshot.getKey(), snapshot.getValue(ChatRoomMeta.class));
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                ChatRoomMeta chatRoomMeta = snapshot.getValue(ChatRoomMeta.class);
-                chatRoomListAdapter.changeChatRoom(snapshot.getKey(), chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
+                chatRoomListChangedListener.ChatRoomChanged(snapshot.getKey(), snapshot.getValue(ChatRoomMeta.class));
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                chatRoomListAdapter.removeChatRoom(snapshot.getKey());
+                chatRoomListChangedListener.ChatRoomRemoved(snapshot.getKey());
             }
 
             @Override

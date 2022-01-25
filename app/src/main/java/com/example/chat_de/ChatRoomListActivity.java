@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chat_de.databinding.ActivityChatRoomListBinding;
 
-
 public class ChatRoomListActivity extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
     private final String USER_KEY = "user2";
@@ -18,13 +17,12 @@ public class ChatRoomListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityChatRoomListBinding.inflate(getLayoutInflater());
-        int mode = getIntent().getIntExtra("mode",0);
-        if(mode == 0) {
+        int mode = getIntent().getIntExtra("mode", 0);
+        if (mode == 0) {
             binding.textMode.setVisibility(View.GONE);
-            ChatDB.setReference("pre_4", USER_KEY,true);
-        }
-        else {
-            ChatDB.setReference("pre_1", USER_KEY,true);
+            ChatDB.setReference("pre_4", USER_KEY, true);
+        } else {
+            ChatDB.setReference("pre_1", USER_KEY, true);
         }
         View view = binding.getRoot();
         setContentView(view);
@@ -48,7 +46,5 @@ public class ChatRoomListActivity extends AppCompatActivity {
         mainFragment.setArguments(bundle);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, mainFragment).commit();
-
     }
-
 }

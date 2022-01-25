@@ -36,7 +36,7 @@ public class ChatDB {
     public static final String EXIST = "exist";
 
     private static DatabaseReference ref = null;
-    private static final ArrayList<Pair<String, ChildEventListener>> eventListeners = new ArrayList<>();
+    private static final HashMap<Integer, ArrayList<Pair<String, ChildEventListener>>> eventListeners = new HashMap<>();
     private static String rootPath;
     private static String currentUserKey = null;
     private static boolean adminMode = false;
@@ -59,7 +59,9 @@ public class ChatDB {
         currentUser = user;
     }
     public static void setRootPath(@NonNull String root) {
-        removeEventListenerBindOnThis();
+        for(int key : eventListeners.keySet()) {
+            removeEventListener(key);
+        }
         ref = FirebaseDatabase.getInstance().getReference(root);
     }
     public static DatabaseReference getReference() {
@@ -103,7 +105,7 @@ public class ChatDB {
         });
     }
 
-    public static void getUsersCompleteEventListener(IEventListener<HashMap<String, User>> listener) {
+    public static void getUsersCompleteListener(IEventListener<HashMap<String, User>> listener) {
         ref.child(USERS).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 HashMap<String, User> item = new HashMap<>();
@@ -117,7 +119,7 @@ public class ChatDB {
             }
         });
     }
-    public static void setChatRoomCompleteListener(String chatRoomName, ArrayList<AUser> userList, User userMe, IEventListener<String> listener) {
+    public static void setChatRoomCompleteListener(String chatRoomName, ArrayList<AUser> userList, AUser userMe, IEventListener<String> listener) {
         final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER,"");
         ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
         ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
@@ -128,38 +130,7 @@ public class ChatDB {
             }
         });
     }
-    public static void setPersonalChatRoom(AUser userMe, AUser userOther, IEventListener<String> listener) {
-        String chatRoomName = userMe.getName() + ", " + userOther.getName();
-        final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER,"");
-        ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
-        ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
-            if (error == null) {
-                final String chatRoomKey = rf.getKey();
-                HashMap<String, Object> result = new HashMap<>();
-                // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
-                result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userMe.getUserKey()), new ChatRoomUser(userMe));
-                result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey, userOther.getUserKey()), new ChatRoomUser(userOther));
-                // userJoined의 userKey들에 새로운 chatRoom 추가
-                result.put(makePath(USER_JOINED, userMe.getUserKey(), chatRoomKey), chatRoomMeta);
-                result.put(makePath(USER_JOINED, userOther.getUserKey(), chatRoomKey), chatRoomMeta);
-
-                // 종합한 값들을 최종적으로 update
-                ref.updateChildren(result).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        String message = userMe.getName() + "님이 새 채팅방을 생성하셨습니다.";
-                        uploadMessage(message, -2, Chat.Type.SYSTEM, chatRoomKey, "SYSTEM", new HashMap<>());
-                    } else {
-                        Log.e("FRD", "Can not update data of users and the new chat room");
-                    }
-                });
-
-                listener.eventListener(chatRoomKey);
-            } else {
-                Log.e("FDB", "Make chat room error: " + error.toString());
-            }
-        });
-    }
-    public static void inviteUserListCompleteListener(String chatRoomKey, ChatRoomMeta chatRoomMeta, ArrayList<AUser> userList, User userMe, IEventListener<String> listener) {
+    public static void inviteUserListCompleteListener(String chatRoomKey, ChatRoomMeta chatRoomMeta, ArrayList<AUser> userList, AUser userMe, IEventListener<String> listener) {
         HashMap<String, Object> result = new HashMap<>();
         for (AUser item : userList) {
             // chatRoomJoined의 chatRoomKey에 새로운 user들 추가
@@ -278,7 +249,7 @@ public class ChatDB {
         }
     }
 
-    public static void messageAddedEventListener(String chatRoomKey, String lastChatKey, IKeyValueEventListener<String, Chat> listener) {
+    public static void messageAddedEventListener(String chatRoomKey, String lastChatKey, int objHashCode ,IKeyValueEventListener<String, Chat> listener) {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -313,9 +284,10 @@ public class ChatDB {
         } else {                    // 빈 채팅방일 때
             ref.child(path).addChildEventListener(myListener);
         }
-        eventListeners.add(new Pair<>(path, myListener));
+
+        registerEventListener(objHashCode, path, myListener);
     }
-    public static void userListChangedEventListener(String chatRoomKey, IKeyValueEventListener<String, ChatRoomUser> listener) {
+    public static void userListChangedEventListener(String chatRoomKey, int objHashCode, IKeyValueEventListener<String, ChatRoomUser> listener) {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -346,25 +318,23 @@ public class ChatDB {
         String path = makePath(CHAT_ROOM_JOINED, chatRoomKey);
 
         ref.child(path).addChildEventListener(myListener);
-        //eventListeners.add(new Pair<>(path, myListener));
+        registerEventListener(objHashCode, path, myListener);
     }
-    public static void chatRoomListChangedEventListener(String userKey, ChatRoomListAdapter chatRoomListAdapter) {
+    public static void chatRoomListChangedEventListener(String userKey, int objHashCode, IChatRoomListChangedListener chatRoomListChangedListener) {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                ChatRoomMeta chatRoomMeta = snapshot.getValue(ChatRoomMeta.class);
-                chatRoomListAdapter.addChatRoom(snapshot.getKey(), chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
+                chatRoomListChangedListener.ChatRoomAdded(snapshot.getKey(), snapshot.getValue(ChatRoomMeta.class));
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                ChatRoomMeta chatRoomMeta = snapshot.getValue(ChatRoomMeta.class);
-                chatRoomListAdapter.changeChatRoom(snapshot.getKey(), chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
+                chatRoomListChangedListener.ChatRoomChanged(snapshot.getKey(), snapshot.getValue(ChatRoomMeta.class));
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                chatRoomListAdapter.removeChatRoom(snapshot.getKey());
+                chatRoomListChangedListener.ChatRoomRemoved(snapshot.getKey());
             }
 
             @Override
@@ -381,7 +351,7 @@ public class ChatDB {
         String path = makePath(USER_JOINED, userKey);
 
         ref.child(path).addChildEventListener(myListener);
-        eventListeners.add(new Pair<>(path, myListener));
+        registerEventListener(objHashCode, path, myListener);
     }
 
     public static void getChatRoomMeta(String chatRoomKey, IEventListener<ChatRoomMeta> listener) {
@@ -450,10 +420,18 @@ public class ChatDB {
         return ret.toString();
     }
 
-    public static void removeEventListenerBindOnThis() {
-        for (Pair<String, ChildEventListener> i : eventListeners) {
-            ref.child(i.first).removeEventListener(i.second);
+    private static void registerEventListener(int key, String path, ChildEventListener listener) {
+        if(!eventListeners.containsKey(key)) {
+            eventListeners.put(key, new ArrayList<>());
         }
-        eventListeners.clear();
+        eventListeners.get(key).add(new Pair<>(path, listener));
+    }
+    public static void removeEventListener(int objHashCode) {
+        if(eventListeners.containsKey(objHashCode)) {
+            for (Pair<String, ChildEventListener> i : eventListeners.get(objHashCode)) {
+                ref.child(i.first).removeEventListener(i.second);
+            }
+            eventListeners.get(objHashCode).clear();
+        }
     }
 }

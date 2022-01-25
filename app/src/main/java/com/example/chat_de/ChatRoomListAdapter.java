@@ -8,10 +8,11 @@ import android.widget.BaseAdapter;
 
 import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ItemListChatRoomBinding;
+import com.example.chat_de.datas.ChatRoomMeta;
 
 import java.util.ArrayList;
 
-public class ChatRoomListAdapter extends BaseAdapter {
+public class ChatRoomListAdapter extends BaseAdapter implements IChatRoomListChangedListener{
     ArrayList<ChatRoomListItem> chatRoomList;
 
     public ChatRoomListAdapter(ArrayList<ChatRoomListItem> chatRoomList){ //생성자
@@ -32,13 +33,15 @@ public class ChatRoomListAdapter extends BaseAdapter {
         return i;
     }
 
-    public void addChatRoom(String key, String picture, String name) {
-        ChatRoomListItem item = new ChatRoomListItem(key, picture, name);
+    @Override
+    public void ChatRoomAdded(String key, ChatRoomMeta chatRoomMeta) {
+        ChatRoomListItem item = new ChatRoomListItem(key, chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
         chatRoomList.add(item);
         this.notifyDataSetChanged();
     }
-    public void changeChatRoom(String key, String picture, String name) {
-        ChatRoomListItem item = new ChatRoomListItem(key, picture, name);
+    @Override
+    public void ChatRoomChanged(String key, ChatRoomMeta chatRoomMeta) {
+        ChatRoomListItem item = new ChatRoomListItem(key, chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
         int size=chatRoomList.size();
         int pos = 0;
         while (pos < size){
@@ -50,7 +53,8 @@ public class ChatRoomListAdapter extends BaseAdapter {
         }
         this.notifyDataSetChanged();
     }
-    public void removeChatRoom(String key) {
+    @Override
+    public void ChatRoomRemoved(String key) {
         int size=chatRoomList.size();
         int pos = 0;
         while (pos < size){

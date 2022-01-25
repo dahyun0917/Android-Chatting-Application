@@ -12,6 +12,8 @@ import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ActivityUserProfileBinding;
 import com.example.chat_de.datas.AUser;
 
+import java.util.ArrayList;
+
 public class UserProfileActivity extends AppCompatActivity {
     private ActivityUserProfileBinding binding;
     private Dialog dialog;
@@ -48,7 +50,11 @@ public class UserProfileActivity extends AppCompatActivity {
         binding.makeChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ChatDB.setPersonalChatRoom(userMe, userOther, chatRoomKey -> {
+                ArrayList<AUser> userList = new ArrayList<>();
+                userList.add(userMe);
+                userList.add(userOther);
+                String chatRoomName = userMe.getName() + ", " + userOther.getName();
+                ChatDB.setChatRoomCompleteListener(chatRoomName, userList, userMe, chatRoomKey -> {
                     Intent chat = new Intent(UserProfileActivity.this, RoomActivity.class);
                     chat.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     chat.putExtra("chatRoomKey",chatRoomKey);

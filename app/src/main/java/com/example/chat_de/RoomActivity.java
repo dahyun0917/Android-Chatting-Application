@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.ListIterator;
 
 public class RoomActivity extends AppCompatActivity {
+    private final int HASH_CODE = hashCode();
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
     private ActivityRoomBinding binding;
@@ -74,7 +75,6 @@ public class RoomActivity extends AppCompatActivity {
     private int lastIndex = -1;
     private boolean isLoading = false;
     private boolean autoScroll = true;
-    private boolean isFirstRun = true;
     private boolean isActionMove = false;
     private ChatRoomMeta chatRoomMeta;
     private Uri filePath;
@@ -88,11 +88,7 @@ public class RoomActivity extends AppCompatActivity {
         setContentView(view);
         //화면 기본 설정
         setUpRoomActivity();
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
         /*리스너 설정*/
         // 처음 CHAT_LIMIT + 1개의 채팅 불러오고 채팅에 대한 리스너 설정
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, joinedUserList -> {
@@ -110,17 +106,22 @@ public class RoomActivity extends AppCompatActivity {
                         prevChatList.add(chatValue);
                     }
                     floatOldMessage(prevChatList);
-                    ChatDB.messageAddedEventListener(chatRoomKey, chatKey, (newChatKey, newChat) -> {
+                    ChatDB.messageAddedEventListener(chatRoomKey, chatKey, HASH_CODE, (newChatKey, newChat) -> {
                         lastChatKey = newChatKey;
                         floatNewMessage(newChat);
                     });
                 });
             });
-            ChatDB.userListChangedEventListener(chatRoomKey, (changedUserKey, changedUser) -> {
+            ChatDB.userListChangedEventListener(chatRoomKey, HASH_CODE, (changedUserKey, changedUser) -> {
                 userList.put(changedUserKey, changedUser);
             });
         });
         ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         //리사이클러뷰 스크롤 리스너 설정
         initScrollListener();
@@ -278,27 +279,24 @@ public class RoomActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         //onCreate를 통해 만들어 진 것이 아니면 messageAddedEventListener를 붙임
-        if (!isFirstRun) {
-            ChatDB.messageAddedEventListener(chatRoomKey, lastChatKey, (newChatKey, newChat) -> {
-                lastChatKey = newChatKey;
-                floatNewMessage(newChat);
-            });
-        }
-        isFirstRun = false;
         initScrollListener();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ChatDB.removeEventListenerBindOnThis();
-        binding.recyclerView.clearOnScrollListeners();
     }
 
     @Override
     public void onStop() {
         super.onStop();
         binding.recyclerView.clearOnScrollListeners();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        ChatDB.removeEventListener(HASH_CODE);
     }
 
     public void initRecyclerView() {
@@ -436,26 +434,23 @@ public class RoomActivity extends AppCompatActivity {
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("파일 종류") //제목
-                .setItems(fileKind, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int position) {
-                        switch (position) {
-                            case 0:  //image
-                                intent.setType("image/*");
-                                intent.setAction(Intent.ACTION_GET_CONTENT);
-                                startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), IMAGE_CODE);
-                                break;
-                            case 1:  //video
-                                intent.setType("video/*");
-                                intent.setAction(Intent.ACTION_GET_CONTENT);
-                                startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
-                                break;
-                            case 2 :  //file
-                                intent.setType("application/*");
-                                intent.setAction(Intent.ACTION_GET_CONTENT);
-                                startActivityForResult(Intent.createChooser(intent, "파일를 선택하세요."), FILE_CODE);
-                                break;
-                        }
+                .setItems(fileKind, (dialogInterface, position) -> {
+                    switch (position) {
+                        case 0:  //image
+                            intent.setType("image/*");
+                            intent.setAction(Intent.ACTION_GET_CONTENT);
+                            startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), IMAGE_CODE);
+                            break;
+                        case 1:  //video
+                            intent.setType("video/*");
+                            intent.setAction(Intent.ACTION_GET_CONTENT);
+                            startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
+                            break;
+                        case 2 :  //file
+                            intent.setType("application/*");
+                            intent.setAction(Intent.ACTION_GET_CONTENT);
+                            startActivityForResult(Intent.createChooser(intent, "파일를 선택하세요."), FILE_CODE);
+                            break;
                     }
                 });
         dlg.setIcon(R.drawable.file_blue);  //대화창 아이콘 설정

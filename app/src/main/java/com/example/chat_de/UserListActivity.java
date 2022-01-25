@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private final String[] items = {"전체","1-10기","11-20기","21-30기","31-40기","41-50기","51-60기","61기-70기","71기-"};
-    private final int generationCountPerTen = 8;
+    private final int generationCountPerTen = items.length - 1;
 
     private ArrayList<UserListItem>[] userList;
     private ArrayList<UserListItem> selectedList;
@@ -61,12 +61,11 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
 
         myUserKey = ChatDB.getCurrentUserKey();
         setUpUserListActivity();
-        Log.d("TAG","hello");
+        showUserList();
     }
     @Override
     protected void onStart() {
         super.onStart();
-        showUserList();
     }
     @Override
     protected void onDestroy() {
@@ -77,7 +76,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     public void setUpUserListActivity() {
     /*view, 변수 할당, click listener 등 한번만 설정되는 화면 구성 설정*/
         userList = new ArrayList[generationCountPerTen];
-        for(int i = 0; i <generationCountPerTen; ++i) {
+        for(int i = 0; i < generationCountPerTen; i++) {
             userList[i] = new ArrayList<>();
         }
         selectedList = new ArrayList<>();
@@ -192,7 +191,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
         loading.show();
 
-        ChatDB.getUsersCompleteEventListener(item -> { //모든 유저 목록 불러옴
+        ChatDB.getUsersCompleteListener(item -> { //모든 유저 목록 불러옴
             for(Map.Entry<String, User> i: item.entrySet()) {
                 if(!userKeySet.contains(i.getKey())) {
                     classifyAdd(new UserListItem(i.getValue()));
@@ -306,5 +305,5 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         userListAdapter.getFilter().filter(charSequence);
     }
     @Override
-    public void afterTextChanged(Editable editable) {  }
+    public void afterTextChanged(Editable editable) { }
 }

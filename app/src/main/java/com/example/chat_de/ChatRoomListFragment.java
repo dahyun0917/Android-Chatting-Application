@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class ChatRoomListFragment extends Fragment {
+    private final int HASH_CODE = hashCode();
     private FragmentChatRoomListBinding binding;
     private ChatRoomListAdapter chatRoomListAdapter;
     private String userKey;
@@ -80,19 +81,29 @@ public class ChatRoomListFragment extends Fragment {
         chatRoomList.clear();
         chatRoomListAdapter = new ChatRoomListAdapter(chatRoomList);
         binding.listview.setAdapter(chatRoomListAdapter);
-        ChatDB.chatRoomListChangedEventListener(userKey, chatRoomListAdapter);
+        ChatDB.chatRoomListChangedEventListener(userKey, HASH_CODE, chatRoomListAdapter);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        showChatRoomList();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        showChatRoomList();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ChatDB.removeEventListenerBindOnThis();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        ChatDB.removeEventListener(HASH_CODE);
     }
 
     private void enterChatRoom(String chatRoomKey){
@@ -132,5 +143,4 @@ public class ChatRoomListFragment extends Fragment {
         intent.putExtra("userList", set);
         getActivity().startActivity(intent);
     }
-
 }

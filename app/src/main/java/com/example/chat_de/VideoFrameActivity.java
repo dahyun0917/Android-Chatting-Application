@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
@@ -21,7 +22,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.chat_de.databinding.ActivityVideoFrameBinding;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.ui.PlayerControlView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,7 +36,7 @@ public class VideoFrameActivity extends AppCompatActivity {
     private String fromName;
     private String passDate;
     private String videoViewUrl;
-    private int screenTouchNum =0;  //Todo: 스크린 터치 나중에 추가적으로 더 필요없으면 boolean으로 수정
+    private boolean screenTouchNum =true; 
     private boolean downloadCancle = false;
     private boolean fail = true;
 
@@ -76,24 +79,29 @@ public class VideoFrameActivity extends AppCompatActivity {
 
         downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
 
-        //TODO:누르기 개선
-        binding.videoView.setOnClickListener(new View.OnClickListener(){
-
+        //컨트롤바 바뀔때마다 이름, 날짜, 툴바도 보이도록 지정
+        binding.videoView.setControllerVisibilityListener(new PlayerControlView.VisibilityListener() {
             @Override
-            public void onClick(View view) {
-                if(screenTouchNum ==0) {
-                    screenTouchNum =1;
+            public void onVisibilityChange(int visibility) {
+                if(!screenTouchNum) {
+                    screenTouchNum =true;
                     binding.fromName.setVisibility(View.GONE);
                     binding.passDate.setVisibility(View.GONE);
                     binding.toolbar.setVisibility(View.GONE);
+                    //binding.videoView.setControllerAutoShow();
+                    //binding.videoView.hideController();
+
                 } else {
-                    screenTouchNum =0;
+                    screenTouchNum =false;
                     binding.fromName.setVisibility(View.VISIBLE);
                     binding.passDate.setVisibility(View.VISIBLE);
                     binding.toolbar.setVisibility(View.VISIBLE);
                 }
             }
         });
+
+
+
 
         binding.downloads.setOnClickListener(new View.OnClickListener(){
 
@@ -257,7 +265,6 @@ public class VideoFrameActivity extends AppCompatActivity {
         player.prepare();
 
 
-
         player.addListener(new Player.Listener() {
            @Override
            public void onPlaybackStateChanged(int playbackState) {
@@ -266,18 +273,13 @@ public class VideoFrameActivity extends AppCompatActivity {
                    loading.dismiss();
                    player.play();
                }
-               if(binding.videoView.getControllerAutoShow()){
+               /*if(playbackState==Player.STATE_ENDED){
                    screenTouchNum =0;
                    binding.fromName.setVisibility(View.VISIBLE);
                    binding.passDate.setVisibility(View.VISIBLE);
                    binding.toolbar.setVisibility(View.VISIBLE);
-               }
-               if(playbackState==Player.STATE_ENDED){
-                   screenTouchNum =0;
-                   binding.fromName.setVisibility(View.VISIBLE);
-                   binding.passDate.setVisibility(View.VISIBLE);
-                   binding.toolbar.setVisibility(View.VISIBLE);
-               }
+                   //binding.videoView.setUseController(true);
+               }*/
                //비디오 로딩 시간 측정 (현재 15초)
                CountDownTimer countDownTimer = new CountDownTimer(5000, 1000) {
                    public void onTick(long millisUntilFinished) {
@@ -291,8 +293,15 @@ public class VideoFrameActivity extends AppCompatActivity {
                    }
                }.start();
            }
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                Throwable cause = error.getCause();
+                Log.d("error", String.valueOf(error.errorCode));
+                //PlayerControlView.INVISIBLE;
+            }
 
        });
+
                 //player.play();
                 //로딩이 완료되어 준비가 되었을 때
                 //자동 실행되도록..

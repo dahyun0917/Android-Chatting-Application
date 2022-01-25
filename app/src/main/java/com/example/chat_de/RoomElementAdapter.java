@@ -2,7 +2,6 @@ package com.example.chat_de;
 
 import android.content.Context;
 import android.content.Intent;
-
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,7 +10,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 
 import com.bumptech.glide.Glide;
 import com.example.chat_de.databinding.ItemElementCenterSystemBinding;
@@ -239,7 +237,26 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
 
-            Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftImageBinding.imagevMsg);
+            /*Glide.with(itemView.getContext())
+                    .load(item.getText())
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            //Toast.makeText(ImageFrameActivity.this, "이미지 로딩 실패",Toast.LENGTH_SHORT).show();
+                            //Glide.with(itemView.getContext()).load(R.drawable.no).centerInside().into(leftImageBinding.imagevMsg);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+
+                            return false;
+                        }
+                    })
+                    .thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading))
+                    .into(leftImageBinding.imagevMsg);*/
+
+            Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftImageBinding.imagevMsg);
             leftImageBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftImageBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.userMeta().getPictureURL()).error(R.drawable.knu_mark_white).into(leftImageBinding.imgv);
@@ -295,7 +312,8 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
 
-            Glide.with(itemView.getContext()).load(R.drawable.player).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftVideoBinding.imagevMsg);
+
+            Glide.with(itemView.getContext()).load(R.drawable.player).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.imagevMsg);
             leftVideoBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftVideoBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.userMeta().getPictureURL()).error(R.drawable.knu_mark_white).into(leftVideoBinding.imgv);
@@ -354,7 +372,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
 
-            Glide.with(itemView.getContext()).load(R.drawable.file_icon).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftFileBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(R.drawable.file_icon).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftFileBinding.imagevMsg);
             leftFileBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftFileBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.userMeta().getPictureURL()).error(R.drawable.knu_mark_white).into(leftFileBinding.imgv);

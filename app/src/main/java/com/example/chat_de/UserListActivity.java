@@ -138,7 +138,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         });
     }
     public void setActionBar(){
-        //인텐트로 mode값 , 초대/생성하는 User 정보 받아오기기
+        /*인텐트로 mode값 , 초대/생성하는 User 정보 받아오고, actionbar setting*/
         Intent intent = getIntent();
         mode = intent.getIntExtra("tag",0);
         userKeySet = (HashSet<String>)intent.getSerializableExtra("userList");
@@ -159,7 +159,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         }
     }
     private void showNewChatDialog(){
-        //다이얼로그(대화상자) 띄우기
+        /*채팅방 생성시 정보 입력을 위한 다이얼로그(대화상자) 띄우기*/
         final EditText editText = new EditText(UserListActivity.this);
         AlertDialog.Builder dlg = new AlertDialog.Builder(UserListActivity.this);
         dlg.setTitle("채팅방 이름 입력"); //제목
@@ -178,20 +178,20 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     }
 
     private void classifyAdd(@NonNull UserListItem item){
+        /*기수별로 나누어서 추가*/
         userList[(item.getGeneration()-1)/10].add(item);
         userDictionary.put(item.getUserKey(), item);
     }
     private void showUserList() {
-        //초기화 및 데이터 불러오기
-//        getAllUserList();
-
+        /*초기화 및 데이터 불러오기*/
+        //로딩 시작
         ProgressDialog loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
         //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
         loading.show();
 
-        ChatDB.getUsersCompleteListener(item -> {
+        ChatDB.getUsersCompleteListener(item -> { //모든 유저 목록 불러옴
             for(Map.Entry<String, User> i: item.entrySet()) {
                 if(!userKeySet.contains(i.getKey())) {
                     classifyAdd(new UserListItem(i.getValue()));
@@ -257,25 +257,17 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         });
     }
     private ArrayList<AUser> returnChoose(){
+        /*체크표시된 유저 리스트를 반환*/
         ArrayList<AUser> choose = new ArrayList<>();
-        for(ArrayList<UserListItem> list : userList) {
-            for (UserListItem i : list) {
-                if (i.getChecked()) {
-                    choose.add(i);
-                }
-            }
+        for(UserListItem i:selectedList){
+            choose.add(i);
         }
         return choose;
     }
     private void createChatRoom(){
-        //체크박스로 표시된 유저 정보를 받아옴.
+        /*새 ChatRoom 생성*/
         ArrayList<AUser> list = returnChoose();
         list.add(userMe);
-        //채팅방 만들기 누른 유저 정보 : callUserName
-        //새 ChatRoom 생성
-        //chatRoomJoined에 list의 유저 추가-> list.get(i).getUserKey() 사용
-        //list의 user의 userJoined에 생성된 채팅방 정보 추가
-        //생성메세지(message) 현재 채팅방에 시스템 메세지로 추가
         ChatDB.setChatRoomCompleteListener(chatRoomName, list, userMe, generatedKey -> {
             Intent intent = new Intent(this, RoomActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -285,14 +277,12 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         });
     }
     private void inviteChatRoom(){
-        //체크박스로 표시된 유저 정보를 받아옴
+        /*초대하기*/
         ArrayList<AUser> list = returnChoose();
-        //초대하기 누른 유저 정보 : callUserName
-
         ChatDB.inviteUserListCompleteListener(chatRoomKey, chatRoomMeta, list, userMe, dummyKey -> finish());
     }
     private String changeToString(ArrayList<AUser> list, boolean formal){
-        //유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.
+        /*유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.*/
         StringBuilder result = new StringBuilder();
         if(formal){
             for(AUser i : list){

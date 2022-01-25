@@ -13,12 +13,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.chat_de.databinding.FragmentChatRoomListBinding;
 import com.example.chat_de.datas.AUser;
-import com.example.chat_de.datas.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
 public class ChatRoomListFragment extends Fragment {
+    private final int HASH_CODE = hashCode();
     private FragmentChatRoomListBinding binding;
     private ChatRoomListAdapter chatRoomListAdapter;
     private String userKey;
@@ -79,19 +79,29 @@ public class ChatRoomListFragment extends Fragment {
         chatRoomList.clear();
         chatRoomListAdapter = new ChatRoomListAdapter(chatRoomList);
         binding.listview.setAdapter(chatRoomListAdapter);
-        ChatDB.chatRoomListChangedEventListener(userKey, chatRoomListAdapter);
+        ChatDB.chatRoomListChangedEventListener(userKey, HASH_CODE, chatRoomListAdapter);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        showChatRoomList();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        showChatRoomList();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ChatDB.removeEventListenerBindOnThis();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        ChatDB.removeEventListener(HASH_CODE);
     }
 
     private void enterChatRoom(String chatRoomKey){
@@ -106,7 +116,7 @@ public class ChatRoomListFragment extends Fragment {
         if(!false) {
             settings = new String[]{"채팅방 나가기"};
         } else {
-            settings = new String[]{"채팅방 나가기", "채팅방 이름 바꾸기"};
+            settings = new String[]{"채팅방 나가기", "채팅방 이름 바꾸기", "채팅방 사진 바꾸기"};
         }
         AlertDialog.Builder dlg = new AlertDialog.Builder(getActivity());
         dlg.setTitle(chatRoomName).setItems(settings, (dialogInterface, position) -> {
@@ -118,6 +128,9 @@ public class ChatRoomListFragment extends Fragment {
                     break;
                 case 1: // 채팅방 이름 바꾸기
                     //TODO: 채팅방 이름 바꾸기
+                    break;
+                case 2: // 채팅방 사진 바꾸기
+                    //TODO: 채팅방 사진 바꾸기
                     break;
             }
         }).show();
@@ -132,5 +145,4 @@ public class ChatRoomListFragment extends Fragment {
         intent.putExtra("userList", set);
         getActivity().startActivity(intent);
     }
-
 }

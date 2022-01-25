@@ -36,7 +36,7 @@ public class ChatDB {
     public static final String EXIST = "exist";
 
     private static DatabaseReference ref = null;
-    private static final ArrayList<Pair<String, ChildEventListener>> eventListeners = new ArrayList<>();
+    private static final HashMap<Integer, ArrayList<Pair<String, ChildEventListener>>> eventListeners = new HashMap<>();
     private static String rootPath;
     private static String currentUserKey = null;
     private static boolean adminMode = false;
@@ -59,7 +59,9 @@ public class ChatDB {
         currentUser = user;
     }
     public static void setRootPath(@NonNull String root) {
-        removeEventListenerBindOnThis();
+        for(int key : eventListeners.keySet()) {
+            removeEventListener(key);
+        }
         ref = FirebaseDatabase.getInstance().getReference(root);
     }
     public static DatabaseReference getReference() {
@@ -103,7 +105,7 @@ public class ChatDB {
         });
     }
 
-    public static void getUsersCompleteEventListener(IEventListener<HashMap<String, User>> listener) {
+    public static void getUsersCompleteListener(IEventListener<HashMap<String, User>> listener) {
         ref.child(USERS).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 HashMap<String, User> item = new HashMap<>();
@@ -247,7 +249,7 @@ public class ChatDB {
         }
     }
 
-    public static void messageAddedEventListener(String chatRoomKey, String lastChatKey, IKeyValueEventListener<String, Chat> listener) {
+    public static void messageAddedEventListener(String chatRoomKey, String lastChatKey, int objHashCode ,IKeyValueEventListener<String, Chat> listener) {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -282,9 +284,10 @@ public class ChatDB {
         } else {                    // 빈 채팅방일 때
             ref.child(path).addChildEventListener(myListener);
         }
-        eventListeners.add(new Pair<>(path, myListener));
+
+        registerEventListener(objHashCode, path, myListener);
     }
-    public static void userListChangedEventListener(String chatRoomKey, IKeyValueEventListener<String, ChatRoomUser> listener) {
+    public static void userListChangedEventListener(String chatRoomKey, int objHashCode, IKeyValueEventListener<String, ChatRoomUser> listener) {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -315,9 +318,9 @@ public class ChatDB {
         String path = makePath(CHAT_ROOM_JOINED, chatRoomKey);
 
         ref.child(path).addChildEventListener(myListener);
-        //eventListeners.add(new Pair<>(path, myListener));
+        registerEventListener(objHashCode, path, myListener);
     }
-    public static void chatRoomListChangedEventListener(String userKey, IChatRoomListChangedListener chatRoomListChangedListener) {
+    public static void chatRoomListChangedEventListener(String userKey, int objHashCode, IChatRoomListChangedListener chatRoomListChangedListener) {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -348,7 +351,7 @@ public class ChatDB {
         String path = makePath(USER_JOINED, userKey);
 
         ref.child(path).addChildEventListener(myListener);
-        eventListeners.add(new Pair<>(path, myListener));
+        registerEventListener(objHashCode, path, myListener);
     }
 
     public static void getChatRoomMeta(String chatRoomKey, IEventListener<ChatRoomMeta> listener) {
@@ -417,10 +420,18 @@ public class ChatDB {
         return ret.toString();
     }
 
-    public static void removeEventListenerBindOnThis() {
-        for (Pair<String, ChildEventListener> i : eventListeners) {
-            ref.child(i.first).removeEventListener(i.second);
+    private static void registerEventListener(int key, String path, ChildEventListener listener) {
+        if(!eventListeners.containsKey(key)) {
+            eventListeners.put(key, new ArrayList<>());
         }
-        eventListeners.clear();
+        eventListeners.get(key).add(new Pair<>(path, listener));
+    }
+    public static void removeEventListener(int objHashCode) {
+        if(eventListeners.containsKey(objHashCode)) {
+            for (Pair<String, ChildEventListener> i : eventListeners.get(objHashCode)) {
+                ref.child(i.first).removeEventListener(i.second);
+            }
+            eventListeners.get(objHashCode).clear();
+        }
     }
 }

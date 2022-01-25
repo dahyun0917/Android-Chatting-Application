@@ -113,6 +113,11 @@ public class RoomActivity extends AppCompatActivity {
                 });
             });
             ChatDB.userListChangedEventListener(chatRoomKey, HASH_CODE, (changedUserKey, changedUser) -> {
+                // 강퇴당했거나 방이 사라진 등의 사유로 더 이상 자신이 채팅방에 존재하지 않는 경우 액티비티 종료
+                if(changedUserKey.equals(currentUser.getUserKey()) && !changedUser.getExist()) {
+                    Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
                 userList.put(changedUserKey, changedUser);
             });
         });

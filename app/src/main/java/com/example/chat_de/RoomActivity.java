@@ -397,7 +397,6 @@ public class RoomActivity extends AppCompatActivity {
         intent.putExtra("tag", 2);
         intent.putExtra("chatRoomKey", chatRoomKey);
         intent.putExtra("chatRoomMeta", chatRoomMeta);
-        intent.putExtra("myUserKey", currentUser.userMeta().getUserKey());
         //TODO: 현재 채팅방에 있는 유저리스트를 항상 새로 만들지 않게 변경 필요
         HashSet<String> set = new HashSet<>();
         for(ChatRoomUser e : userList.values()) {

@@ -69,7 +69,7 @@ public class VideoFrameActivity extends AppCompatActivity {
         Intent getIntent = getIntent();
         fromName = getIntent.getStringExtra("fromName");
         passDate = getIntent.getStringExtra("passDate");
-        videoViewUrl = getIntent.getStringExtra("imageView");
+        videoViewUrl = getIntent.getStringExtra("videoUrl");
         videoUri=Uri.parse(videoViewUrl);
 
 

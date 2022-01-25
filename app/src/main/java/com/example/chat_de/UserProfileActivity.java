@@ -16,7 +16,6 @@ import java.util.ArrayList;
 
 public class UserProfileActivity extends AppCompatActivity {
     private ActivityUserProfileBinding binding;
-    private Dialog dialog;
     private AUser userOther;
     private AUser userMe;
 

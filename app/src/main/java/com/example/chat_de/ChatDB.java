@@ -130,6 +130,27 @@ public class ChatDB {
             }
         });
     }
+    public static void setChatRoomCompleteListener(String chatRoomName, String chatPictureURL , ArrayList<AUser> userList, AUser userMe, IEventListener<String> listener) {
+        final ChatRoomMeta chatRoomMeta = new ChatRoomMeta(chatRoomName, ChatRoomMeta.Type.BY_USER,chatPictureURL);
+        ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
+        ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
+            if (error == null) {
+                inviteUserListCompleteListener(rf.getKey(), chatRoomMeta, userList, userMe, listener);
+            } else {
+                Log.e("FRD", "Make chat room error: " + error.toString());
+            }
+        });
+    }
+    public static void setChatRoomCompleteListener(ChatRoomMeta chatRoomMeta, ArrayList<AUser> userList, AUser userMe, IEventListener<String> listener) {
+        ChatRoom chatRoom = new ChatRoom(new HashMap<>(), chatRoomMeta);
+        ref.child(CHAT_ROOMS).push().setValue(chatRoom, (error, rf) -> {
+            if (error == null) {
+                inviteUserListCompleteListener(rf.getKey(), chatRoomMeta, userList, userMe, listener);
+            } else {
+                Log.e("FRD", "Make chat room error: " + error.toString());
+            }
+        });
+    }
     public static void inviteUserListCompleteListener(String chatRoomKey, ChatRoomMeta chatRoomMeta, ArrayList<AUser> userList, AUser userMe, IEventListener<String> listener) {
         HashMap<String, Object> result = new HashMap<>();
         for (AUser item : userList) {

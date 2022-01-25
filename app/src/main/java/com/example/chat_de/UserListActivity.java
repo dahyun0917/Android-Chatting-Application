@@ -1,9 +1,9 @@
 package com.example.chat_de;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,9 +13,12 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -46,10 +49,12 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private int mode=0;
     private User userMe;
     private String chatRoomKey = null;
-    private ChatRoomMeta chatRoomMeta = null;
+    private ChatRoomMeta currentChatRoomMeta = null;
     private String myUserKey;
-    private String chatRoomName="";
+    private String newChatRoomName ="";
+    private String newChatRoomPicture="";
     private HashSet<String> userKeySet;
+    ActivityResultLauncher<Intent> getCreateRoomMeta;
 
     private ActivityUserListBinding binding;
     @Override
@@ -82,6 +87,20 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         selectedList = new ArrayList<>();
         userDictionary = new HashMap<>();
 
+        //새 채팅방 생성시 intent를 위한 getCreateRoomMeta 초기화
+        getCreateRoomMeta = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if(result.getResultCode() == 9001) {
+                Intent intent = result.getData();
+                newChatRoomName = intent.getStringExtra("chatRoomName");
+                newChatRoomPicture = intent.getStringExtra("chatRoomPicture");
+                if(newChatRoomName.isEmpty()){
+                    newChatRoomName = changeToString(returnChoose(),false);
+                }
+                //파이어베이스에 채팅방 업로드
+                uploadChatRoom();
+            }
+        });
+
         //유저리스트 리사이클러뷰 설정
         userListAdapter = new UserListAdapter(getApplicationContext(), userList);
         binding.recyclerUserList.setAdapter(userListAdapter);
@@ -105,7 +124,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             else{
                 if(mode == NEW_CHAT){
                     //채팅방 만들기
-                    showNewChatDialog();
+                    createChatRoom();
                 }
                 else if(mode == INVITE_CHAT){
                     //초대하기
@@ -152,29 +171,15 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
             //초대하기
             binding.userListMode.setText("초대하기");
             chatRoomKey = intent.getStringExtra("chatRoomKey");
-            chatRoomMeta = (ChatRoomMeta)intent.getSerializableExtra("chatRoomMeta");
+            currentChatRoomMeta = (ChatRoomMeta)intent.getSerializableExtra("chatRoomMeta");
         }
         else{
             Log.e("ERROR MODE","Mode값은 1또는 2만 가능합니다.");
         }
     }
-    private void showNewChatDialog(){
-        /*채팅방 생성시 정보 입력을 위한 다이얼로그(대화상자) 띄우기*/
-        final EditText editText = new EditText(UserListActivity.this);
-        AlertDialog.Builder dlg = new AlertDialog.Builder(UserListActivity.this);
-        dlg.setTitle("채팅방 이름 입력"); //제목
-        dlg.setMessage("새로 생성할 채팅방 이름을 입력해주세요.");
-        dlg.setView(editText);
-        dlg.setPositiveButton("입력", (dialogInterface, i) -> {
-            chatRoomName = "";
-            chatRoomName = editText.getText().toString();
-            if(chatRoomName.isEmpty()){
-                chatRoomName = changeToString(returnChoose(),false);
-            }
-            createChatRoom();
-        });
-        dlg.setNegativeButton("취소",null);
-        dlg.show();
+    private void createChatRoom() {
+        /*채팅방 생성*/
+        getCreateRoomMeta.launch(new Intent(UserListActivity.this, CreateRoomMetaActivity.class));
     }
 
     private void classifyAdd(@NonNull UserListItem item){
@@ -264,11 +269,11 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         }
         return choose;
     }
-    private void createChatRoom(){
+    private void uploadChatRoom(){
         /*새 ChatRoom 생성*/
         ArrayList<AUser> list = returnChoose();
         list.add(userMe);
-        ChatDB.setChatRoomCompleteListener(chatRoomName, list, userMe, generatedKey -> {
+        ChatDB.setChatRoomCompleteListener(newChatRoomName,newChatRoomPicture, list, userMe, generatedKey -> {
             Intent intent = new Intent(this, RoomActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("chatRoomKey", generatedKey);
@@ -279,7 +284,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private void inviteChatRoom(){
         /*초대하기*/
         ArrayList<AUser> list = returnChoose();
-        ChatDB.inviteUserListCompleteListener(chatRoomKey, chatRoomMeta, list, userMe, dummyKey -> finish());
+        ChatDB.inviteUserListCompleteListener(chatRoomKey, currentChatRoomMeta, list, userMe, dummyKey -> finish());
     }
     private String changeToString(ArrayList<AUser> list, boolean formal){
         /*유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.*/

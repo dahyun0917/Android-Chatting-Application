@@ -245,7 +245,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
 
-            Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftImageBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftImageBinding.imagevMsg);
             leftImageBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftImageBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.userMeta().getPictureURL()).error(R.drawable.knu_mark_white).into(leftImageBinding.imgv);
@@ -301,7 +301,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatRoomUser = myUserList.get(item.getFrom());
 
 
-            Glide.with(itemView.getContext()).load(R.drawable.player).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftVideoBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(R.drawable.player).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.imagevMsg);
             leftVideoBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftVideoBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.userMeta().getPictureURL()).error(R.drawable.knu_mark_white).into(leftVideoBinding.imgv);
@@ -360,7 +360,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatRoomUser = myUserList.get(item.getFrom());
 
 
-            Glide.with(itemView.getContext()).load(R.drawable.file_icon).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(leftFileBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(R.drawable.file_icon).override(200,200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftFileBinding.imagevMsg);
             leftFileBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftFileBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.userMeta().getPictureURL()).error(R.drawable.knu_mark_white).into(leftFileBinding.imgv);
@@ -429,7 +429,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void bind(Chat item){
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String chatDate = simpleDateFormat.format(item.normalDate());
-            Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightImageBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(rightImageBinding.imagevMsg);
             rightImageBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
             rightImageBinding.textvTime.setText(chatDate);
         }

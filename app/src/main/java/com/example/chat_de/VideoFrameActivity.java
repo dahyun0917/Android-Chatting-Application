@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ import com.google.android.exoplayer2.Player;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class VideoFrameActivity extends AppCompatActivity {
 
@@ -245,9 +248,6 @@ public class VideoFrameActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-
-
-
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
@@ -255,6 +255,12 @@ public class VideoFrameActivity extends AppCompatActivity {
         loading.show();
 
         player = new ExoPlayer.Builder(this).build();
+
+
+
+
+
+
         //플레이어뷰에게 플레이어 설정
         binding.videoView.setPlayer(player);
 
@@ -263,6 +269,29 @@ public class VideoFrameActivity extends AppCompatActivity {
 
         player.setMediaItem(mediaItem);
         player.prepare();
+
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            int time =0;
+            @Override
+            public void run() {
+                // 반복실행할 구문
+                time++;
+                if(time==3){
+                    timer.cancel();
+                    Log.d("timer", String.valueOf(time));
+                    failLoading();
+                    //player.stop();
+                    /*binding.videoView.setPlayer(null);
+                    player.release();
+                    player=null;*/
+                    //finish();
+                }
+            }
+        };
+        //timer.schedule(timerTask,0,1000);
+
+
         player.addListener(new Player.Listener() {
            @Override
            public void onPlaybackStateChanged(int playbackState) {
@@ -321,6 +350,13 @@ public class VideoFrameActivity extends AppCompatActivity {
             }
         });*/
     }
+    private void failLoading(){
+        loading.dismiss();
+        //binding.videoView.setPlayer(null);
+        //player.release();
+        //player=null;
+        Toast.makeText(VideoFrameActivity.this, "비디오 로딩 실패",Toast.LENGTH_SHORT).show();
+    }
 
     //화면에 안보일 때..
     @Override
@@ -330,7 +366,9 @@ public class VideoFrameActivity extends AppCompatActivity {
         binding.videoView.setPlayer(null);
         player.release();
         player=null;
+        Toast.makeText(getApplication(), "비디오 로딩 실패",Toast.LENGTH_SHORT).show();
     }
+
 
 
 

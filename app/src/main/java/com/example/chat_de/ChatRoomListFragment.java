@@ -63,7 +63,7 @@ public class ChatRoomListFragment extends Fragment {
         binding.listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                chatRoomSettingDialog(chatRoomList.get(i).getChatRoomKey(), chatRoomList.get(i).getChatRoomName());
+                chatRoomSettingDialog(chatRoomList.get(i).getChatRoomKey(), chatRoomList.get(i).getName());
                 return true;
             }
         });

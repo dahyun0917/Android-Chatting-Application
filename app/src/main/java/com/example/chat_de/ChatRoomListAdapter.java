@@ -35,13 +35,13 @@ public class ChatRoomListAdapter extends BaseAdapter implements IChatRoomListCha
 
     @Override
     public void ChatRoomAdded(String key, ChatRoomMeta chatRoomMeta) {
-        ChatRoomListItem item = new ChatRoomListItem(key, chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
+        ChatRoomListItem item = new ChatRoomListItem(key, chatRoomMeta);
         chatRoomList.add(item);
         this.notifyDataSetChanged();
     }
     @Override
     public void ChatRoomChanged(String key, ChatRoomMeta chatRoomMeta) {
-        ChatRoomListItem item = new ChatRoomListItem(key, chatRoomMeta.getPictureURL(), chatRoomMeta.getName());
+        ChatRoomListItem item = new ChatRoomListItem(key, chatRoomMeta);
         int size=chatRoomList.size();
         int pos = 0;
         while (pos < size){
@@ -78,11 +78,11 @@ public class ChatRoomListAdapter extends BaseAdapter implements IChatRoomListCha
             view = inflater.inflate(R.layout.item_list_chat_room, viewGroup,false);
         }
         itemListChatRoomBinding = ItemListChatRoomBinding.bind(view);
-        itemListChatRoomBinding.chatRoomName.setText(item.getChatRoomName());
+        itemListChatRoomBinding.chatRoomName.setText(item.getName());
 
         Glide
                 .with(context)
-                .load(item.getChatRoomPictureURL())
+                .load(item.getPictureURL())
                 .circleCrop()
                 .placeholder(R.drawable.knu_mark)
                 .into(itemListChatRoomBinding.chatRoomImage);

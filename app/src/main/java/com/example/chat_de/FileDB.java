@@ -104,8 +104,6 @@ public class FileDB {
     }
 
     public static long downloadFile(DownloadManager downloadManager, String fileUrl, String filename, String localPath){
-
-
         Uri urlToDownload = Uri.parse(fileUrl);
         DownloadManager.Request request = new DownloadManager.Request(urlToDownload);
         request.setTitle(filename); //제목

@@ -1,6 +1,5 @@
 package com.example.chat_de;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;

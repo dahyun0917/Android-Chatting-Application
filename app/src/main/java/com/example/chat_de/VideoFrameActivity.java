@@ -22,14 +22,19 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class VideoFrameActivity extends AppCompatActivity {
-
     private ActivityVideoFrameBinding binding;
     private String fromName;
     private String passDate;
@@ -41,15 +46,14 @@ public class VideoFrameActivity extends AppCompatActivity {
     private DownloadManager downloadManager;
     private long latestId = -1;
 
-    ProgressDialog loading;
-    Uri videoUri;
+    private MyProgressDialog loading;
+    private Uri videoUri;
 
     //임의의 동영상 url(동영상 재생 테스트로 필요)
     //Uri videoUri=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
     //Uri sample=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
 
     //실제 비디오를 플레이하는 객체의 참조 변수
-
     ExoPlayer player;
 
     @Override
@@ -60,18 +64,14 @@ public class VideoFrameActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE); //메뉴바 안뜨게
         setContentView(view);
 
-
-
         Intent getIntent = getIntent();
         fromName = getIntent.getStringExtra("fromName");
         passDate = getIntent.getStringExtra("passDate");
         videoViewUrl = getIntent.getStringExtra("videoUrl");
         videoUri=Uri.parse(videoViewUrl);
 
-
         binding.fromName.setText(fromName);
         binding.passDate.setText(passDate);
-
 
         downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
 
@@ -93,10 +93,7 @@ public class VideoFrameActivity extends AppCompatActivity {
                 }
             }
         });
-
-
         binding.downloads.setOnClickListener(new View.OnClickListener(){
-
             @Override
             public void onClick(View view) {
                 binding.downloads.setVisibility(View.GONE);
@@ -105,7 +102,6 @@ public class VideoFrameActivity extends AppCompatActivity {
 
             }
         });
-
         binding.downloadCancle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -115,7 +111,6 @@ public class VideoFrameActivity extends AppCompatActivity {
                 downloadManager.remove(latestId);
             }
         });
-
     }
     @Override
     public void onPostResume(){
@@ -125,23 +120,16 @@ public class VideoFrameActivity extends AppCompatActivity {
     }
 
     public void downVideo(){
-        Toast.makeText(this, "다운로드 시작되었습니다.",Toast.LENGTH_SHORT).show();
-
-
+        Toast.makeText(this, "다운로드가 시작되었습니다.",Toast.LENGTH_SHORT).show();
         //파일 이름 :날짜_시간
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
 
-        String extension = FileDB.getExtension(videoViewUrl);
-        //Log.d("extension",extension);
-        String filename = String.valueOf(sdf.format(day))+"."+ extension;
-
-
+        String extension = FileDB.getFileType(videoViewUrl);
+        String filename = sdf.format(day)+"."+ extension;
         String localPath = "/KNU_AMP/video/" + filename;
 
-
         latestId=FileDB.downloadFile(downloadManager,videoViewUrl,filename,localPath);
-
     }
     /*// 다운로드 상태조회
     private BroadcastReceiver downloadCompleteReceiver = new BroadcastReceiver() {
@@ -182,23 +170,20 @@ public class VideoFrameActivity extends AppCompatActivity {
         }
     };*/
 
-
-
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 
         @Override
         public void onReceive(Context context, Intent intent) {
             binding.downloads.setVisibility(View.VISIBLE);
             binding.downloadCancle.setVisibility(View.GONE);
-            if(!downloadCancle) Toast.makeText(context, "다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
-            else if( downloadCancle ) {
+            if(!downloadCancle) Toast.makeText(context, "비디오 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
+            else{
                 downloadCancle =false;
                 Toast.makeText(context, "다운로드 취소.",Toast.LENGTH_SHORT).show();
             }
         }
 
     };
-
 
     /*@Override
     protected void onPostResume() {
@@ -221,22 +206,29 @@ public class VideoFrameActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        loading = new ProgressDialog(this);
+        loading = new MyProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
         //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
         loading.show();
-
 
         player = new ExoPlayer.Builder(this).build();
 
         //플레이어뷰에게 플레이어 설정
         binding.videoView.setPlayer(player);
         MediaItem mediaItem = MediaItem.fromUri(videoUri);
+        DataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true);
+        DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(this, httpDataSourceFactory);
+        CacheDataSource.Factory cacheDataSourceFactory = new CacheDataSource.Factory()
+                .setCache(ChatApplication.simpleCache)
+                .setUpstreamDataSourceFactory(dataSourceFactory)
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR);
 
-        player.setMediaItem(mediaItem);
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                .createMediaSource(mediaItem);
+
+        player.setMediaSource(mediaSource, true);
         player.prepare();
-
 
         player.addListener(new Player.Listener() {
            @Override
@@ -264,19 +256,16 @@ public class VideoFrameActivity extends AppCompatActivity {
                 Throwable cause = error.getCause();
                 Log.d("error", String.valueOf(error.errorCode));
             }
-
        });
 
                 //player.play();
                 //로딩이 완료되어 준비가 되었을 때
                 //자동 실행되도록..
                 //player.setPlayWhenReady(true);
-
         /*if(player.setPlayWhenReady()) {
             loading.dismiss();
             player.play();
         }*/
-
                 //웹 주소 에러 관련 리스너
         /*player.addListener(new Player.Listener() {
 
@@ -318,9 +307,9 @@ public class VideoFrameActivity extends AppCompatActivity {
         super.onStop();
         //플레이어뷰 및 플레이어 객체 초기화
         if(!fail){  //로딩이 실패되지 않았을 때
-        binding.videoView.setPlayer(null);
-        player.release();
-        player=null;
+            binding.videoView.setPlayer(null);
+            player.release();
+            player=null;
         }
         fail=false;
     }
@@ -364,6 +353,4 @@ public class VideoFrameActivity extends AppCompatActivity {
         private File getCacheDirFile() {
             return new File(context.getCacheDir(), "exo_cache");
         }*/
-
-
 }

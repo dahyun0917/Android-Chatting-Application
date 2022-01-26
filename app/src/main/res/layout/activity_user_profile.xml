@@ -1,40 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--프로필 크게 만들기 위해서 LinearLayout으로 감싸줌-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_gravity="center"
-    android:orientation="vertical">
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_image"
-        android:layout_width="180dp"
-        android:layout_height="130dp"
-        android:layout_gravity="top"
-        android:layout_marginTop="20dp"
-        android:src="@drawable/knu_mark"
-        />
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical" >
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center">
-        <TextView
-            android:id="@+id/user_name"
-            android:layout_marginTop="15dp"
+        android:layout_width="250dp"
+        android:layout_height="320dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_gravity="top|center"
+            android:layout_margin="20dp"
+            android:src="@drawable/knu_mark"
+            />
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="이름"
-            android:textSize="15sp"
-            android:gravity="center"/>
+            android:orientation="vertical"
+            android:layout_gravity="center">
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="이름"
+                android:textSize="15sp"
+                android:gravity="center"/>
+            <TextView
+                android:id="@+id/user_num"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="기수"
+                android:textSize="10sp"
+                android:gravity="center"/>
 
-        <Button
-            android:id="@+id/make_chat"
-            android:layout_marginTop="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/colorKNU"
-            android:text="일대일 채팅방 만들기"
-            android:gravity="center"/>
+            <Button
+                android:id="@+id/make_chat"
+                android:layout_margin="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorKNU"
+                android:text="일대일 채팅방 만들기"
+                android:gravity="center"/>
+        </LinearLayout>
+
     </LinearLayout>
-
 </LinearLayout>

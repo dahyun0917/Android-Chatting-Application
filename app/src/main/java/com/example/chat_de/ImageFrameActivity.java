@@ -156,7 +156,7 @@ public class ImageFrameActivity extends AppCompatActivity {
         //파일 이름 :날짜_시간_확장자
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
-        String extension = FileDB.getExtension(imageViewUrl);
+        String extension = FileDB.getFileType(imageViewUrl);
         // Log.d("extension",extension);
         filename = String.valueOf(sdf.format(day))+"."+ extension;
 

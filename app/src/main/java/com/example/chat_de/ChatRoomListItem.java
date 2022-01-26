@@ -1,37 +1,21 @@
 package com.example.chat_de;
 
-public class ChatRoomListItem {
+import com.example.chat_de.datas.ChatRoomMeta;
+
+public class ChatRoomListItem extends ChatRoomMeta {
     private String chatRoomKey;
-    private String chatRoomPictureURL;
-    private String chatRoomName;
 
-    public ChatRoomListItem() {    }
-    public ChatRoomListItem(String chatRoomKey, String chatRoomPictureURL, String chatRoomName) {
-        this.chatRoomKey = chatRoomKey;
-        this.chatRoomPictureURL = chatRoomPictureURL;
-        this.chatRoomName = chatRoomName;
+    public ChatRoomListItem() { }
+    public ChatRoomListItem(String chatRoomKey, ChatRoomMeta chatRoomMeta) {
+        super(chatRoomMeta);
+        setChatRoomKey(chatRoomKey);
     }
 
-    public String getChatRoomPictureURL() {
-        return chatRoomPictureURL;
-    }
     public String getChatRoomKey() {
         return chatRoomKey;
     }
 
     public void setChatRoomKey(String chatRoomKey) {
         this.chatRoomKey = chatRoomKey;
-    }
-    public void setChatRoomPictureURL(String chatRoomPictureURL) {
-        this.chatRoomPictureURL = chatRoomPictureURL;
-    }
-
-    public String getChatRoomName() {
-        return chatRoomName;
-    }
-
-
-    public void setChatRoomName(String chatRoomName) {
-        this.chatRoomName = chatRoomName;
     }
 }

@@ -181,23 +181,17 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         //startActivityForResult를 대체하는 ActivityResultLauncher
         //ActivityResultLauncher의 경우 onResume이 실행되기전에 초기화 되어야 한다
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if(result.getResultCode() == RESULT_OK) {
-                filePath = result.getData() != null ? result.getData().getData() : null;
-
-                String extension = getMimeType(this, filePath);
+            if (result.getResultCode() == RESULT_OK) {
+                Uri filePath = result.getData().getData();
                 String fileName = getName(filePath);
-                Log.d("filePath", String.valueOf(filePath));
-                Log.d("확장자", getMimeType(this, filePath));
-                Log.d("filename", fileName);
-                if (filePath != null) {
-                    if (requestCode == FILE_CODE)
-                        uploadFile(requestCode, fileName);
+                if (filePath != null){
+                    if(requestCode==FILE_CODE)
+                        uploadFile(requestCode,filePath,fileName);
                     else
-                        uploadFile(requestCode, extension);
+                        uploadFile(requestCode,filePath,FileDB.getFileType(this,filePath));
                 }
                 try {
                     InputStream in = getContentResolver().openInputStream(filePath);
-                    //Bitmap img = BitmapFactory.decodeStream(in);
                     in.close();
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -18,12 +17,12 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,14 +32,9 @@ import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,7 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
 
-public class RoomActivity extends AppCompatActivity {
+public class RoomActivity extends AppCompatActivity implements IUploadFileEventListener {
     private final int HASH_CODE = hashCode();
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
@@ -60,12 +54,14 @@ public class RoomActivity extends AppCompatActivity {
     private final int IMAGE_CODE = 10;
     private final int VIDEO_CODE = 20;
     private final int FILE_CODE = 30;
+    private int requestCode;
     private String chatRoomKey;
 
     private ChatRoomUser currentUser; //TODO LOGIN : 현재 로그인된 사용자
     private String frontChatKey = null;
-    private String lastChatKey = null;
     private Chat.Type messageType = null;
+
+    private ActivityResultLauncher<Intent> activityResultLauncher;
 
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
@@ -77,6 +73,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean autoScroll = true;
     private boolean isActionMove = false;
     private ChatRoomMeta chatRoomMeta;
+    private ProgressDialog progressDialog;
     private Uri filePath;
 
     @Override
@@ -97,7 +94,7 @@ public class RoomActivity extends AppCompatActivity {
             ChatDB.setCurrentUser(currentUser);
             roomElementAdapter.setCurrentUser(currentUser);
             ChatDB.getLastChatCompleteListener(chatRoomKey, (chatKey, chatValue) -> {
-                lastChatKey = frontChatKey = chatKey;
+                frontChatKey = chatKey;
                 ChatDB.getPrevChatListCompleteListener(chatRoomKey, chatKey, CHAT_LIMIT, (prevChatListKey, prevChatList) -> {
                     if (prevChatListKey != null) {
                         frontChatKey = prevChatListKey;
@@ -107,12 +104,16 @@ public class RoomActivity extends AppCompatActivity {
                     }
                     floatOldMessage(prevChatList);
                     ChatDB.messageAddedEventListener(chatRoomKey, chatKey, HASH_CODE, (newChatKey, newChat) -> {
-                        lastChatKey = newChatKey;
                         floatNewMessage(newChat);
                     });
                 });
             });
             ChatDB.userListChangedEventListener(chatRoomKey, HASH_CODE, (changedUserKey, changedUser) -> {
+                // 강퇴당했거나 방이 사라진 등의 사유로 더 이상 자신이 채팅방에 존재하지 않는 경우 액티비티 종료
+                if(changedUserKey.equals(currentUser.getUserKey()) && !changedUser.getExist()) {
+                    Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
                 userList.put(changedUserKey, changedUser);
             });
         });
@@ -177,6 +178,27 @@ public class RoomActivity extends AppCompatActivity {
             return false;
         });
 
+        //startActivityForResult를 대체하는 ActivityResultLauncher
+        //ActivityResultLauncher의 경우 onResume이 실행되기전에 초기화 되어야 한다
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Uri filePath = result.getData().getData();
+                String fileName = getName(filePath);
+                if (filePath != null){
+                    if(requestCode==FILE_CODE)
+                        uploadFile(requestCode,filePath,fileName);
+                    else
+                        uploadFile(requestCode,filePath,FileDB.getFileType(this,filePath));
+                }
+                try {
+                    InputStream in = getContentResolver().openInputStream(filePath);
+                    in.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         //유저 목록 보기 버튼에 대한 클릭 리스너 지정
         binding.userListButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,15 +208,10 @@ public class RoomActivity extends AppCompatActivity {
         });
 
         //초대하기 버튼에 대한 클릭 리스너 지정
-        if(!ChatDB.getAdminMode()) //adminmode가 아니면
+        if(!ChatDB.getAdminMode()) { //adminmode가 아니면
             binding.addUserButton.setVisibility(View.GONE);
-        else{
-            binding.addUserButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    inviteUser();
-                }
-            });
+        } else {
+            binding.addUserButton.setOnClickListener(view -> inviteUser());
         }
 
         //채팅방 이름이 길 경우, 회전하도록 설정
@@ -213,7 +230,6 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
 
                 if (!recyclerView.canScrollVertically(1)) { //최하단에 닿았을 때
                     Log.d("TAG", String.valueOf(autoScroll));
@@ -272,7 +288,7 @@ public class RoomActivity extends AppCompatActivity {
                 });
                 autoScroll = false;
             }
-        }, 1000);
+        }, 500);
     }
 
     @Override
@@ -411,101 +427,43 @@ public class RoomActivity extends AppCompatActivity {
 
     private void galleryAccess() {
         /*사진 전송시 사용자 갤러리로 접근하는 함수*/
-        /*final int[] image = {R.drawable.image_red,R.drawable.video_red};*/
-        final String[] fileKind = {"image", "video","file"};
+        final String[] fileKind = {"image", "video", "file"};
 
-        Intent intent = new Intent();
         //갤러리만
         /*Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
 
         startActivityForResult(intent,10);*/
 
-        /*final List<Map<String,Object>> dialogItemList = new ArrayList<>();
-        for(int i =0;i>image.length;i++){
-            Map<String,Object> itemMap = new HashMap<>();
-            itemMap.put("image",image[i]);
-            itemMap.put("text",fileKind[i]);
-
-            dialogItemList.add(itemMap);
-        }*/
 
 
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("파일 종류") //제목
                 .setItems(fileKind, (dialogInterface, position) -> {
+                    Intent sendIntent = new Intent();
                     switch (position) {
                         case 0:  //image
-                            intent.setType("image/*");
-                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), IMAGE_CODE);
+                            sendIntent = Intent.createChooser(FileDB.openImage(), "이미지를 선택하세요.");
+                            requestCode = IMAGE_CODE;
                             break;
                         case 1:  //video
-                            intent.setType("video/*");
-                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
+                            sendIntent = Intent.createChooser(FileDB.openVideo(), "video를 선택하세요.");
+                            requestCode = VIDEO_CODE;
                             break;
                         case 2 :  //file
-                            intent.setType("application/*");
-                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent, "파일를 선택하세요."), FILE_CODE);
+                            sendIntent = Intent.createChooser(FileDB.openFile(), "파일를 선택하세요.");
+                            requestCode = FILE_CODE;
                             break;
                     }
+                    //activityResultLauncher를 sendIntent로 실행
+                    activityResultLauncher.launch(sendIntent);
                 });
         dlg.setIcon(R.drawable.file_blue);  //대화창 아이콘 설정
-        //dlg.setAdapter(adapter,null);
-
-        /*adapter.add("image");
-        adapter.add("video");
-        dlg.setAdapter(adapter,new AdapterView.OnItemClickListener(){
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                if(fileKind[position].equals("image")){
-                    intent.setType("image/*");
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), IMAGE_CODE);
-                } else if(fileKind[position].equals("video")){
-                    intent.setType("video/*");
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
-                }
-            }
-        });*/
-
         dlg.setNegativeButton("cancel", null);
 
         dlg.show();
 
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        /*갤러리 액티비티에서 결과값을 제대로 받았는지 확인*/
-        super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode == IMAGE_CODE || requestCode == VIDEO_CODE || requestCode == FILE_CODE) && resultCode == RESULT_OK) {
-            filePath = data.getData();
-
-            String extension =getMimeType(this,filePath);
-            String fileName = getName(filePath);
-            Log.d("filePath", String.valueOf(filePath));
-            Log.d("확장자", getMimeType(this,filePath));
-            Log.d("filename",fileName);
-            if (filePath != null){
-                if(requestCode==FILE_CODE)
-                    uploadFile(requestCode,fileName);
-                else
-                    uploadFile(requestCode,extension);
-            }
-            try {
-                InputStream in = getContentResolver().openInputStream(filePath);
-                //Bitmap img = BitmapFactory.decodeStream(in);
-                in.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private String getName(Uri uri) {
@@ -518,25 +476,11 @@ public class RoomActivity extends AppCompatActivity {
         return cursor.getString(column_index);
     }
 
-    public static String getMimeType(Context context, Uri uri) {
-        /*파일 확장자 가져오기*/
-        String extension;
-
-        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-            final MimeTypeMap mime = MimeTypeMap.getSingleton();
-            extension = mime.getExtensionFromMimeType(context.getContentResolver().getType(uri));
-        } else {
-            extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(uri.getPath())).toString());
-        }
-
-        return extension;
-    }
-
-    public void uploadFile(int requestCode,String FileNameOrExtension) {
+    public void uploadFile(int requestCode,Uri filePath,String FileNameOrExtension) {
         /*firebase storage에 파일(이미지, 비디오, 파일)을 업로드 하는 함수*/
         //Todo: 파이어베이스에 올리는 코드 수정 (node에서 링크 받아오기)
 
-        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("업로드중...");
         progressDialog.show();
 
@@ -556,41 +500,29 @@ public class RoomActivity extends AppCompatActivity {
             filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey() +"_"+ FileNameOrExtension;
         else
             filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+FileNameOrExtension;
-        //uploads라는 폴더가 없으면 자동 생성
+        //폴더가 없으면 자동 생성
         StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+ChatDB.getRootPath()+"/"+chatRoomMeta.getName()+"/" + filename);
 
-        //이미지 파일 업로드
-        UploadTask uploadTask = imgRef.putFile(filePath);
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                //Toast.makeText(RoomActivity.this, "success upload", Toast.LENGTH_SHORT).show();
-                imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        //userKey="user2";
-                        ChatDB.uploadMessage(uri.toString(), ++lastIndex, messageType, chatRoomKey, currentUser.userMeta().getUserKey(), userList);
-                        progressDialog.dismiss();
-                        //Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                progressDialog.dismiss();
-                Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-            }
-        });
-        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                @SuppressWarnings("VisibleForTests")
-                double progress = (100 * taskSnapshot.getBytesTransferred()) /  taskSnapshot.getTotalByteCount();
-                //dialog에 진행률을 퍼센트로 출력해 준다
-                progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
-            }
-        });
+        FileDB.uploadFile(filePath,imgRef,this);
+
+    }
+
+    @Override
+    public void SuccessUpload(Uri uri) {
+        ChatDB.uploadMessage(uri.toString(), ++lastIndex, messageType, chatRoomKey, currentUser.userMeta().getUserKey(), userList);
+        progressDialog.dismiss();
+    }
+
+    @Override
+    public void FailUpload(Exception e) {
+        progressDialog.dismiss();
+        Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+        Log.d("exception", String.valueOf(e));
+    }
+
+    @Override
+    public void ProgressUpload(double progress) {
+        //dialog에 진행률을 퍼센트로 출력해 준다
+        progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
     }
 }

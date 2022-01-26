@@ -82,7 +82,7 @@ public class ChatDB {
         return currentUser;
     }
 
-    public static void checkUserExist(String userKey, IEventListener<Boolean> listener) {
+    public static void checkUserExistCompleteListener(String userKey, IEventListener<Boolean> listener) {
         ref.child(makePath(USERS, userKey)).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (task.getResult().getValue() != null) {
@@ -95,7 +95,7 @@ public class ChatDB {
             }
         });
     }
-    public static void setUser(String userKey, User user, IEventListener<String> listener){
+    public static void setUser(String userKey, User user) {
         ref.child(makePath(USERS, userKey)).setValue(user, (error, rf) -> {
             if(error == null) {
                 Log.i("FRD", "User data update success");
@@ -105,6 +105,15 @@ public class ChatDB {
         });
     }
 
+    public static void setChatRoomMeta(String chatRoomKey, ChatRoomMeta chatRoomMeta) {
+        ref.child(makePath(CHAT_ROOMS, chatRoomKey)).setValue(chatRoomMeta, (error, rf) -> {
+            if(error == null) {
+                Log.i("FRD", "Chat room meta data update success");
+            } else {
+                Log.e("FRD", "Chat room meta data update fail: " + error);
+            }
+        });
+    }
     public static void getUsersCompleteListener(IEventListener<HashMap<String, User>> listener) {
         ref.child(USERS).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

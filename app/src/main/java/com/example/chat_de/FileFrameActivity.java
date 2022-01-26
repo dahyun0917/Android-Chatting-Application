@@ -5,10 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -27,8 +24,6 @@ public class FileFrameActivity extends AppCompatActivity {
 
     private String fileUrl;
     private DownloadManager downloadManager;
-    private DownloadManager.Request request;
-    private Uri urlToDownload;
     private long latestId = -1;
 
 
@@ -60,47 +55,23 @@ public class FileFrameActivity extends AppCompatActivity {
     }
     public void downFile() {
 
-        //파일 이름 :날짜_시간_확장자
+        //파일 이름 :날짜_시간_확장자포함 원래 파일 이름
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
-        String extension = getExtension(fileUrl);
-        String originalFileName = getFileName(fileUrl);
-        // Log.d("extension",extension);
+        //String extension = getExtension(fileUrl);
+        String originalFileName = FileDB.getFileName(fileUrl);
         Log.d("name",originalFileName);
         //String filename = String.valueOf(sdf.format(day))+"."+ extension;
+
+        //파일을 다운로드 받는 시간 + 원래 파일 이름 or 다운로드 받은 시간_원래 파일 이름
         String filename = String.valueOf(sdf.format(day))+"_"+originalFileName;
 
 
         String localPath = "/KNU_AMP/file/" + filename;
 
-
-        urlToDownload = Uri.parse(fileUrl);
-        request = new DownloadManager.Request(urlToDownload);
-        request.setTitle(filename); //제목
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //알림창에 다운로드 중 , 다운로드 완료 창이 보이게 설정
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,localPath); //다운로드한 파일을 저장할 경로를 지정
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs(); //디렉토리가 존재하지 않을 경우 디렉토리를 생성하도록 구현
-        latestId = downloadManager.enqueue(request); //latestID : 다운로드매니저 큐에 잘 들어갔는지 확인하는 변수로 사용하는 것으로 추정
-
-
+        latestId=FileDB.downloadFile(downloadManager,fileUrl,filename,localPath);
 
     }
-
-    //파일 확장자 가져오기
-    public static String getExtension(String fileStr){
-        //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
-        //uri 스트링의 마지막 . 뒤부터 마지막 ? 까지의 스트링을 받아옴
-        String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
-        return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
-    }
-    //파일 이름 가져오기
-    public static String getFileName(String fileStr){
-        String fileName = null;
-        fileName = fileStr.substring(fileStr.lastIndexOf("_")+1);
-
-        return fileName;
-    }
-
 
     //다운로드 완료되었을 때 작동
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){

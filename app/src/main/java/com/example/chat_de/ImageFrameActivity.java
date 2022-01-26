@@ -8,10 +8,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
@@ -36,10 +33,8 @@ public class ImageFrameActivity extends AppCompatActivity {
     private String fromName;
     private String passDate;
     private String imageViewUrl;
-    private int touchnum = 0;
+    private int touchNum = 0;
     private DownloadManager downloadManager;
-    private DownloadManager.Request request;
-    private Uri urlToDownload;
     private long latestId = -1;
     private boolean downloadCancle = false;
 
@@ -66,9 +61,6 @@ public class ImageFrameActivity extends AppCompatActivity {
 
         downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
 
-
-       /* SimpleDateFormat passDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
-        String str= passDateFormat.format(passDate);  //TODO : 수정해야함*/
 
         loading = new ProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -106,13 +98,13 @@ public class ImageFrameActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                if (touchnum == 0) {
-                    touchnum = 1;
+                if (touchNum == 0) {
+                    touchNum = 1;
                     binding.fromName.setVisibility(View.GONE);
                     binding.passDate.setVisibility(View.GONE);
                     binding.toolbar.setVisibility(View.GONE);
                 } else {
-                    touchnum = 0;
+                    touchNum = 0;
                     binding.fromName.setVisibility(View.VISIBLE);
                     binding.passDate.setVisibility(View.VISIBLE);
                     binding.toolbar.setVisibility(View.VISIBLE);
@@ -164,7 +156,7 @@ public class ImageFrameActivity extends AppCompatActivity {
         //파일 이름 :날짜_시간_확장자
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
-        String extension = getExtension(imageViewUrl);
+        String extension = FileDB.getExtension(imageViewUrl);
         // Log.d("extension",extension);
         filename = String.valueOf(sdf.format(day))+"."+ extension;
 
@@ -172,25 +164,10 @@ public class ImageFrameActivity extends AppCompatActivity {
         String localPath = "/KNU_AMP/image" + filename;
 
 
-        urlToDownload = Uri.parse(imageViewUrl);
-        request = new DownloadManager.Request(urlToDownload);
-        request.setTitle(filename); //제목
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //알림창에 다운로드 중 , 다운로드 완료 창이 보이게 설정
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,localPath); //다운로드한 파일을 저장할 경로를 지정
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs(); //디렉토리가 존재하지 않을 경우 디렉토리를 생성하도록 구현
-        latestId = downloadManager.enqueue(request); //latestID : 다운로드매니저 큐에 잘 들어갔는지 확인하는 변수로 사용하는 것으로 추정
-
-
+        latestId=FileDB.downloadFile(downloadManager,imageViewUrl,filename,localPath);
 
     }
 
-    //파일 확장자 가져오기
-    public static String getExtension(String fileStr){
-        //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
-        //uri 스트링의 마지막 . 뒤부터 마지막 ? 까지의 스트링을 받아옴
-        String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
-        return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
-    }
 
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 

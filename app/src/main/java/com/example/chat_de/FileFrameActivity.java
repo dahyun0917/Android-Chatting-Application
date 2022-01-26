@@ -24,8 +24,6 @@ public class FileFrameActivity extends AppCompatActivity {
 
     private String fileUrl;
     private DownloadManager downloadManager;
-    private long latestId = -1;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +43,6 @@ public class FileFrameActivity extends AppCompatActivity {
 
         downFile();
         finish();
-
     }
     @Override
     public void onResume(){
@@ -54,7 +51,6 @@ public class FileFrameActivity extends AppCompatActivity {
         registerReceiver(completeReceiver, completeFilter);
     }
     public void downFile() {
-
         //파일 이름 :날짜_시간_확장자포함 원래 파일 이름
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
@@ -64,22 +60,17 @@ public class FileFrameActivity extends AppCompatActivity {
         //String filename = String.valueOf(sdf.format(day))+"."+ extension;
 
         //파일을 다운로드 받는 시간 + 원래 파일 이름 or 다운로드 받은 시간_원래 파일 이름
-        String filename = String.valueOf(sdf.format(day))+"_"+originalFileName;
-
-
+        String filename = sdf.format(day)+"_"+originalFileName;
         String localPath = "/KNU_AMP/file/" + filename;
 
-        latestId=FileDB.downloadFile(downloadManager,fileUrl,filename,localPath);
-
+        FileDB.downloadFile(downloadManager,fileUrl,filename,localPath);
     }
 
     //다운로드 완료되었을 때 작동
-    private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
-
+    private BroadcastReceiver completeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "download/KNU_AMP에 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
         }
-
     };
 }

@@ -24,7 +24,6 @@ public class FileDB {
     public static final Intent intent = new Intent();
     private static final FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
-
     public static Intent openImage(){
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -41,8 +40,19 @@ public class FileDB {
         return intent;
     }
 
+    //파일 이름 가져오기
+    public static String getFileName(String fileStr){
+        return fileStr.substring(fileStr.lastIndexOf("_") + 1);
+    }
+
+    //파일 확장자 가져오기
+    public static String getFileType(String fileStr) {
+        //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
+        //uri 스트링의 마지막 . 뒤부터 마지막 ? 까지의 스트링을 받아옴
+        String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
+        return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
+    }
     public static String getFileType(Context context, Uri uri) {
-        /*파일 확장자 가져오기*/
         String extension;
 
         if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
@@ -55,52 +65,12 @@ public class FileDB {
         return extension;
     }
 
-    //파일 이름 가져오기
-    public static String getFileName(String fileStr){
-        String fileName = null;
-        fileName = fileStr.substring(fileStr.lastIndexOf("_")+1);
-
-        return fileName;
-    }
-
-    //파일 확장자 가져오기
-    public static String getExtension(String fileStr){
-        //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
-        //uri 스트링의 마지막 . 뒤부터 마지막 ? 까지의 스트링을 받아옴
-        String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
-        return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
-    }
-
     public static void uploadFile(Uri filePath, StorageReference imgRef, IUploadFileEventListener listener){
-
         //이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                //Toast.makeText(RoomActivity.this, "success upload", Toast.LENGTH_SHORT).show();
-                imgRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        listener.SuccessUpload(uri);
-                    }
-                });
-            }
-        });
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                listener.FailUpload(e);
-            }
-        });
-        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                @SuppressWarnings("VisibleForTests")
-                double progress = (100 * taskSnapshot.getBytesTransferred()) /  taskSnapshot.getTotalByteCount();
-                listener.ProgressUpload(progress);
-            }
-        });
+        uploadTask.addOnSuccessListener(taskSnapshot -> imgRef.getDownloadUrl().addOnSuccessListener(uri -> listener.SuccessUpload(uri)));
+        uploadTask.addOnFailureListener(e -> listener.FailUpload(e));
+        uploadTask.addOnProgressListener(taskSnapshot -> listener.ProgressUpload((100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount()));
     }
 
     public static long downloadFile(DownloadManager downloadManager, String fileUrl, String filename, String localPath){

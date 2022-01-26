@@ -284,7 +284,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         Intent intent = new Intent(itemView.getContext(), VideoFrameActivity.class);
                         intent.putExtra("fromName", chatRoomUser.userMeta().getName());
                         intent.putExtra("passDate", passDate);
-                        intent.putExtra("imageView", item.getText());
+                        intent.putExtra("videoUrl", item.getText());
                         view.getContext().startActivity(intent);
                     }
                 }
@@ -465,7 +465,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     Intent intent = new Intent(itemView.getContext(), VideoFrameActivity.class);
                     intent.putExtra("fromName", myCurrentUser.userMeta().getName());
                     intent.putExtra("passDate", passDate);
-                    intent.putExtra("imageView", item.getText());
+                    intent.putExtra("videoUrl", item.getText());
                     view.getContext().startActivity(intent);
                 }
             });

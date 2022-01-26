@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -25,7 +27,6 @@ public class ChatRoomListFragment extends Fragment {
     private ChatRoomListAdapter chatRoomListAdapter;
     private String userKey;
     private ArrayList<ChatRoomListItem> chatRoomList = new ArrayList<>();
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -63,11 +64,10 @@ public class ChatRoomListFragment extends Fragment {
         binding.listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                chatRoomSettingDialog(chatRoomList.get(i).getChatRoomKey(), chatRoomList.get(i).getName());
+                chatRoomSettingDialog(chatRoomList.get(i));
                 return true;
             }
         });
-
         return view;
     }
 
@@ -112,7 +112,7 @@ public class ChatRoomListFragment extends Fragment {
         getActivity().startActivity(intent);
     }
 
-    private void chatRoomSettingDialog(String chatRoomKey, String chatRoomName) {
+    private void chatRoomSettingDialog(ChatRoomListItem chatRoomListItem) {
         String[] settings;
         if(!ChatDB.getAdminMode()) {
             settings = new String[]{"채팅방 나가기"};
@@ -120,15 +120,19 @@ public class ChatRoomListFragment extends Fragment {
             settings = new String[]{"채팅방 나가기", "채팅방 정보 바꾸기"};
         }
         AlertDialog.Builder dlg = new AlertDialog.Builder(getActivity());
-        dlg.setTitle(chatRoomName).setItems(settings, (dialogInterface, position) -> {
+        dlg.setTitle(chatRoomListItem.getName()).setItems(settings, (dialogInterface, position) -> {
             switch(position) {
                 case 0: //채팅방 나가기
                     ArrayList<AUser> user = new ArrayList<>();
                     user.add(ChatDB.getCurrentUser());
-                    ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {});
+                    ChatDB.exitChatRoomCompleteListener(chatRoomListItem.getChatRoomKey(), user, () -> {});
                     break;
                 case 1: // 채팅방 이름 바꾸기
-                    //TODO: 채팅방 정보 바꾸기
+                    Intent intent = new Intent(getActivity(), CreateRoomMetaActivity.class);
+                    intent.putExtra("chatRoomKey",chatRoomListItem.getChatRoomKey());
+                    intent.putExtra("chatRoomName",chatRoomListItem.getName());
+                    intent.putExtra("chatRoomPicture",chatRoomListItem.getPictureURL());
+                    getActivity().startActivity(intent);
                     break;
             }
         }).show();

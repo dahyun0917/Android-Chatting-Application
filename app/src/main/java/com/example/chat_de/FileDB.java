@@ -53,6 +53,7 @@ public class FileDB {
         return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
     }
     public static String getFileType(Context context, Uri uri) {
+        /*파일 확장자 가져오기*/
         String extension;
 
         if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
@@ -66,7 +67,7 @@ public class FileDB {
     }
 
     public static void uploadFile(Uri filePath, StorageReference imgRef, IUploadFileEventListener listener){
-        //이미지 파일 업로드
+        /*이미지 파일 업로드*/
         UploadTask uploadTask = imgRef.putFile(filePath);
         uploadTask.addOnSuccessListener(taskSnapshot -> imgRef.getDownloadUrl().addOnSuccessListener(uri -> listener.SuccessUpload(uri)));
         uploadTask.addOnFailureListener(e -> listener.FailUpload(e));

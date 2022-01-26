@@ -12,7 +12,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-
+        <activity
+            android:name=".CreateRoomMetaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustUnspecified"
+            android:label="create_room_meta_activity"
+            android:theme="@style/Theme.AppCompat.Light.Dialog"/>
         <activity
             android:name=".RoomActivity"
             android:exported="false"

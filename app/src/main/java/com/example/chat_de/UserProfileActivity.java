@@ -1,6 +1,5 @@
 package com.example.chat_de;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 
 public class UserProfileActivity extends AppCompatActivity {
     private ActivityUserProfileBinding binding;
-    private Dialog dialog;
     private AUser userOther;
     private AUser userMe;
 

@@ -91,13 +91,18 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         getCreateRoomMeta = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if(result.getResultCode() == 9001) {
                 Intent intent = result.getData();
-                newChatRoomName = intent.getStringExtra("chatRoomName");
-                newChatRoomPicture = intent.getStringExtra("chatRoomPicture");
-                if(newChatRoomName.isEmpty()){
-                    newChatRoomName = changeToString(returnChoose(),false);
+                if(intent != null) {
+                    newChatRoomName = intent.getStringExtra("chatRoomName");
+                    newChatRoomPicture = intent.getStringExtra("chatRoomPicture");
+                    if (newChatRoomName.isEmpty()) {
+                        newChatRoomName = changeToString(returnChoose(), false);
+                    }
+                    if (newChatRoomPicture.isEmpty()) {
+                        newChatRoomPicture = "";
+                    }
+                    //파이어베이스에 채팅방 업로드
+                    uploadChatRoom();
                 }
-                //파이어베이스에 채팅방 업로드
-                uploadChatRoom();
             }
         });
 
@@ -270,7 +275,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         return choose;
     }
     private void uploadChatRoom(){
-        /*새 ChatRoom 생성*/
+        /*새 ChatRoom firebase에 업로드*/
         ArrayList<AUser> list = returnChoose();
         list.add(userMe);
         ChatDB.setChatRoomCompleteListener(newChatRoomName,newChatRoomPicture, list, userMe, generatedKey -> {

@@ -10,8 +10,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Environment;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -41,14 +39,12 @@ public class VideoFrameActivity extends AppCompatActivity {
     private boolean fail = true;
 
     private DownloadManager downloadManager;
-    private DownloadManager.Request request;
-    private Uri urlToDownload;
     private long latestId = -1;
 
     ProgressDialog loading;
     Uri videoUri;
 
-    //임의의 동영상 url
+    //임의의 동영상 url(동영상 재생 테스트로 필요)
     //Uri videoUri=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
     //Uri sample=Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
 
@@ -88,8 +84,6 @@ public class VideoFrameActivity extends AppCompatActivity {
                     binding.fromName.setVisibility(View.GONE);
                     binding.passDate.setVisibility(View.GONE);
                     binding.toolbar.setVisibility(View.GONE);
-                    //binding.videoView.setControllerAutoShow();
-                    //binding.videoView.hideController();
 
                 } else {
                     screenTouchNum =false;
@@ -99,8 +93,6 @@ public class VideoFrameActivity extends AppCompatActivity {
                 }
             }
         });
-
-
 
 
         binding.downloads.setOnClickListener(new View.OnClickListener(){
@@ -120,13 +112,9 @@ public class VideoFrameActivity extends AppCompatActivity {
                 binding.downloads.setVisibility(View.VISIBLE);
                 binding.downloadCancle.setVisibility(View.GONE);
                 downloadCancle =true;
-                //Toast.makeText(view.getContext(), "다운로드 취소",Toast.LENGTH_SHORT).show();
                 downloadManager.remove(latestId);
             }
         });
-       /* String extension = getExtension(videoViewUrl);
-        Log.d("extension",videoViewUrl);
-        Log.d("extension",extension);*/
 
     }
     @Override
@@ -144,22 +132,15 @@ public class VideoFrameActivity extends AppCompatActivity {
         Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
 
-        String extension = getExtension(videoViewUrl);
+        String extension = FileDB.getExtension(videoViewUrl);
         //Log.d("extension",extension);
         String filename = String.valueOf(sdf.format(day))+"."+ extension;
 
 
         String localPath = "/KNU_AMP/video/" + filename;
 
-        urlToDownload = Uri.parse(videoViewUrl);
-        request = new DownloadManager.Request(videoUri);
-        request.setTitle(filename); //제목
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //알림창에 다운로드 중 , 다운로드 완료 창이 보이게 설정
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,localPath); //다운로드한 파일을 저장할 경로를 지정
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs(); //디렉토리가 존재하지 않을 경우 디렉토리를 생성하도록 구현
-        latestId = downloadManager.enqueue(request); //latestID : 다운로드매니저 큐에 잘 들어갔는지 확인하는 변수로 사용하는 것으로 추정
 
-
+        latestId=FileDB.downloadFile(downloadManager,videoViewUrl,filename,localPath);
 
     }
     /*// 다운로드 상태조회
@@ -201,13 +182,7 @@ public class VideoFrameActivity extends AppCompatActivity {
         }
     };*/
 
-    //파일 확장자 가져오기
-    public static String getExtension(String fileStr){
-        //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
-        //uri 스트링의 마지막 . 뒤부터 마지막 ? 까지의 스트링을 받아옴
-        String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
-        return TextUtils.isEmpty(fileExtension) ? null : fileExtension;
-    }
+
 
     private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
 
@@ -252,13 +227,11 @@ public class VideoFrameActivity extends AppCompatActivity {
         //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음
         loading.show();
 
-        player = new ExoPlayer.Builder(this).build();
 
+        player = new ExoPlayer.Builder(this).build();
 
         //플레이어뷰에게 플레이어 설정
         binding.videoView.setPlayer(player);
-
-
         MediaItem mediaItem = MediaItem.fromUri(videoUri);
 
         player.setMediaItem(mediaItem);
@@ -273,15 +246,8 @@ public class VideoFrameActivity extends AppCompatActivity {
                    loading.dismiss();
                    player.play();
                }
-               /*if(playbackState==Player.STATE_ENDED){
-                   screenTouchNum =0;
-                   binding.fromName.setVisibility(View.VISIBLE);
-                   binding.passDate.setVisibility(View.VISIBLE);
-                   binding.toolbar.setVisibility(View.VISIBLE);
-                   //binding.videoView.setUseController(true);
-               }*/
                //비디오 로딩 시간 측정 (현재 15초)
-               CountDownTimer countDownTimer = new CountDownTimer(5000, 1000) {
+               CountDownTimer countDownTimer = new CountDownTimer(15000, 1000) {
                    public void onTick(long millisUntilFinished) {
                    }
 
@@ -297,7 +263,6 @@ public class VideoFrameActivity extends AppCompatActivity {
             public void onPlayerError(PlaybackException error) {
                 Throwable cause = error.getCause();
                 Log.d("error", String.valueOf(error.errorCode));
-                //PlayerControlView.INVISIBLE;
             }
 
        });
@@ -352,17 +317,53 @@ public class VideoFrameActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         //플레이어뷰 및 플레이어 객체 초기화
-        if(!fail){
+        if(!fail){  //로딩이 실패되지 않았을 때
         binding.videoView.setPlayer(null);
         player.release();
         player=null;
         }
         fail=false;
-        //Toast.makeText(getApplication(), "비디오 로딩 실패",Toast.LENGTH_SHORT).show();
     }
 
+   /* public class VideoCacheManager {
+        private final Context context;
+        private DefaultDataSourceFactory defaultDataSourceFactory;
+        private SimpleCache simpleCache;
 
+        public VideoCacheManager(Context $context) {
+            context = $context;
+            simpleCache = new SimpleCache(getCacheDirFile(), new NoOpCacheEvictor());
+            //simpleCache = new SimpleCache(getCacheDirFile(), evictor);
+            String userAgent = Util.getUserAgent(context, context.getString(R.string.app_name));
+            DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            defaultDataSourceFactory = new DefaultDataSourceFactory(
+                    context,
+                    bandwidthMeter,
+                    new DefaultHttpDataSourceFactory(userAgent, bandwidthMeter)
+            );
+        }
 
+        private DataSource createDataSource() {
+            return new CacheDataSource(
+                    simpleCache,
+                    defaultDataSourceFactory.createDataSource(),
+                    new FileDataSource(),
+                    new CacheDataSink(simpleCache, DEFAULT_MAX_CACHE_FILE_SIZE),
+                    CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR,
+                    new CacheDataSource.EventListener() {
+                        @Override public void onCachedBytesRead(long cacheSizeBytes, long cachedBytesRead) {
+                            Timber.d("onCachedBytesRead");
+                        }
+
+                        @Override public void onCacheIgnored(int reason) {
+                            Timber.d("onCacheIgnored");
+                        }
+                    }
+            );
+        }
+        private File getCacheDirFile() {
+            return new File(context.getCacheDir(), "exo_cache");
+        }*/
 
 
 }

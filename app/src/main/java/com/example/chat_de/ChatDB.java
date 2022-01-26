@@ -34,6 +34,8 @@ public class ChatDB {
     public static final String USER_JOINED = "userJoined";
     public static final String DATE = "date";
     public static final String EXIST = "exist";
+    public static final String CHAT_ROOM_NAME = "name";
+    public static final String CHAT_ROOM_PICTURE = "pictureURL";
 
     private static DatabaseReference ref = null;
     private static final HashMap<Integer, ArrayList<Pair<String, ChildEventListener>>> eventListeners = new HashMap<>();
@@ -114,6 +116,34 @@ public class ChatDB {
             }
         });
     }
+    public static void changeChatRoomMeta(String chatRoomKey, String chatRoomName, String chatRoomPicture) {
+        ref.child(makePath(CHAT_ROOMS, chatRoomKey,CHAT_ROOM_META, CHAT_ROOM_PICTURE)).setValue(chatRoomPicture, (error, rf) -> {
+            if(error == null) {
+                Log.i("FRD", "Change chat room meta data success");
+            } else {
+                Log.e("FRD", "Change chat room meta data fail: " + error);
+            }
+        });
+        ref.child(makePath(CHAT_ROOMS, chatRoomKey,CHAT_ROOM_META, CHAT_ROOM_NAME)).setValue(chatRoomName, (error, rf) -> {
+            if(error == null) {
+                Log.i("FRD", "Change chat room meta data success");
+            } else {
+                Log.e("FRD", "Change chat room meta data fail: " + error);
+            }
+        });
+        ref.child(CHAT_ROOM_JOINED).child(chatRoomKey).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                for(DataSnapshot userKey : task.getResult().getChildren()) {
+                    ref.child(makePath(USER_JOINED, userKey.getKey(), chatRoomKey,CHAT_ROOM_NAME)).setValue(chatRoomName);
+                    ref.child(makePath(USER_JOINED, userKey.getKey(), chatRoomKey,CHAT_ROOM_PICTURE)).setValue(chatRoomPicture);
+                }
+            }
+            else {
+                Log.e("FRD", "Can not get users");
+            }
+        });
+    }
+
     public static void getUsersCompleteListener(IEventListener<HashMap<String, User>> listener) {
         ref.child(USERS).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

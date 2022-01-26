@@ -22,8 +22,8 @@ import java.io.File;
 
 public class FileDB {
     public static final Intent intent = new Intent();
-    private static final FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
-
+    public static FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+    //private static StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
     public static Intent openImage(){
         intent.setType("image/*");
@@ -55,16 +55,16 @@ public class FileDB {
         return extension;
     }
 
-    //파일 이름 가져오기
     public static String getFileName(String fileStr){
+        /*파일 이름 가져오기*/
         String fileName = null;
         fileName = fileStr.substring(fileStr.lastIndexOf("_")+1);
 
         return fileName;
     }
 
-    //파일 확장자 가져오기
     public static String getExtension(String fileStr){
+        /*파일 확장자 가져오기*/
         //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
         //uri 스트링의 마지막 . 뒤부터 마지막 ? 까지의 스트링을 받아옴
         String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.lastIndexOf("?"));
@@ -72,8 +72,7 @@ public class FileDB {
     }
 
     public static void uploadFile(Uri filePath, StorageReference imgRef, IUploadFileEventListener listener){
-
-        //이미지 파일 업로드
+        /*이미지 파일 업로드*/
         UploadTask uploadTask = imgRef.putFile(filePath);
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override

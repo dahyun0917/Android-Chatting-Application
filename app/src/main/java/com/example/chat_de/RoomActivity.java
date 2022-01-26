@@ -188,7 +188,7 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
                     if(requestCode==FILE_CODE)
                         uploadFile(requestCode,filePath,fileName);
                     else
-                        uploadFile(requestCode,filePath,FileDB.getFileType(this,filePath));
+                        uploadFile(requestCode,filePath,FileDB.getFileType(this, filePath));
                 }
                 try {
                     InputStream in = getContentResolver().openInputStream(filePath);

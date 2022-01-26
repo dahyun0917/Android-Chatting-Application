@@ -78,7 +78,7 @@ public class FileFrameActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context, "download/KNU_AMP에 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "파일 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
         }
 
     };

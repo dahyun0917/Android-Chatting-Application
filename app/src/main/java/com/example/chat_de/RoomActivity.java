@@ -3,8 +3,6 @@ package com.example.chat_de;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -12,11 +10,13 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -24,10 +24,13 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chat_de.databinding.ActivityRoomBinding;
+import com.example.chat_de.databinding.NavigationJoinUserBinding;
+import com.example.chat_de.datas.AUser;
 import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
@@ -48,6 +51,8 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
     private ActivityRoomBinding binding;
+    private NavigationJoinUserBinding binding_temp;
+    //private NavigationJoinUserBinding binding;
     private RoomElementAdapter roomElementAdapter;
     private LinearLayoutManager manager;
 
@@ -76,11 +81,16 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
     private ProgressDialog progressDialog;
     private Uri filePath;
 
+    private boolean isDrawerOpened;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //바인딩 설정
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
+        //binding = NavigationJoinUserBinding.inflate(getLayoutInflater());
+        binding_temp = binding.drawerView;
+        //binding_temp =NavigationJoinUserBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
         //화면 기본 설정
@@ -118,6 +128,7 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
             });
         });
         ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
+
     }
 
     @Override
@@ -203,9 +214,43 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         binding.userListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showJoinedUserList();
+                //drawerView에 채팅 참가자 리스트 띄워주기
+                ArrayList<AUser> joinUser = new ArrayList<>();
+                AUser userMe= currentUser.userMeta();
+                joinUser.add(userList.get(userMe.getUserKey()));
+                for (ChatRoomUser e : userList.values()) {
+                    if(e.getExist() && !e.getUserKey().equals(userMe.getUserKey())) {
+                        joinUser.add(e);
+                    }
+                }
+
+                JoinUserListAdapter joinUserListAdapter;
+                joinUserListAdapter = new JoinUserListAdapter(joinUser, userMe);
+                binding.drawerView.joinUser.setAdapter(joinUserListAdapter);
+
+                binding.drawerView.joinUser.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        //current user를 제외한 다른 사용자를 클릭 시 일대일 채팅을 할 수 있도록 설정
+                        if(!userMe.getUserKey().equals(joinUser.get(i).getUserKey())) {
+                            Intent intent = new Intent(RoomActivity.this, UserProfileActivity.class);
+                            //선택한 사용자 정보 전송
+                            intent.putExtra("userOther", joinUser.get(i));
+                            //로그인된 사용자 정보 전송
+                            intent.putExtra("userMe", currentUser.userMeta());
+                            startActivity(intent);
+                        }
+                    }
+                });
+
+                binding.drawerLayout.openDrawer(binding_temp.getRoot());
+                binding.drawerLayout.setDrawerListener(drawerL);
+
+                //showJoinedUserList();
             }
         });
+
+
 
         //초대하기 버튼에 대한 클릭 리스너 지정
         if(!ChatDB.getAdminMode()) { //adminmode가 아니면
@@ -218,6 +263,39 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         binding.chatTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
         binding.chatTitle.setSelected(true);
     }
+
+    //drawerlayout의 리스너 : 네비게이션 드로워가 열려있는지 닫혀있는지를 구분하여 backpress를 눌렀을 때 다른 동작
+    DrawerLayout.DrawerListener drawerL = new DrawerLayout.DrawerListener() {
+        @Override
+        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+        }
+
+        @Override
+        public void onDrawerOpened(@NonNull View drawerView) {
+            isDrawerOpened=true;
+        }
+
+        @Override
+        public void onDrawerClosed(@NonNull View drawerView) {
+            isDrawerOpened=false;
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+
+        }
+    };
+
+    @Override
+    public void onBackPressed(){
+        if(isDrawerOpened){
+            binding.drawerLayout.closeDrawer(Gravity.RIGHT);
+        }
+        else
+            finish();
+    }
+
 
     private void initScrollListener() {
         /*리사이클러뷰(채팅창)의 스크롤 리스너 설정*/
@@ -327,15 +405,6 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         roomElementAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.ALLOW);
     }
 
-    private void showJoinedUserList() {
-        /*채팅방 참가자 목록 보는 액티비티로 넘어가는 함수*/
-        Intent intent = new Intent(this, JoinUserListActivity.class);
-
-        //사용자 정보 전송
-        intent.putExtra("userList", userList);
-        intent.putExtra("userMe", currentUser.userMeta());
-        startActivity(intent);
-    }
 
     private void floatOldMessage(ArrayList<Chat> chatList) {
         /*불러와진 예전 메세지를 화면에 보여주는 함수*/
@@ -466,6 +535,7 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
 
     }
 
+    //FileDB로 못 옮김! AppCompatActivity를 상속해야지 사용할 수 있는 함수가 있어서!!
     private String getName(Uri uri) {
         /*파일명 찾기*/
         String[] projection = { MediaStore.Images.ImageColumns.DISPLAY_NAME };
@@ -494,7 +564,6 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
 
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
-        //TODO:파일에 맞는 확장자 추가
         String filename;
         if(requestCode==FILE_CODE)
             filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey() +"_"+ FileNameOrExtension;

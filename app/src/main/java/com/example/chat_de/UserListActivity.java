@@ -185,7 +185,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private void showUserList() {
         /*초기화 및 데이터 불러오기*/
         //로딩 시작
-        ProgressDialog loading = new ProgressDialog(this);
+        MyProgressDialog loading = new MyProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
         //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음

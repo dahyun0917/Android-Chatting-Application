@@ -41,7 +41,7 @@ public class VideoFrameActivity extends AppCompatActivity {
     private DownloadManager downloadManager;
     private long latestId = -1;
 
-    ProgressDialog loading;
+    MyProgressDialog loading;
     Uri videoUri;
 
     //임의의 동영상 url(동영상 재생 테스트로 필요)
@@ -190,8 +190,8 @@ public class VideoFrameActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             binding.downloads.setVisibility(View.VISIBLE);
             binding.downloadCancle.setVisibility(View.GONE);
-            if(!downloadCancle) Toast.makeText(context, "다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
-            else if( downloadCancle ) {
+            if(!downloadCancle) Toast.makeText(context, "비디오 다운로드가 완료되었습니다.",Toast.LENGTH_SHORT).show();
+            else{
                 downloadCancle =false;
                 Toast.makeText(context, "다운로드 취소.",Toast.LENGTH_SHORT).show();
             }
@@ -221,7 +221,7 @@ public class VideoFrameActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        loading = new ProgressDialog(this);
+        loading = new MyProgressDialog(this);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         loading.setCanceledOnTouchOutside(false);  //로딩 중 화면 눌렀을 때 로딩바 취소되지 않음
         //loading.setCancelable(false);  //로딩 중 뒤로가기 버튼 눌렀을 때 로딩방 취소되지 않음

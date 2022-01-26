@@ -33,10 +33,10 @@
             android:name=".UserProfileActivity"
             android:theme="@style/Theme.AppCompat.Dialog"
             android:exported="false" />
-        <activity
+        <!--<activity
             android:name=".JoinUserListActivity"
             android:theme="@style/Theme.AppCompat.Light.Dialog"
-            android:exported="false" />
+            android:exported="false" />-->
         <activity
             android:name=".ChatRoomListActivity"
             android:exported="true">

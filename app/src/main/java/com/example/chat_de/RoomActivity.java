@@ -3,9 +3,6 @@ package com.example.chat_de;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -18,7 +15,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -33,14 +29,9 @@ import com.example.chat_de.datas.Chat;
 import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,7 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
 
-public class RoomActivity extends AppCompatActivity {
+public class RoomActivity extends AppCompatActivity implements IUploadFileEventListener {
     private final int HASH_CODE = hashCode();
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
@@ -77,7 +68,7 @@ public class RoomActivity extends AppCompatActivity {
     private boolean autoScroll = true;
     private boolean isActionMove = false;
     private ChatRoomMeta chatRoomMeta;
-    private Uri filePath;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -414,7 +405,7 @@ public class RoomActivity extends AppCompatActivity {
         /*final int[] image = {R.drawable.image_red,R.drawable.video_red};*/
         final String[] fileKind = {"image", "video","file"};
 
-        Intent intent = new Intent();
+        //Intent intent = new Intent();
         //갤러리만
         /*Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
@@ -437,19 +428,19 @@ public class RoomActivity extends AppCompatActivity {
                 .setItems(fileKind, (dialogInterface, position) -> {
                     switch (position) {
                         case 0:  //image
-                            intent.setType("image/*");
-                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent, "이미지를 선택하세요."), IMAGE_CODE);
+                            /*intent.setType("image/*");
+                            intent.setAction(Intent.ACTION_GET_CONTENT);*/
+                            startActivityForResult(Intent.createChooser(FileDB.openImage(), "이미지를 선택하세요."), IMAGE_CODE);
                             break;
                         case 1:  //video
-                            intent.setType("video/*");
-                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent, "video를 선택하세요."), VIDEO_CODE);
+                            /*intent.setType("video/*");
+                            intent.setAction(Intent.ACTION_GET_CONTENT);*/
+                            startActivityForResult(Intent.createChooser(FileDB.openVideo(), "video를 선택하세요."), VIDEO_CODE);
                             break;
                         case 2 :  //file
-                            intent.setType("application/*");
-                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent, "파일를 선택하세요."), FILE_CODE);
+                            /*intent.setType("application/*");
+                            intent.setAction(Intent.ACTION_GET_CONTENT);*/
+                            startActivityForResult(Intent.createChooser(FileDB.openFile(), "파일를 선택하세요."), FILE_CODE);
                             break;
                     }
                 });
@@ -485,18 +476,19 @@ public class RoomActivity extends AppCompatActivity {
         /*갤러리 액티비티에서 결과값을 제대로 받았는지 확인*/
         super.onActivityResult(requestCode, resultCode, data);
         if ((requestCode == IMAGE_CODE || requestCode == VIDEO_CODE || requestCode == FILE_CODE) && resultCode == RESULT_OK) {
-            filePath = data.getData();
+            Uri filePath = data.getData();
 
-            String extension =getMimeType(this,filePath);
+            //String extension =getMimeType(this,filePath);
             String fileName = getName(filePath);
-            Log.d("filePath", String.valueOf(filePath));
+            /*Log.d("filePath", String.valueOf(filePath));
             Log.d("확장자", getMimeType(this,filePath));
-            Log.d("filename",fileName);
+            Log.d("filename",fileName);*/
             if (filePath != null){
                 if(requestCode==FILE_CODE)
-                    uploadFile(requestCode,fileName);
+                    uploadFile(requestCode,filePath,fileName);
                 else
-                    uploadFile(requestCode,extension);
+                    uploadFile(requestCode,filePath,FileDB.getFileType(this,filePath));
+                    //uploadFile(requestCode,extension);
             }
             try {
                 InputStream in = getContentResolver().openInputStream(filePath);
@@ -518,8 +510,8 @@ public class RoomActivity extends AppCompatActivity {
         return cursor.getString(column_index);
     }
 
-    public static String getMimeType(Context context, Uri uri) {
-        /*파일 확장자 가져오기*/
+    /*public static String getMimeType(Context context, Uri uri) {
+        *//*파일 확장자 가져오기*//*
         String extension;
 
         if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
@@ -530,13 +522,13 @@ public class RoomActivity extends AppCompatActivity {
         }
 
         return extension;
-    }
+    }*/
 
-    public void uploadFile(int requestCode,String FileNameOrExtension) {
+    public void uploadFile(int requestCode,Uri filePath,String FileNameOrExtension) {
         /*firebase storage에 파일(이미지, 비디오, 파일)을 업로드 하는 함수*/
         //Todo: 파이어베이스에 올리는 코드 수정 (node에서 링크 받아오기)
 
-        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("업로드중...");
         progressDialog.show();
 
@@ -559,7 +551,10 @@ public class RoomActivity extends AppCompatActivity {
         //uploads라는 폴더가 없으면 자동 생성
         StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+ChatDB.getRootPath()+"/"+chatRoomMeta.getName()+"/" + filename);
 
-        //이미지 파일 업로드
+        FileDB.uploadFile(filePath,imgRef,this);
+        //Uri filePath, StorageReference imgRef, IUploadFileEventListener listener
+
+        /*//이미지 파일 업로드
         UploadTask uploadTask = imgRef.putFile(filePath);
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -591,6 +586,25 @@ public class RoomActivity extends AppCompatActivity {
                 //dialog에 진행률을 퍼센트로 출력해 준다
                 progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
             }
-        });
+        });*/
+    }
+
+    @Override
+    public void SuccessUpload(Uri uri) {
+        ChatDB.uploadMessage(uri.toString(), ++lastIndex, messageType, chatRoomKey, currentUser.userMeta().getUserKey(), userList);
+        progressDialog.dismiss();
+    }
+
+    @Override
+    public void FailUpload(Exception e) {
+        progressDialog.dismiss();
+        Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+        Log.d("exception", String.valueOf(e));
+    }
+
+    @Override
+    public void ProgressUpload(double progress) {
+        //dialog에 진행률을 퍼센트로 출력해 준다
+        progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
     }
 }

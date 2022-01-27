@@ -108,6 +108,8 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
             }
             else {
                 //아무것도 안바뀌었을 경우
+                if (isNewRoom)
+                    newRoomUpload();
                 finish();
             }
         });

@@ -18,7 +18,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
     Context context;
     private ArrayList<UserListItem> filteredUsers = new ArrayList<>(); //필터링된 리스트 -> 보여줄 리스트
     private ArrayList<UserListItem> unFilteredUsers = new ArrayList<>(); //필터링되지않은 리스트
-    private CheckBoxClickListener listener;
+    private UserSelectListener listener;
 
     //생성자1
     public UserListAdapter(Context context, ArrayList<UserListItem>[] userList) {
@@ -98,7 +98,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListViewHolder> im
         setUserList(list);
     }
 
-    public void setOnCheckBoxClickListener(CheckBoxClickListener listener){
+    public void setListener(UserSelectListener listener){
         this.listener = listener;
     }
 

@@ -34,6 +34,7 @@
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_element_left_text.xml" value="0.24791666666666667" />
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_element_right_image.xml" value="0.24791666666666667" />
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_element_right_text.xml" value="0.24791666666666667" />
+        <entry key="..\:/android_project/chat_de/app/src/main/res/layout/item_recycler_selected_user.xml" value="1.25" />
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/recycler_item.xml" value="0.33" />
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/room_center_item_list.xml" value="0.35052083333333334" />
         <entry key="..\:/android_project/chat_de/app/src/main/res/layout/room_left_item_list_image.xml" value="0.35052083333333334" />

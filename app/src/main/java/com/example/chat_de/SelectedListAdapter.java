@@ -1,6 +1,7 @@
 package com.example.chat_de;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,17 @@ import java.util.ArrayList;
 public class SelectedListAdapter extends RecyclerView.Adapter<SelectedListAdapter.SelectedListViewHolder> {
     Context context;
     private ArrayList<UserListItem> selectedUsers;
+    UserSelectListener listener;
 
     //생성자
     public SelectedListAdapter(Context context, ArrayList<UserListItem> userList) {
         super();
         this.context = context;
         this.selectedUsers = userList;
+    }
+
+    public void setListener(UserSelectListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -52,13 +58,21 @@ public class SelectedListAdapter extends RecyclerView.Adapter<SelectedListAdapte
             super(itemView);
             itemBinding = ItemRecyclerSelectedUserBinding.bind(itemView);
         }
-        void bind(AUser user) {
+        void bind(UserListItem user) {
             itemBinding.selectedUserName.setText(user.getName());
             Glide.with(this.itemView.getContext())
                     .load(user.getPictureURL())
                     .circleCrop()
                     .placeholder(R.drawable.knu_mark)
                     .into(itemBinding.selectedProfileImage);
+            itemBinding.selectCancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    user.setChecked(false);
+                    Log.d("TAG","Click!"+String.valueOf(user.getChecked()));
+                    listener.onUnCheckedClick(user.getUserKey());
+                }
+            });
         }
     }
 }

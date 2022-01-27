@@ -117,7 +117,7 @@ public class ChatRoomListFragment extends Fragment {
         if(!ChatDB.getAdminMode()) {
             settings = new String[]{"채팅방 나가기"};
         } else {
-            settings = new String[]{"채팅방 나가기", "채팅방 정보 바꾸기"};
+            settings = new String[]{"채팅방 나가기", "채팅방 정보 바꾸기", "채팅방 폐쇄하기"};
         }
         AlertDialog.Builder dlg = new AlertDialog.Builder(getActivity());
         dlg.setTitle(chatRoomListItem.getName()).setItems(settings, (dialogInterface, position) -> {
@@ -127,13 +127,21 @@ public class ChatRoomListFragment extends Fragment {
                     user.add(ChatDB.getCurrentUser());
                     ChatDB.exitChatRoomCompleteListener(chatRoomListItem.getChatRoomKey(), user, () -> {});
                     break;
-                case 1: // 채팅방 이름 바꾸기
+                case 1: //채팅방 이름 바꾸기
                     Intent intent = new Intent(getActivity(), CreateRoomMetaActivity.class);
                     intent.putExtra("chatRoomKey",chatRoomListItem.getChatRoomKey());
                     intent.putExtra("chatRoomName",chatRoomListItem.getName());
                     intent.putExtra("chatRoomPicture",chatRoomListItem.getPictureURL());
                     getActivity().startActivity(intent);
                     break;
+                case 2: //채팅방 폐쇄하기
+                    AlertDialog.Builder cautionDialog = new AlertDialog.Builder(getActivity());
+                    cautionDialog.setTitle("경고").setMessage("채팅방을 폐쇄하면 채팅방의 모든 정보가 삭제됩니다. 계속 진행하시겠습니까?");
+                    cautionDialog.setPositiveButton("예", (dialog, id) -> {
+                        ChatDB.closeChatRoomCompleteListener(chatRoomListItem.getChatRoomKey(), () -> {});
+                    });
+                    cautionDialog.setNegativeButton("아니오", (a, b) -> {});
+                    cautionDialog.show();
             }
         }).show();
     }

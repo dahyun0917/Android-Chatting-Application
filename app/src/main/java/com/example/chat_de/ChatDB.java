@@ -347,21 +347,21 @@ public class ChatDB {
 
         registerEventListener(objHashCode, path, myListener);
     }
-    public static void userListChangedEventListener(String chatRoomKey, int objHashCode, IKeyValueEventListener<String, ChatRoomUser> listener) {
+    public static void userListChangedEventListener(String chatRoomKey, int objHashCode, IUserChangedEventListener listener) {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.eventListener(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class));
+                listener.changed(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.eventListener(snapshot.getKey(), snapshot.getValue(ChatRoomUser.class));
+                listener.changed(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
+                listener.removed(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override

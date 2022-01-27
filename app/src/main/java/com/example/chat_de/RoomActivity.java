@@ -118,17 +118,30 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
                     });
                 });
             });
-            ChatDB.userListChangedEventListener(chatRoomKey, HASH_CODE, (changedUserKey, changedUser) -> {
-                // 강퇴당했거나 방이 사라진 등의 사유로 더 이상 자신이 채팅방에 존재하지 않는 경우 액티비티 종료
-                if(changedUserKey.equals(currentUser.getUserKey()) && !changedUser.getExist()) {
-                    Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
-                    finish();
+            ChatDB.userListChangedEventListener(chatRoomKey, HASH_CODE, new IUserChangedEventListener() {
+                @Override
+                public void changed(ChatRoomUser changedUser) {
+                    String key = changedUser.getUserKey();
+                    //강퇴당했을 때 액티비티 종료
+                    if(key.equals(currentUser.getUserKey()) && !changedUser.getExist()) {
+                        Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                    userList.put(key, changedUser);
                 }
-                userList.put(changedUserKey, changedUser);
+
+                @Override
+                public void removed(ChatRoomUser exitedUser) {
+                    //방이 폐쇄당했을 때 액티비티 종료
+                    String key = exitedUser.getUserKey();
+                    if(key.equals(currentUser.getUserKey())) {
+                        Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
             });
         });
         ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
-
     }
 
     @Override

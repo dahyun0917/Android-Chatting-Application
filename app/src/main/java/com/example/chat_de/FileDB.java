@@ -22,8 +22,17 @@ import java.io.File;
 
 public class FileDB {
     public static final Intent intent = new Intent();
-    public static final FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+    private static StorageReference ref;
+    private static String rootPath;
 
+    public static void setReference(String root){
+        ref =FirebaseStorage.getInstance().getReference(root);
+        rootPath=root;
+    }
+    public static StorageReference getReference(){return ref;}
+    public static String getRootPath(){
+        return rootPath;
+    }
     public static Intent openImage(){
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -66,10 +75,11 @@ public class FileDB {
         return extension;
     }
 
-    public static void uploadFile(Uri filePath, StorageReference imgRef, IUploadFileEventListener listener){
+    public static void uploadFileToFireStorage(String chatRoomName, String fileName, Uri filePath, IUploadFileEventListener listener){
         /*이미지 파일 업로드*/
-        UploadTask uploadTask = imgRef.putFile(filePath);
-        uploadTask.addOnSuccessListener(taskSnapshot -> imgRef.getDownloadUrl().addOnSuccessListener(uri -> listener.SuccessUpload(uri)));
+        StorageReference uploadRef = ref.child(makePath(chatRoomName,fileName));
+        UploadTask uploadTask = uploadRef.putFile(filePath);
+        uploadTask.addOnSuccessListener(taskSnapshot -> uploadRef.getDownloadUrl().addOnSuccessListener(uri -> listener.SuccessUpload(uri)));
         uploadTask.addOnFailureListener(e -> listener.FailUpload(e));
         uploadTask.addOnProgressListener(taskSnapshot -> listener.ProgressUpload((100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount()));
     }
@@ -85,4 +95,14 @@ public class FileDB {
 
         return downloadManager.enqueue(request);
     }
+    @NonNull
+    private static String makePath(@NonNull String... strings) {
+        StringBuilder ret = new StringBuilder();
+        for (String str : strings) {
+            ret.append("/").append(str);
+        }
+
+        return ret.toString();
+    }
+
 }

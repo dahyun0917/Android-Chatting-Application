@@ -117,7 +117,7 @@ public class RoomActivity extends AppCompatActivity {
                     String key = changedUser.getUserKey();
                     //강퇴당했을 때 액티비티 종료
                     if(key.equals(currentUser.getUserKey()) && !changedUser.getExist()) {
-                        Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RoomActivity.this, "방에서 퇴장하셨습니다.", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                     userList.put(key, changedUser);
@@ -128,7 +128,7 @@ public class RoomActivity extends AppCompatActivity {
                     //방이 폐쇄당했을 때 액티비티 종료
                     String key = exitedUser.getUserKey();
                     if(key.equals(currentUser.getUserKey())) {
-                        Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RoomActivity.this, "방에서 퇴장하셨습니다.", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 }
@@ -226,9 +226,9 @@ public class RoomActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if(ChatDB.getAdminMode())
-                    binding.drawerView.functions.setVisibility(View.VISIBLE);
+                    binding.drawerView.settings.setVisibility(View.VISIBLE);
                 else
-                    binding.drawerView.functions.setVisibility(View.GONE);
+                    binding.drawerView.settings.setVisibility(View.GONE);
                 //drawerView에 채팅 참가자 리스트 띄워주기
                 ArrayList<AUser> joinUser = new ArrayList<>();
                 AUser userMe= currentUser.userMeta();
@@ -276,7 +276,15 @@ public class RoomActivity extends AppCompatActivity {
             }
         });
 
-
+        //나가기 버튼에 대한 클릭 리스너 지정
+        binding.drawerView.exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ArrayList<AUser> user = new ArrayList<>();
+                user.add(ChatDB.getCurrentUser());
+                ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {});
+            }
+        });
 
         //초대하기 버튼에 대한 클릭 리스너 지정
         if(!ChatDB.getAdminMode()) { //adminmode가 아니면

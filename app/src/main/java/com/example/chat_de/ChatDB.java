@@ -353,17 +353,17 @@ public class ChatDB {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.changed(snapshot.getValue(ChatRoomUser.class));
+                listener.onChanged(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.changed(snapshot.getValue(ChatRoomUser.class));
+                listener.onChanged(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                listener.removed(snapshot.getValue(ChatRoomUser.class));
+                listener.onRemoved(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override

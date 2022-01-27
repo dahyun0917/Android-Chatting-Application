@@ -116,7 +116,7 @@ public class RoomActivity extends AppCompatActivity {
             });
             ChatDB.userListChangedEventListener(chatRoomKey, HASH_CODE, new IUserChangedEventListener() {
                 @Override
-                public void changed(ChatRoomUser changedUser) {
+                public void onChanged(ChatRoomUser changedUser) {
                     String key = changedUser.getUserKey();
                     //강퇴당했을 때 액티비티 종료
                     if(key.equals(currentUser.getUserKey()) && !changedUser.getExist()) {
@@ -127,9 +127,9 @@ public class RoomActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void removed(ChatRoomUser exitedUser) {
-                    //방이 폐쇄당했을 때 액티비티 종료
+                public void onRemoved(ChatRoomUser exitedUser) {
                     String key = exitedUser.getUserKey();
+                    //방이 폐쇄당했을 때 액티비티 종료
                     if(key.equals(currentUser.getUserKey())) {
                         Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
                         finish();
@@ -137,8 +137,8 @@ public class RoomActivity extends AppCompatActivity {
                 }
             });
         });
+        //채팅방에 들어왔으니 유저는 가장 최근 메시지를 읽었다고 가정
         ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
-
     }
 
     @Override

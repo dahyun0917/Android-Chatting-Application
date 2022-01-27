@@ -26,8 +26,8 @@ public class FileDB {
     private static String rootPath;
 
     public static void setReference(String root){
-        ref =FirebaseStorage.getInstance().getReference(root);
-        rootPath=root;
+        ref = FirebaseStorage.getInstance().getReference(root);
+        rootPath = root;
     }
     public static StorageReference getReference(){return ref;}
     public static String getRootPath(){
@@ -79,8 +79,8 @@ public class FileDB {
         /*이미지 파일 업로드*/
         StorageReference uploadRef = ref.child(makePath(chatRoomName,fileName));
         UploadTask uploadTask = uploadRef.putFile(filePath);
-        uploadTask.addOnSuccessListener(taskSnapshot -> uploadRef.getDownloadUrl().addOnSuccessListener(uri -> listener.SuccessUpload(uri)));
-        uploadTask.addOnFailureListener(e -> listener.FailUpload(e));
+        uploadTask.addOnSuccessListener(taskSnapshot -> uploadRef.getDownloadUrl().addOnSuccessListener(listener::SuccessUpload));
+        uploadTask.addOnFailureListener(listener::FailUpload);
         uploadTask.addOnProgressListener(taskSnapshot -> listener.ProgressUpload((100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount()));
     }
 

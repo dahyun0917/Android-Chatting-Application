@@ -36,7 +36,6 @@ import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -46,13 +45,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
 
-public class RoomActivity extends AppCompatActivity implements IUploadFileEventListener {
+public class RoomActivity extends AppCompatActivity {
     private final int HASH_CODE = hashCode();
     private final int SYSTEM_MESSAGE = -2;
     private final int CHAT_LIMIT = 15;
     private ActivityRoomBinding binding;
     private NavigationJoinUserBinding binding_temp;
-    //private NavigationJoinUserBinding binding;
     private RoomElementAdapter roomElementAdapter;
     private LinearLayoutManager manager;
 
@@ -88,9 +86,7 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         super.onCreate(savedInstanceState);
         //바인딩 설정
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
-        //binding = NavigationJoinUserBinding.inflate(getLayoutInflater());
         binding_temp = binding.drawerView;
-        //binding_temp =NavigationJoinUserBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
         //화면 기본 설정
@@ -231,6 +227,11 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         binding.userListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if(ChatDB.getAdminMode())
+                    binding.drawerView.functions.setVisibility(View.VISIBLE);
+                else
+                    binding.drawerView.functions.setVisibility(View.GONE);
                 //drawerView에 채팅 참가자 리스트 띄워주기
                 ArrayList<AUser> joinUser = new ArrayList<>();
                 AUser userMe= currentUser.userMeta();
@@ -257,6 +258,17 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
                             intent.putExtra("userMe", currentUser.userMeta());
                             startActivity(intent);
                         }
+                    }
+                });
+
+                binding.drawerView.settings.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(RoomActivity.this, CreateRoomMetaActivity.class);
+                        intent.putExtra("chatRoomKey",chatRoomKey);
+                        intent.putExtra("chatRoomName",chatRoomMeta.getName());
+                        intent.putExtra("chatRoomPicture",chatRoomMeta.getPictureURL());
+                        startActivity(intent);
                     }
                 });
 
@@ -514,7 +526,6 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         startActivityForResult(intent,10);*/
 
 
-
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
         AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
         dlg.setTitle("파일 종류") //제목
@@ -548,9 +559,8 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
     private String getName(Uri uri) {
         /*파일명 찾기*/
         String[] projection = { MediaStore.Images.ImageColumns.DISPLAY_NAME };
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        int column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME);
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME);
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
@@ -559,7 +569,7 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         /*firebase storage에 파일(이미지, 비디오, 파일)을 업로드 하는 함수*/
         //Todo: 파이어베이스에 올리는 코드 수정 (node에서 링크 받아오기)
 
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(RoomActivity.this);
         progressDialog.setTitle("업로드중...");
         progressDialog.show();
 
@@ -573,34 +583,34 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
 
         //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 사용자 키)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
-        String filename;
+        String fileName;
         if(requestCode==FILE_CODE)
-            filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey() +"_"+ FileNameOrExtension;
+            fileName = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey() +"_"+ FileNameOrExtension;
         else
-            filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+FileNameOrExtension;
-        //폴더가 없으면 자동 생성
-        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+ChatDB.getRootPath()+"/"+chatRoomMeta.getName()+"/" + filename);
+            fileName = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+FileNameOrExtension;
 
-        FileDB.uploadFile(filePath,imgRef,this);
+
+        FileDB.uploadFileToFireStorage(chatRoomMeta.getName(), fileName, filePath, new IUploadFileEventListener() {
+            @Override
+            public void SuccessUpload(Uri uri) {
+                ChatDB.uploadMessage(uri.toString(), ++lastIndex, messageType, chatRoomKey, currentUser.userMeta().getUserKey(), userList);
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void FailUpload(Exception e) {
+                progressDialog.dismiss();
+                Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+                Log.d("exception", String.valueOf(e));
+            }
+
+            @Override
+            public void ProgressUpload(double progress) {
+                //dialog에 진행률을 퍼센트로 출력해 준다
+                progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
+            }
+        });
 
     }
 
-    @Override
-    public void SuccessUpload(Uri uri) {
-        ChatDB.uploadMessage(uri.toString(), ++lastIndex, messageType, chatRoomKey, currentUser.userMeta().getUserKey(), userList);
-        progressDialog.dismiss();
-    }
-
-    @Override
-    public void FailUpload(Exception e) {
-        progressDialog.dismiss();
-        Toast.makeText(RoomActivity.this, "upload 실패, 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-        Log.d("exception", String.valueOf(e));
-    }
-
-    @Override
-    public void ProgressUpload(double progress) {
-        //dialog에 진행률을 퍼센트로 출력해 준다
-        progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
-    }
 }

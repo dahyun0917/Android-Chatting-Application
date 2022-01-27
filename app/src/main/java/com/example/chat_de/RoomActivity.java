@@ -36,7 +36,6 @@ import com.example.chat_de.datas.ChatRoomMeta;
 import com.example.chat_de.datas.ChatRoomUser;
 import com.example.chat_de.datas.IndexDeque;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -570,9 +569,10 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         else
             filename = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+FileNameOrExtension;
         //폴더가 없으면 자동 생성
-        StorageReference imgRef = firebaseStorage.getReference("KNU_AMP/"+ChatDB.getRootPath()+"/"+chatRoomMeta.getName()+"/" + filename);
+        String rootPath = "KNU_AMP/"+ChatDB.getRootPath()+"/"+chatRoomMeta.getName()+"/" + filename;
 
-        FileDB.uploadFile(filePath,imgRef,this);
+        FileDB.setReference(rootPath);
+        FileDB.uploadFile(filePath,this);
 
     }
 

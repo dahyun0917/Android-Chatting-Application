@@ -2,6 +2,7 @@ package com.example.chat_de;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,9 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.example.chat_de.databinding.ItemElementCenterSystemBinding;
 import com.example.chat_de.databinding.ItemElementLeftFileBinding;
 import com.example.chat_de.databinding.ItemElementLeftImageBinding;
@@ -312,8 +317,28 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
 
+            Glide.with(itemView.getContext())
+                    .load(item.getText())
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, com.bumptech.glide.request.target.Target<Drawable> target, boolean isFirstResource) {
+                            return false;
+                        }
 
-            Glide.with(itemView.getContext()).load(R.drawable.player).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.imagevMsg);
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, com.bumptech.glide.request.target.Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            Glide.with(itemView.getContext()).load(R.drawable.player_black).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.videoPlayer);
+                            return false;
+                        }
+
+                    })
+                    .centerCrop()
+                    .thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading))
+                    .into(leftVideoBinding.imagevMsg);
+
+            //Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.imagevMsg);
+            //Glide.with(itemView.getContext()).load(R.drawable.player_black).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.videoPlayer);
+            //Glide.with(itemView.getContext()).load(R.drawable.player).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.imagevMsg);
             leftVideoBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftVideoBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.userMeta().getPictureURL()).error(R.drawable.knu_mark_white).into(leftVideoBinding.imgv);
@@ -474,7 +499,28 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void bind(Chat item) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String chatDate = simpleDateFormat.format(item.normalDate());
-            Glide.with(itemView.getContext()).load(R.drawable.player).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightVideoBinding.imagevMsg);
+            //Todo: thumbnail 삭제하기
+            Glide.with(itemView.getContext())
+                    .load(item.getText())
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, com.bumptech.glide.request.target.Target<Drawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, com.bumptech.glide.request.target.Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            Glide.with(itemView.getContext()).load(R.drawable.player_black).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(rightVideoBinding.videoPlayer);
+                            return false;
+                        }
+
+                    })
+                    .centerCrop()
+                    .thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading))
+                    .into(rightVideoBinding.imagevMsg);
+            //Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(rightVideoBinding.imagevMsg);
+            //Glide.with(itemView.getContext()).load(R.drawable.player_black).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(rightVideoBinding.videoPlayer);
+            //Glide.with(itemView.getContext()).load(R.drawable.player).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightVideoBinding.imagevMsg);
             rightVideoBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
             rightVideoBinding.textvTime.setText(chatDate);
         }

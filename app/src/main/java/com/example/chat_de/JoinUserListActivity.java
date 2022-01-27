@@ -32,10 +32,10 @@ public class JoinUserListActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(view);
 
-        //선택한 사용자 정보 전송
+        //선택한 사용자 정보 받아옴
         //userOther = (User)getIntent().getSerializableExtra("userlist");
-        //로그인된 사용자 정보 전송
-        userMe = (AUser)getIntent().getSerializableExtra("userMe");
+        //로그인된 사용자 정보 받아옴
+        userMe = ChatDB.getCurrentUser();
 
         /*userList.add(userMe);
         userList.add(userOther);*/
@@ -50,7 +50,7 @@ public class JoinUserListActivity extends AppCompatActivity {
         }
 
         JoinUserListAdapter joinUserListAdapter;
-        joinUserListAdapter = new JoinUserListAdapter(joinUser, userMe);
+        joinUserListAdapter = new JoinUserListAdapter(joinUser);
         binding.listview.setAdapter(joinUserListAdapter);
 
         binding.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -69,8 +69,6 @@ public class JoinUserListActivity extends AppCompatActivity {
         Intent intent = new Intent(this, UserProfileActivity.class);
         //선택한 사용자 정보 전송
         intent.putExtra("userOther", userOther);
-        //로그인된 사용자 정보 전송
-        intent.putExtra("userMe", userMe);
         startActivity(intent);
     }
 }

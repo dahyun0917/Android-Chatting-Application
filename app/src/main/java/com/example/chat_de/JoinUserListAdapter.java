@@ -14,12 +14,10 @@ import java.util.ArrayList;
 
 public class JoinUserListAdapter extends BaseAdapter {
     private ArrayList<AUser> myUserList;
-    private AUser userMe;
 
     // 생성할 클래스
-    JoinUserListAdapter(ArrayList<AUser> userList, AUser user){
+    JoinUserListAdapter(ArrayList<AUser> userList){
         myUserList = userList;
-        userMe = user;
     }
 
     @Override
@@ -58,7 +56,7 @@ public class JoinUserListAdapter extends BaseAdapter {
                 .into(itemListJoinUserBinding.alertDialogItemImageView);
 
         //사용자 자신을 알려주는 '(나)' text를 보이지 않도록 설정
-        if(!item.getUserKey().equals(userMe.getUserKey())) {
+        if(!item.getUserKey().equals(ChatDB.getCurrentUserKey())) {
             itemListJoinUserBinding.me.setVisibility(View.GONE);
         }
 

@@ -240,7 +240,7 @@ public class RoomActivity extends AppCompatActivity {
                 }
 
                 JoinUserListAdapter joinUserListAdapter;
-                joinUserListAdapter = new JoinUserListAdapter(joinUser, userMe);
+                joinUserListAdapter = new JoinUserListAdapter(joinUser);
                 binding.drawerView.joinUser.setAdapter(joinUserListAdapter);
 
                 binding.drawerView.joinUser.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -251,8 +251,6 @@ public class RoomActivity extends AppCompatActivity {
                             Intent intent = new Intent(RoomActivity.this, UserProfileActivity.class);
                             //선택한 사용자 정보 전송
                             intent.putExtra("userOther", joinUser.get(i));
-                            //로그인된 사용자 정보 전송
-                            intent.putExtra("userMe", currentUser.userMeta());
                             startActivity(intent);
                         }
                     }

@@ -44,10 +44,9 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     private final int NEW_CHAT = 1;
     private final int INVITE_CHAT = 2;
     private int mode=0;
-    private User userMe;
+    private AUser userMe;
     private String chatRoomKey = null;
     private ChatRoomMeta currentChatRoomMeta = null;
-    private String myUserKey;
     private String newChatRoomName ="";
     private String newChatRoomPicture="";
     private HashSet<String> userKeySet;
@@ -61,7 +60,6 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         View view = binding.getRoot();
         setContentView(view);
 
-        myUserKey = ChatDB.getCurrentUserKey();
         setUpUserListActivity();
         showUserList();
     }
@@ -196,7 +194,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     classifyAdd(new UserListItem(i.getValue()));
                 }
             }
-            userMe = item.get(myUserKey);
+            userMe = ChatDB.getCurrentUser();
             userListAdapter.setListener(new UserSelectListener() {
                 @Override
                 public void onCheckedClick(String userID) {

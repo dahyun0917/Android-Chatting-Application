@@ -3,7 +3,6 @@ package com.example.chat_de;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,9 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -75,7 +72,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        userListAdapter.setOnCheckBoxClickListener(null);
+        userListAdapter.setListener(null);
     }
 
     public void setUpUserListActivity() {
@@ -95,7 +92,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                     newChatRoomName = intent.getStringExtra("chatRoomName");
                     newChatRoomPicture = intent.getStringExtra("chatRoomPicture");
                     if (newChatRoomName.isEmpty()) {
-                        newChatRoomName = changeToString(returnChoose(), false);
+                        newChatRoomName = changeToString(returnChoose(), false, true);
                     }
                     if (newChatRoomPicture.isEmpty()) {
                         newChatRoomPicture = "";
@@ -139,26 +136,18 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         });
 
         //텍스트뷰 내용 지우기
-        binding.searchButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                binding.searchText.setText(null);
-            }
-        });
+        binding.searchButton.setOnClickListener(view -> binding.searchText.setText(null));
 
         //모두 선택 버튼 설정
-        binding.checkedAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                binding.selectedList.setVisibility(View.VISIBLE);
-                for(UserListItem i: userListAdapter.getFilterUserList()){
-                    i.setChecked(true);
-                    if(!selectedList.contains(userDictionary.get(i.getUserKey())))
-                        selectedList.add(userDictionary.get(i.getUserKey()));
-                }
-                selectedListAdapter.notifyDataSetChanged();
-                userListAdapter.notifyDataSetChanged();
+        binding.checkedAll.setOnClickListener(view -> {
+            binding.selectedList.setVisibility(View.VISIBLE);
+            for(UserListItem i: userListAdapter.getFilterUserList()){
+                i.setChecked(true);
+                if(!selectedList.contains(userDictionary.get(i.getUserKey())))
+                    selectedList.add(userDictionary.get(i.getUserKey()));
             }
+            selectedListAdapter.notifyDataSetChanged();
+            userListAdapter.notifyDataSetChanged();
         });
     }
     public void setActionBar(){
@@ -208,7 +197,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 }
             }
             userMe = item.get(myUserKey);
-            userListAdapter.setOnCheckBoxClickListener(new CheckBoxClickListener() {
+            userListAdapter.setListener(new UserSelectListener() {
                 @Override
                 public void onCheckedClick(String userID) {
                     selectedList.add(userDictionary.get(userID));
@@ -220,7 +209,6 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                         binding.selectedList.setAnimation(animation);
                     }
                 }
-
                 @Override
                 public void onUnCheckedClick(String userID) {
                     selectedList.remove(userDictionary.get(userID));
@@ -231,6 +219,24 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                         binding.selectedList.setVisibility(View.GONE);
                         binding.selectedList.setAnimation(animation);
                     }
+                }
+            });
+            selectedListAdapter.setListener(new UserSelectListener() {
+                @Override
+                public void onCheckedClick(String userID) {
+
+                }
+                @Override
+                public void onUnCheckedClick(String userID) {
+                    selectedList.remove(userDictionary.get(userID));
+                    selectedListAdapter.notifyDataSetChanged();
+                    if(selectedList.size() == 0){
+                        Animation animation = new AlphaAnimation(1, 0);
+                        animation.setDuration(80);
+                        binding.selectedList.setVisibility(View.GONE);
+                        binding.selectedList.setAnimation(animation);
+                    }
+                    userListAdapter.notifyDataSetChanged();
                 }
             });
             //스피너 설정
@@ -268,10 +274,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     }
     private ArrayList<AUser> returnChoose(){
         /*체크표시된 유저 리스트를 반환*/
-        ArrayList<AUser> choose = new ArrayList<>();
-        for(UserListItem i:selectedList){
-            choose.add(i);
-        }
+        ArrayList<AUser> choose = new ArrayList<>(selectedList);
         return choose;
     }
     private void uploadChatRoom(){
@@ -291,9 +294,15 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
         ArrayList<AUser> list = returnChoose();
         ChatDB.inviteUserListCompleteListener(chatRoomKey, currentChatRoomMeta, list, userMe, dummyKey -> finish());
     }
-    private String changeToString(ArrayList<AUser> list, boolean formal){
+    private String changeToString(ArrayList<AUser> list, boolean formal, boolean self){
         /*유저리스트를 ~님, 형식으로 바꿔서 String으로 반환해줌.*/
         StringBuilder result = new StringBuilder();
+        if(self)
+            if(formal)
+                result.append(ChatDB.getCurrentUser().getName()).append("님, ");
+            else
+                result.append(ChatDB.getCurrentUser().getName()).append(", ");
+
         if(formal){
             for(AUser i : list){
                 result.append(i.getName()).append("님, ");

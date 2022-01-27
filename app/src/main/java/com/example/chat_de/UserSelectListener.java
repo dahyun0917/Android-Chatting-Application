@@ -1,6 +1,6 @@
 package com.example.chat_de;
 
-public interface CheckBoxClickListener {
+public interface UserSelectListener {
     void onCheckedClick(String userID);
     void onUnCheckedClick(String userID);
 }

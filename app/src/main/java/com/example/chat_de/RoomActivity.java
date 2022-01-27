@@ -242,6 +242,17 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
                     }
                 });
 
+                binding.drawerView.settings.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(RoomActivity.this, CreateRoomMetaActivity.class);
+                        intent.putExtra("chatRoomKey",chatRoomKey);
+                        intent.putExtra("chatRoomName",chatRoomMeta.getName());
+                        intent.putExtra("chatRoomPicture",chatRoomMeta.getPictureURL());
+                        startActivity(intent);
+                    }
+                });
+
                 binding.drawerLayout.openDrawer(binding_temp.getRoot());
                 binding.drawerLayout.setDrawerListener(drawerL);
 

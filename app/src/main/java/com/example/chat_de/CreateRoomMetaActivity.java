@@ -2,10 +2,8 @@ package com.example.chat_de;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -163,17 +161,6 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
         });
     }
 
-    private String getName(Uri uri) {
-        /*파일명 찾기*/
-        //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 파일명)
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
-        String[] projection = { MediaStore.Images.ImageColumns.DISPLAY_NAME };
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        int column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME);
-        cursor.moveToFirst();
-        return sdf.format(new Date())+"_"+cursor.getString(column_index);
-    }
 
     @Override
     protected void onStop() {

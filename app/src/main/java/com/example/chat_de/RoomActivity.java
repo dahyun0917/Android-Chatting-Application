@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -207,7 +205,7 @@ public class RoomActivity extends AppCompatActivity {
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Uri filePath = result.getData().getData();
-                String fileName = getName(filePath);
+                String fileName = FileDB.getFileName(filePath,this);
                 if (filePath != null){
                     if(requestCode==FILE_CODE)
                         uploadFile(requestCode,filePath,fileName);
@@ -553,16 +551,6 @@ public class RoomActivity extends AppCompatActivity {
 
         dlg.show();
 
-    }
-
-    //FileDB로 못 옮김! AppCompatActivity를 상속해야지 사용할 수 있는 함수가 있어서!!
-    private String getName(Uri uri) {
-        /*파일명 찾기*/
-        String[] projection = { MediaStore.Images.ImageColumns.DISPLAY_NAME };
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
     }
 
     public void uploadFile(int requestCode,Uri filePath,String FileNameOrExtension) {

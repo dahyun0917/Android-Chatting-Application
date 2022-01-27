@@ -213,6 +213,11 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         binding.userListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if(ChatDB.getAdminMode())
+                    binding.drawerView.functions.setVisibility(View.VISIBLE);
+                else
+                    binding.drawerView.functions.setVisibility(View.GONE);
                 //drawerView에 채팅 참가자 리스트 띄워주기
                 ArrayList<AUser> joinUser = new ArrayList<>();
                 AUser userMe= currentUser.userMeta();

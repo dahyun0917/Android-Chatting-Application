@@ -142,6 +142,7 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
             });
         });
         ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
+
     }
 
     @Override
@@ -163,7 +164,10 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
 
         //채팅방 설정
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
-        getChatRoomMeta();
+        ChatDB.chatRoomMetaChangedEventListener(chatRoomKey, HASH_CODE, meta -> {
+            chatRoomMeta = meta;
+            binding.chatTitle.setText(chatRoomMeta.getName());
+        });
 
         //액션바 타이틀 바 이름 설정
         setSupportActionBar(binding.toolbarRoom);
@@ -466,14 +470,6 @@ public class RoomActivity extends AppCompatActivity implements IUploadFileEventL
         roomElementAdapter.notifyItemRangeInserted(dataList.size() - cnt + 1, cnt);
         if (autoScroll)
             binding.recyclerView.scrollToPosition(dataList.size() - 1);
-    }
-
-    private void getChatRoomMeta() {
-        /*채팅방 정보(ChatRoomMeta)를 불러오는 함수*/
-        ChatDB.getChatRoomMeta(chatRoomKey, item -> {
-            chatRoomMeta = item;
-            binding.chatTitle.setText(chatRoomMeta.getName());
-        });
     }
 
     private void sendMessage() {

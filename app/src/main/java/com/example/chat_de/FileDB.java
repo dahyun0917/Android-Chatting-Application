@@ -22,7 +22,7 @@ import java.io.File;
 
 public class FileDB {
     public static final Intent intent = new Intent();
-    private static final FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+    public static final FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
 
     public static Intent openImage(){
         intent.setType("image/*");

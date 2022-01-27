@@ -9,12 +9,7 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -22,8 +17,18 @@ import java.io.File;
 
 public class FileDB {
     public static final Intent intent = new Intent();
-    private static final FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+    private static FirebaseStorage firebaseStorage = null;
+    private static StorageReference imgRef;
+    private static String rootPath;
 
+    public static void setReference(String root){
+        firebaseStorage=FirebaseStorage.getInstance();
+        rootPath=root;
+        imgRef = firebaseStorage.getReference(root);
+    }
+    public static String getRootPath(){
+        return rootPath;
+    }
     public static Intent openImage(){
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -66,7 +71,7 @@ public class FileDB {
         return extension;
     }
 
-    public static void uploadFile(Uri filePath, StorageReference imgRef, IUploadFileEventListener listener){
+    public static void uploadFile(Uri filePath, IUploadFileEventListener listener){
         /*이미지 파일 업로드*/
         UploadTask uploadTask = imgRef.putFile(filePath);
         uploadTask.addOnSuccessListener(taskSnapshot -> imgRef.getDownloadUrl().addOnSuccessListener(uri -> listener.SuccessUpload(uri)));

@@ -24,6 +24,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         } else {
             ChatDB.setReference("pre_1", USER_KEY, true);
         }
+        FileDB.setReference("KNU_AMP/"+ChatDB.getRootPath());
         View view = binding.getRoot();
         setContentView(view);
 

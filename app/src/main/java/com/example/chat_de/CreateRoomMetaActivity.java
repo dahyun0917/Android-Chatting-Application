@@ -98,7 +98,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
             if (!changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl) && !changedChatRoomPictureUrl.equals("") && !changedChatRoomPictureUrl.isEmpty()){
                 //새로운 이미지로 바뀌었을 경우, 파이어스토어 및 파이어베이스에 업로드 ( 파이어 스토리지 업로드 필요한 경우 )
                 //TODO : 기존 이미지는 지우기
-                pictureUploadToFireStorage();
+                uploadChatRoomPicture();
             }
             else if(!changedChatRoomName.equals(originalChatRoomName) || ((changedChatRoomPictureUrl.equals("") || !changedChatRoomPictureUrl.isEmpty())  && !changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl))){
                 //채팅방 이름만 바뀌었을 경우, 또는 기본 이미지로만 바뀌었을 경우 ( 파이어 스토리지 업로드가 필요 없는 경우 )
@@ -127,15 +127,16 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
         ChatDB.changeChatRoomMeta(originalChatRoomKey,changedChatRoomName,changedChatRoomPictureUrl);
     }
 
-    private void pictureUploadToFireStorage() {
+    private void uploadChatRoomPicture() {
         progressDialog = new ProgressDialog(CreateRoomMetaActivity.this);
         progressDialog.setTitle("업로드중...");
         progressDialog.show();
-        String fileName = getName(imageUri);
-        String rootPath = "KNU_AMP/"+ChatDB.getRootPath()+"/ChatRoomPicture/"+fileName;
 
-        FileDB.setReference(rootPath);
-        FileDB.uploadFile(imageUri, new IUploadFileEventListener() { //파이어스토리지 업로드
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
+
+        String fileName = originalChatRoomName+" -> "+changedChatRoomName+"_"+sdf.format(new Date())+"."+FileDB.getFileType(this,imageUri);
+
+        FileDB.uploadFileToFireStorage("ChatRoomPicture",fileName,imageUri, new IUploadFileEventListener() { //파이어스토리지 업로드
             @Override
             public void SuccessUpload(Uri uri) { //업로드 완료
                 changedChatRoomPictureUrl = uri.toString();

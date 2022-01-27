@@ -89,7 +89,6 @@ public class RoomActivity extends AppCompatActivity {
         setContentView(view);
         //화면 기본 설정
         setUpRoomActivity();
-
         /*리스너 설정*/
         // 처음 CHAT_LIMIT + 1개의 채팅 불러오고 채팅에 대한 리스너 설정
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, joinedUserList -> {

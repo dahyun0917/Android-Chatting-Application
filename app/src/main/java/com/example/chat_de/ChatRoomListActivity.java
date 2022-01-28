@@ -20,9 +20,10 @@ public class ChatRoomListActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        if(!ChatDB.isGenAccessPossible()) {
+        if(!ChatDB.isGenAccessPossible()) { //003
             binding.textMode.setVisibility(View.GONE);
-            binding.changeModeImage.setVisibility(View.GONE);
+            binding.upImage.setVisibility(View.GONE);
+            binding.downImage.setVisibility(View.GONE);
             binding.toolbarChatRoomList.setClickable(false);
         }
         else {
@@ -32,8 +33,16 @@ public class ChatRoomListActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             });
-            if (ChatDB.getChatMode() == 0) {
+            if (ChatDB.getChatMode() == 0) { //전체모드
+                binding.ampLogo.setVisibility(View.GONE);
+                binding.generationNumber.setVisibility(View.GONE);
                 binding.textMode.setVisibility(View.GONE);
+                binding.downImage.setVisibility(View.GONE);
+            }
+            else {
+                binding.knuLogo.setVisibility(View.GONE);
+                binding.generationNumber.setText(String.valueOf(ChatDB.getChatMode()));
+                binding.upImage.setVisibility(View.GONE);
             }
         }
 

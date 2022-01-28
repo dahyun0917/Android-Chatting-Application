@@ -126,7 +126,7 @@ public class ChatRoomListFragment extends Fragment {
                     ChatDB.exitChatRoomCompleteListener(chatRoomListItem.getChatRoomKey(), user, () -> {});
                     break;
                 case 1: //채팅방 이름 바꾸기
-                    Intent intent = new Intent(getActivity(), CreateRoomMetaActivity.class);
+                    Intent intent = new Intent(getActivity(), SetUpRoomMetaActivity.class);
                     intent.putExtra("chatRoomKey",chatRoomListItem.getChatRoomKey());
                     intent.putExtra("chatRoomName",chatRoomListItem.getName());
                     intent.putExtra("chatRoomPicture",chatRoomListItem.getPictureURL());

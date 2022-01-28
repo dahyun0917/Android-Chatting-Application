@@ -173,7 +173,7 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
     }
     private void createChatRoom() {
         /*채팅방 생성*/
-        getCreateRoomMeta.launch(new Intent(UserListActivity.this, CreateRoomMetaActivity.class));
+        getCreateRoomMeta.launch(new Intent(UserListActivity.this, SetUpRoomMetaActivity.class));
     }
 
     private void classifyAdd(@NonNull UserListItem item){

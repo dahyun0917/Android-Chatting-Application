@@ -20,7 +20,7 @@ import com.example.chat_de.databinding.ActivityCreateRoomMetaBinding;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class CreateRoomMetaActivity extends AppCompatActivity {
+public class SetUpRoomMetaActivity extends AppCompatActivity {
     private ActivityCreateRoomMetaBinding binding;
     private String changedChatRoomPictureUrl;
     private String changedChatRoomName;
@@ -53,7 +53,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
             changedChatRoomName = originalChatRoomName;
             binding.chatNameText.setText(originalChatRoomName);
             Glide
-                    .with(CreateRoomMetaActivity.this)
+                    .with(SetUpRoomMetaActivity.this)
                     .load(originalChatRoomPictureUrl)
                     .placeholder(R.drawable.knu_mark_white)
                     .into(binding.chatImage);
@@ -72,7 +72,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
                 imageUri = result.getData().getData();
                 //binding.chatImage.setImageURI(imageUri);
                 Glide
-                        .with(CreateRoomMetaActivity.this)
+                        .with(SetUpRoomMetaActivity.this)
                         .load(imageUri)
                         .into(binding.chatImage);
                 changedChatRoomPictureUrl = imageUri.toString();
@@ -117,7 +117,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
 
     private void newRoomUpload() {
         //인텐트 후, UserListActivity 파이어베이스로 정보 업로드
-        Intent finishIntent = new Intent(CreateRoomMetaActivity.this, UserListActivity.class);
+        Intent finishIntent = new Intent(SetUpRoomMetaActivity.this, UserListActivity.class);
         finishIntent.putExtra("chatRoomName", changedChatRoomName);
         finishIntent.putExtra("chatRoomPicture", changedChatRoomPictureUrl);
         setResult(9001, finishIntent);
@@ -128,7 +128,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
     }
 
     private void uploadChatRoomPicture() {
-        progressDialog = new ProgressDialog(CreateRoomMetaActivity.this);
+        progressDialog = new ProgressDialog(SetUpRoomMetaActivity.this);
         progressDialog.setTitle("업로드중...");
         progressDialog.show();
 
@@ -154,7 +154,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 finish();
                 Log.e("FSE","upload fail!");
-                Toast.makeText(CreateRoomMetaActivity.this,"이미지 업로드에 실패했습니다. 다시 시도해 주세요.",Toast.LENGTH_SHORT).show();
+                Toast.makeText(SetUpRoomMetaActivity.this,"이미지 업로드에 실패했습니다. 다시 시도해 주세요.",Toast.LENGTH_SHORT).show();
             }
             @Override
             public void ProgressUpload(double progress) { //업로드 진행중

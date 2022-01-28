@@ -46,7 +46,7 @@ public class ChatDB {
     private static int chatMode;
     private static String currentUserKey = null;
     private static boolean adminMode = false;
-    private static boolean genAccessPossible;
+    private static boolean genAccessPossible = false;
     private static AUser currentUser = null;
 
     public static void initChatDB(String[] chat_userData_arr) {// 앱 시작할때 딱 1번만 호출할 것
@@ -60,6 +60,12 @@ public class ChatDB {
                 genAccessPossible = true;
             } else {
                 genAccessPossible = false;
+            }
+
+            if(true) {
+                adminMode = true;
+            } else {
+                adminMode = false;
             }
             chatMode = 0;
             ref = FirebaseDatabase.getInstance().getReference(makePath(ROOT, ALL));

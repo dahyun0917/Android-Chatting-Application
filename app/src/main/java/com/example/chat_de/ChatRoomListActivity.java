@@ -17,30 +17,33 @@ public class ChatRoomListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityChatRoomListBinding.inflate(getLayoutInflater());
-
-        if(ChatDB.getChatMode() == 0) {
-            binding.textMode.setVisibility(View.GONE);
-        }
         View view = binding.getRoot();
         setContentView(view);
 
-        binding.toolbaTitle.setOnClickListener(view1 -> {
-            Intent intent = new Intent(ChatRoomListActivity.this, ChatRoomListActivity.class);
-            ChatDB.changeRef();
-            startActivity(intent);
-            finish();
-        });
+        if(!ChatDB.isGenAccessPossible()) {
+            binding.textMode.setVisibility(View.GONE);
+            binding.changeModeImage.setVisibility(View.GONE);
+            binding.toolbarChatRoomList.setClickable(false);
+        }
+        else {
+            binding.toolbaTitle.setOnClickListener(view1 -> {
+                Intent intent = new Intent(ChatRoomListActivity.this, ChatRoomListActivity.class);
+                ChatDB.changeRef();
+                startActivity(intent);
+                finish();
+            });
+            if (ChatDB.getChatMode() == 0) {
+                binding.textMode.setVisibility(View.GONE);
+            }
+        }
 
         setSupportActionBar(binding.toolbarChatRoomList);
         setTitle("");
 
         mainFragment = new ChatRoomListFragment();
-
-
         Bundle bundle = new Bundle(); // 파라미터의 숫자는 전달하려는 값의 갯수
 
         mainFragment.setArguments(bundle);
-
         getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, mainFragment).commit();
     }
 }

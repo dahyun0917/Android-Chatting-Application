@@ -32,11 +32,11 @@
                 android:textSize="15sp"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/user_num"
+                android:id="@+id/user_generation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="기수"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:gravity="center"/>
 
             <Button

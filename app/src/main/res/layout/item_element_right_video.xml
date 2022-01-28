@@ -52,7 +52,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <ImageView
-                        android:id="@+id/imagev_msg"
+                        android:id="@+id/video_msg"
                         android:layout_width="200dp"
                         android:layout_height="200dp"
                         android:scaleType="centerInside"
@@ -71,10 +71,10 @@
                         android:maxLength="150"
                         android:maxLines="15"
                         android:padding="30dp"
-                        app:layout_constraintTop_toTopOf="@id/imagev_msg"
-                        app:layout_constraintRight_toRightOf="@id/imagev_msg"
-                        app:layout_constraintLeft_toLeftOf="@id/imagev_msg"
-                        app:layout_constraintBottom_toBottomOf="@id/imagev_msg"/>
+                        app:layout_constraintTop_toTopOf="@id/video_msg"
+                        app:layout_constraintRight_toRightOf="@id/video_msg"
+                        app:layout_constraintLeft_toLeftOf="@id/video_msg"
+                        app:layout_constraintBottom_toBottomOf="@id/video_msg"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>

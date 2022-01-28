@@ -17,21 +17,16 @@ public class ChatRoomListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityChatRoomListBinding.inflate(getLayoutInflater());
-        int mode = getIntent().getIntExtra("mode", 0);
-        if (mode == 0) {
+
+        if(ChatDB.getChatMode() == 0) {
             binding.textMode.setVisibility(View.GONE);
-            ChatDB.setReference("pre_4", USER_KEY, true);
-        } else {
-            ChatDB.setReference("pre_1", USER_KEY, true);
         }
-        FileDB.setReference("KNU_AMP/"+ChatDB.getRootPath());
         View view = binding.getRoot();
         setContentView(view);
 
         binding.toolbaTitle.setOnClickListener(view1 -> {
             Intent intent = new Intent(ChatRoomListActivity.this, ChatRoomListActivity.class);
-            ChatMode.changeMode();
-            intent.putExtra("mode", ChatMode.getChatMode());
+            ChatDB.changeRef();
             startActivity(intent);
             finish();
         });

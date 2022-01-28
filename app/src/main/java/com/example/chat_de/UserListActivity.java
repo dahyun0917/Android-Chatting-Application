@@ -138,11 +138,13 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
 
         //모두 선택 버튼 설정
         binding.checkedAll.setOnClickListener(view -> {
-            binding.selectedList.setVisibility(View.VISIBLE);
             for(UserListItem i: userListAdapter.getFilterUserList()){
                 i.setChecked(true);
                 if(!selectedList.contains(userDictionary.get(i.getUserKey())))
                     selectedList.add(userDictionary.get(i.getUserKey()));
+            }
+            if(selectedList.size() > 0) {
+                binding.selectedList.setVisibility(View.VISIBLE);
             }
             selectedListAdapter.notifyDataSetChanged();
             userListAdapter.notifyDataSetChanged();

@@ -89,7 +89,8 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 if(intent != null) {
                     newChatRoomName = intent.getStringExtra("chatRoomName");
                     newChatRoomPicture = intent.getStringExtra("chatRoomPicture");
-                    if (newChatRoomName.isEmpty()) {
+                    if (newChatRoomName.trim().isEmpty()) {
+                        Toast.makeText(UserListActivity.this,"채팅방 이름이 기본이름으로 설정됩니다.",Toast.LENGTH_SHORT).show();
                         newChatRoomName = changeToString(returnChoose(), false, true);
                     }
                     if (newChatRoomPicture.isEmpty()) {

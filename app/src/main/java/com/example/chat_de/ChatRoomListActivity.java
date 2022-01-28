@@ -10,7 +10,7 @@ import com.example.chat_de.databinding.ActivityChatRoomListBinding;
 
 public class ChatRoomListActivity extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
-    private final String USER_KEY = "user1";
+    private final String USER_KEY = "user2";
     private ActivityChatRoomListBinding binding;
 
     @Override

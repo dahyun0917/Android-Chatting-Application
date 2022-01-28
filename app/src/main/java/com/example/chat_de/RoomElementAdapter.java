@@ -276,7 +276,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public LeftVideoViewHolder(@NonNull View itemView) {
             super(itemView);
             leftVideoBinding = ItemElementLeftVideoBinding.bind(itemView);
-            leftVideoBinding.imagevMsg.setOnClickListener(new View.OnClickListener() {
+            leftVideoBinding.videoMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Chat item = myDataList.get(getBindingAdapterPosition());
@@ -334,7 +334,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     })
                     .centerCrop()
                     .thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading))
-                    .into(leftVideoBinding.imagevMsg);
+                    .into(leftVideoBinding.videoMsg);
 
             //Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.imagevMsg);
             //Glide.with(itemView.getContext()).load(R.drawable.player_black).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftVideoBinding.videoPlayer);
@@ -353,7 +353,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public LeftFileViewHolder(@NonNull View itemView) {
             super(itemView);
             leftFileBinding = ItemElementLeftFileBinding.bind(itemView);
-            leftFileBinding.imagevMsg.setOnClickListener(new View.OnClickListener() {
+            leftFileBinding.fileMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Chat item = myDataList.get(getBindingAdapterPosition());
@@ -397,7 +397,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
             chatRoomUser = myUserList.get(item.getFrom());
 
-            Glide.with(itemView.getContext()).load(R.drawable.file_icon).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftFileBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(R.drawable.file_icon).override(200, 200).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(leftFileBinding.fileMsg);
             leftFileBinding.textvNicname.setText(chatRoomUser.userMeta().getName());
             leftFileBinding.textvTime.setText(chatDate);
             Glide.with(itemView.getContext()).load(chatRoomUser.userMeta().getPictureURL()).error(R.drawable.knu_mark_white).into(leftFileBinding.imgv);
@@ -480,7 +480,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public RightVideoViewHolder(@NonNull View itemView) {
             super(itemView);
             rightVideoBinding = ItemElementRightVideoBinding.bind(itemView);
-            rightVideoBinding.imagevMsg.setOnClickListener(new View.OnClickListener() {
+            rightVideoBinding.videoMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     int pos = getBindingAdapterPosition();
@@ -517,7 +517,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     })
                     .centerCrop()
                     .thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading))
-                    .into(rightVideoBinding.imagevMsg);
+                    .into(rightVideoBinding.videoMsg);
             //Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(rightVideoBinding.imagevMsg);
             //Glide.with(itemView.getContext()).load(R.drawable.player_black).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(rightVideoBinding.videoPlayer);
             //Glide.with(itemView.getContext()).load(R.drawable.player).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightVideoBinding.imagevMsg);
@@ -532,7 +532,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public RightFileViewHolder(@NonNull View itemView) {
             super(itemView);
             rightFileBinding = ItemElementRightFileBinding.bind(itemView);
-            rightFileBinding.imagevMsg.setOnClickListener(new View.OnClickListener() {
+            rightFileBinding.fileMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     int pos = getBindingAdapterPosition();
@@ -551,7 +551,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void bind(Chat item) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String chatDate = simpleDateFormat.format(item.normalDate());
-            Glide.with(itemView.getContext()).load(R.drawable.file_icon).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightFileBinding.imagevMsg);
+            Glide.with(itemView.getContext()).load(R.drawable.file_icon).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightFileBinding.fileMsg);
             rightFileBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
             rightFileBinding.textvTime.setText(chatDate);
         }

@@ -65,6 +65,7 @@ public class SetUpRoomMetaActivity extends AppCompatActivity {
             originalChatRoomName = "";
             originalChatRoomPictureUrl = "";
             originalChatRoomKey = "";
+            binding.descriptionText.setText("공백만 입력하시거나 아무것도 입력하시지 않으면 기본 이름으로 설정됩니다.");
         }
 
         galleryResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -93,24 +94,27 @@ public class SetUpRoomMetaActivity extends AppCompatActivity {
 
         binding.createComplete.setOnClickListener(view12 -> { //완료 버튼 클릭했을 때
             changedChatRoomName = binding.chatNameText.getText().toString();
-            if (!changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl) && !changedChatRoomPictureUrl.equals("") && !changedChatRoomPictureUrl.isEmpty()){
-                //새로운 이미지로 바뀌었을 경우, 파이어스토어 및 파이어베이스에 업로드 ( 파이어 스토리지 업로드 필요한 경우 )
-                //TODO : 기존 이미지는 지우기
-                uploadChatRoomPicture();
-            }
-            else if(!changedChatRoomName.equals(originalChatRoomName) || ((changedChatRoomPictureUrl.equals("") || !changedChatRoomPictureUrl.isEmpty())  && !changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl))){
-                //채팅방 이름만 바뀌었을 경우, 또는 기본 이미지로만 바뀌었을 경우 ( 파이어 스토리지 업로드가 필요 없는 경우 )
-                if (isNewRoom)
-                    newRoomUpload();
-                else
-                    changeRoomUpload();
-                finish();
+            if(changedChatRoomName.trim().length()<=0 && !isNewRoom) {
+                Toast.makeText(SetUpRoomMetaActivity.this,"공백만 입력하실 수 없습니다.",Toast.LENGTH_SHORT).show();
             }
             else {
-                //아무것도 안바뀌었을 경우
-                if (isNewRoom)
-                    newRoomUpload();
-                finish();
+                if (!changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl) && !changedChatRoomPictureUrl.equals("") && !changedChatRoomPictureUrl.isEmpty()) {
+                    //새로운 이미지로 바뀌었을 경우, 파이어스토어 및 파이어베이스에 업로드 ( 파이어 스토리지 업로드 필요한 경우 )
+                    //TODO : 기존 이미지는 지우기
+                    uploadChatRoomPicture();
+                } else if (!changedChatRoomName.equals(originalChatRoomName) || ((changedChatRoomPictureUrl.equals("") || !changedChatRoomPictureUrl.isEmpty()) && !changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl))) {
+                    //채팅방 이름만 바뀌었을 경우, 또는 기본 이미지로만 바뀌었을 경우 ( 파이어 스토리지 업로드가 필요 없는 경우 )
+                    if (isNewRoom)
+                        newRoomUpload();
+                    else
+                        changeRoomUpload();
+                    finish();
+                } else {
+                    //아무것도 안바뀌었을 경우
+                    if (isNewRoom)
+                        newRoomUpload();
+                    finish();
+                }
             }
         });
     }

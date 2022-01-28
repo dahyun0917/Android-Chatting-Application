@@ -82,9 +82,9 @@ public class FileDB {
         return extension;
     }
 
-    public static void uploadFileToFireStorage(String chatRoomName, String fileName, Uri filePath, IUploadFileEventListener listener){
+    public static void uploadFileToFireStorage(String chatRoomKey, String fileName, Uri filePath, IUploadFileEventListener listener){
         /*이미지 파일 업로드*/
-        StorageReference uploadRef = ref.child(makePath(chatRoomName,fileName));
+        StorageReference uploadRef = ref.child(makePath(chatRoomKey,fileName));
         UploadTask uploadTask = uploadRef.putFile(filePath);
         uploadTask.addOnSuccessListener(taskSnapshot -> uploadRef.getDownloadUrl().addOnSuccessListener(listener::SuccessUpload));
         uploadTask.addOnFailureListener(listener::FailUpload);

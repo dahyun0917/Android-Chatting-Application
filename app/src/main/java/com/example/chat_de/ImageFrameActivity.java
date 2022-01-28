@@ -181,8 +181,5 @@ public class ImageFrameActivity extends AppCompatActivity {
                 Toast.makeText(context, "다운로드 취소.",Toast.LENGTH_SHORT).show();
             }
         }
-
     };
-
-
 }

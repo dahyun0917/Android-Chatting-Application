@@ -37,42 +37,73 @@ public class ChatDB {
     public static final String EXIST = "exist";
     public static final String CHAT_ROOM_NAME = "name";
     public static final String CHAT_ROOM_PICTURE = "pictureURL";
+    public static final String ROOT = "KNU_AMP";
+    public static final String ALL = "0_ALL";
 
     private static DatabaseReference ref = null;
     private static final HashMap<Integer, ArrayList<Pair<String, ChildEventListener>>> childEventListeners = new HashMap<>();
     private static final HashMap<Integer, ArrayList<Pair<String, ValueEventListener>>> valueEventListeners = new HashMap<>();
-    private static String rootPath;
+    private static int chatMode;
     private static String currentUserKey = null;
     private static boolean adminMode = false;
+    private static boolean genAccessPossible = false;
     private static AUser currentUser = null;
 
-    public static void setReference(String root, String userKey, boolean adminMode) { // 앱 시작할때 딱 1번만 호출할 것
-        ref = FirebaseDatabase.getInstance().getReference(root);
-        rootPath = root;
-        currentUserKey = userKey;
-        ChatDB.adminMode = adminMode;
-        ref.child(makePath(USERS, userKey)).get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()) {
-                currentUser = task.getResult().getValue(User.class);
+    public static void initChatDB(String[] chat_userData_arr) {// 앱 시작할때 딱 1번만 호출할 것
+        if(currentUser == null) {
+            User user = new User(chat_userData_arr);
+            currentUser = user;
+            currentUserKey = chat_userData_arr[0];
+            FirebaseDatabase.getInstance().getReference(makePath(ROOT, ALL, USERS, currentUserKey)).setValue(user);
+            if (!chat_userData_arr[4].equals("003")) {
+                FirebaseDatabase.getInstance().getReference(makePath(ROOT, chat_userData_arr[3], USERS, currentUserKey)).setValue(user);
+                genAccessPossible = true;
             } else {
-                Log.e("FRD", "Can not get user data of: " + userKey);
+                genAccessPossible = false;
             }
-        });
+
+            if(true) {
+                adminMode = true;
+            } else {
+                adminMode = false;
+            }
+            chatMode = 0;
+            ref = FirebaseDatabase.getInstance().getReference(makePath(ROOT, ALL));
+            FileDB.setReference(makePath(ROOT, ALL));
+        }
     }
-    public static void setCurrentUser(AUser user) {
-        currentUser = user;
-    }
-    public static void setRootPath(@NonNull String root) {
+    public static void changeRef() {
+        // detach all listeners
         for(int key : childEventListeners.keySet()) {
             removeEventListener(key);
         }
+        for(int key : valueEventListeners.keySet()) {
+            removeEventListener(key);
+        }
+
+        // set new root
+        String root;
+        if(chatMode == 0) {
+            chatMode = currentUser.getGeneration();
+            root = makePath(ROOT, String.valueOf(chatMode));
+        } else {
+            chatMode = 0;
+            root = makePath(ROOT, ALL);
+        }
+        // set new ref
         ref = FirebaseDatabase.getInstance().getReference(root);
+        // set new firestore ref
+        FileDB.setReference(root);
+    }
+
+    public static int getChatMode() {
+        return chatMode;
+    }
+    public static boolean isGenAccessPossible() {
+        return genAccessPossible;
     }
     public static DatabaseReference getReference() {
         return ref;
-    }
-    public static String getRootPath() {
-        return rootPath;
     }
     public static boolean getAdminMode() {
         return adminMode;
@@ -81,7 +112,7 @@ public class ChatDB {
     public static String getCurrentUserKey() {
         return currentUserKey;
     }
-    //TODO : intent로 본인의 데이터를 넘겨주는 부분 있으면 가급적 이쪽으로 바꿔주는게 좋음
+    //TODO : intent로 본인의 데이터를 넘겨주는 부분 있으면 전부 이쪽으로 바꿔야 함
     public static AUser getCurrentUser() {
         return currentUser;
     }
@@ -353,17 +384,17 @@ public class ChatDB {
         class MyChildEventListener implements ChildEventListener {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.changed(snapshot.getValue(ChatRoomUser.class));
+                listener.onChanged(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                listener.changed(snapshot.getValue(ChatRoomUser.class));
+                listener.onChanged(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                listener.removed(snapshot.getValue(ChatRoomUser.class));
+                listener.onRemoved(snapshot.getValue(ChatRoomUser.class));
             }
 
             @Override

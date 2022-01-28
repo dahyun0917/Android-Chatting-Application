@@ -25,7 +25,7 @@
                 android:layout_width="158dp"
                 android:layout_height="25dp"
                 android:layout_alignParentStart="true"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:background="@drawable/knulogo" />
 
             <TextView
@@ -38,16 +38,18 @@
                 android:gravity="center"
                 android:text="기수"
                 android:textColor="#FFFFFF"
-                android:textSize="21dp"
+                android:textSize="13dp"
                 app:autoSizeTextType="uniform" />
 
             <ImageView
+                android:id="@+id/change_mode_image"
                 android:layout_width="25dp"
                 android:layout_height="30dp"
                 android:layout_gravity="center"
                 android:layout_marginStart="15dp"
                 android:layout_toEndOf="@id/text_mode"
                 android:background="@drawable/amp_arrow_up"
+                android:gravity="start" />
                 android:gravity="left" />
             <ImageView
                 android:layout_width="25dp"

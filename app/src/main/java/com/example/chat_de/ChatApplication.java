@@ -14,5 +14,14 @@ public class ChatApplication extends MultiDexApplication {
         super.onCreate();
         LeastRecentlyUsedCacheEvictor leastRecentlyUsedCacheEvictor = new LeastRecentlyUsedCacheEvictor(200 * 1024 * 1024);
         simpleCache = simpleCache == null ? new SimpleCache(getCacheDir(), leastRecentlyUsedCacheEvictor, new StandaloneDatabaseProvider(this)) : simpleCache;
+
+        String[] chat_userData_arr = new String[]{
+                "10005",
+                "테스트안드3",
+                "http://192.168.0.22:9057/images/no-img01.png",
+                "2",
+                "001"};
+
+        ChatDB.initChatDB(chat_userData_arr);
     }
 }

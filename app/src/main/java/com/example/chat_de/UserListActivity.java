@@ -241,10 +241,10 @@ public class UserListActivity extends AppCompatActivity implements TextWatcher {
                 }
             });
             //스피너 설정
-            if(ChatMode.getChatMode()>0){
+            if(ChatDB.getChatMode() != 0){
                 binding.spinner.setVisibility(View.GONE);
                 //TODO : 나중에 allUsers가 아니라 해당 기수만 뜨도록.(현재 chatMode에 기수 정보 담으면 용도에 맞게 실행됨)
-                userListAdapter.setUserList(userList[(ChatMode.getChatMode()-1)/10]);
+                userListAdapter.setUserList(userList[(ChatDB.getChatMode()-1)/10]);
             }
             else {
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);

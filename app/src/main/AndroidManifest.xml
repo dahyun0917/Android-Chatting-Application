@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
-            android:name=".CreateRoomMetaActivity"
+            android:name=".SetUpRoomMetaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustUnspecified"
             android:label="create_room_meta_activity"

@@ -2,10 +2,8 @@ package com.example.chat_de;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -22,7 +20,7 @@ import com.example.chat_de.databinding.ActivityCreateRoomMetaBinding;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class CreateRoomMetaActivity extends AppCompatActivity {
+public class SetUpRoomMetaActivity extends AppCompatActivity {
     private ActivityCreateRoomMetaBinding binding;
     private String changedChatRoomPictureUrl;
     private String changedChatRoomName;
@@ -55,7 +53,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
             changedChatRoomName = originalChatRoomName;
             binding.chatNameText.setText(originalChatRoomName);
             Glide
-                    .with(CreateRoomMetaActivity.this)
+                    .with(SetUpRoomMetaActivity.this)
                     .load(originalChatRoomPictureUrl)
                     .placeholder(R.drawable.knu_mark_white)
                     .into(binding.chatImage);
@@ -67,6 +65,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
             originalChatRoomName = "";
             originalChatRoomPictureUrl = "";
             originalChatRoomKey = "";
+            binding.descriptionText.setText("공백만 입력하시거나 아무것도 입력하시지 않으면 기본 이름으로 설정됩니다.");
         }
 
         galleryResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -74,7 +73,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
                 imageUri = result.getData().getData();
                 //binding.chatImage.setImageURI(imageUri);
                 Glide
-                        .with(CreateRoomMetaActivity.this)
+                        .with(SetUpRoomMetaActivity.this)
                         .load(imageUri)
                         .into(binding.chatImage);
                 changedChatRoomPictureUrl = imageUri.toString();
@@ -95,29 +94,34 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
 
         binding.createComplete.setOnClickListener(view12 -> { //완료 버튼 클릭했을 때
             changedChatRoomName = binding.chatNameText.getText().toString();
-            if (!changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl) && !changedChatRoomPictureUrl.equals("") && !changedChatRoomPictureUrl.isEmpty()){
-                //새로운 이미지로 바뀌었을 경우, 파이어스토어 및 파이어베이스에 업로드 ( 파이어 스토리지 업로드 필요한 경우 )
-                //TODO : 기존 이미지는 지우기
-                uploadChatRoomPicture();
-            }
-            else if(!changedChatRoomName.equals(originalChatRoomName) || ((changedChatRoomPictureUrl.equals("") || !changedChatRoomPictureUrl.isEmpty())  && !changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl))){
-                //채팅방 이름만 바뀌었을 경우, 또는 기본 이미지로만 바뀌었을 경우 ( 파이어 스토리지 업로드가 필요 없는 경우 )
-                if (isNewRoom)
-                    newRoomUpload();
-                else
-                    changeRoomUpload();
-                finish();
+            if(changedChatRoomName.trim().length()<=0 && !isNewRoom) {
+                Toast.makeText(SetUpRoomMetaActivity.this,"공백만 입력하실 수 없습니다.",Toast.LENGTH_SHORT).show();
             }
             else {
-                //아무것도 안바뀌었을 경우
-                finish();
+                if (!changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl) && !changedChatRoomPictureUrl.equals("") && !changedChatRoomPictureUrl.isEmpty()) {
+                    //새로운 이미지로 바뀌었을 경우, 파이어스토어 및 파이어베이스에 업로드 ( 파이어 스토리지 업로드 필요한 경우 )
+                    //TODO : 기존 이미지는 지우기
+                    uploadChatRoomPicture();
+                } else if (!changedChatRoomName.equals(originalChatRoomName) || ((changedChatRoomPictureUrl.equals("") || !changedChatRoomPictureUrl.isEmpty()) && !changedChatRoomPictureUrl.equals(originalChatRoomPictureUrl))) {
+                    //채팅방 이름만 바뀌었을 경우, 또는 기본 이미지로만 바뀌었을 경우 ( 파이어 스토리지 업로드가 필요 없는 경우 )
+                    if (isNewRoom)
+                        newRoomUpload();
+                    else
+                        changeRoomUpload();
+                    finish();
+                } else {
+                    //아무것도 안바뀌었을 경우
+                    if (isNewRoom)
+                        newRoomUpload();
+                    finish();
+                }
             }
         });
     }
 
     private void newRoomUpload() {
         //인텐트 후, UserListActivity 파이어베이스로 정보 업로드
-        Intent finishIntent = new Intent(CreateRoomMetaActivity.this, UserListActivity.class);
+        Intent finishIntent = new Intent(SetUpRoomMetaActivity.this, UserListActivity.class);
         finishIntent.putExtra("chatRoomName", changedChatRoomName);
         finishIntent.putExtra("chatRoomPicture", changedChatRoomPictureUrl);
         setResult(9001, finishIntent);
@@ -128,7 +132,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
     }
 
     private void uploadChatRoomPicture() {
-        progressDialog = new ProgressDialog(CreateRoomMetaActivity.this);
+        progressDialog = new ProgressDialog(SetUpRoomMetaActivity.this);
         progressDialog.setTitle("업로드중...");
         progressDialog.show();
 
@@ -154,7 +158,7 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 finish();
                 Log.e("FSE","upload fail!");
-                Toast.makeText(CreateRoomMetaActivity.this,"이미지 업로드에 실패했습니다. 다시 시도해 주세요.",Toast.LENGTH_SHORT).show();
+                Toast.makeText(SetUpRoomMetaActivity.this,"이미지 업로드에 실패했습니다. 다시 시도해 주세요.",Toast.LENGTH_SHORT).show();
             }
             @Override
             public void ProgressUpload(double progress) { //업로드 진행중
@@ -163,17 +167,6 @@ public class CreateRoomMetaActivity extends AppCompatActivity {
         });
     }
 
-    private String getName(Uri uri) {
-        /*파일명 찾기*/
-        //파일 명이 중복되지 않도록 날짜를 이용 (현재시간 + 파일명)
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSSSS");
-        String[] projection = { MediaStore.Images.ImageColumns.DISPLAY_NAME };
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        int column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME);
-        cursor.moveToFirst();
-        return sdf.format(new Date())+"_"+cursor.getString(column_index);
-    }
 
     @Override
     protected void onStop() {

@@ -3,11 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="다운로드 중..."
         android:textSize="30sp"
-        android:gravity="center"></TextView>
+        android:gravity="center" />
 
 </LinearLayout>

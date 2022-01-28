@@ -29,7 +29,7 @@ public class UserProfileActivity extends AppCompatActivity {
         //선택한 사용자 정보 전송
         userOther = (AUser)getIntent().getSerializableExtra("userOther");
         //로그인된 사용자 정보 전송
-        userMe = (AUser)getIntent().getSerializableExtra("userMe");
+        userMe = ChatDB.getCurrentUser();
 
 
         binding.makeChat.setVisibility(View.VISIBLE);
@@ -42,7 +42,7 @@ public class UserProfileActivity extends AppCompatActivity {
         //이름 설정
         binding.userName.setText(userOther.getName());
 
-        if(userMe.userMeta().getUserKey().equals(userOther.userMeta().getUserKey()))
+        if(userMe.getUserKey().equals(userOther.getUserKey()))
             binding.makeChat.setVisibility(View.GONE);
         //채팅방 만들기 버튼 설정
         binding.makeChat.setOnClickListener(new View.OnClickListener() {

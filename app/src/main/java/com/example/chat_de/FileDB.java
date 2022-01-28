@@ -4,17 +4,16 @@ import android.app.DownloadManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -53,7 +52,15 @@ public class FileDB {
     public static String getFileName(String fileStr){
         return fileStr.substring(fileStr.lastIndexOf("_") + 1);
     }
-
+    public static String getFileName(Uri uri,Context context) {
+        /*파일명 찾기*/
+        String[] projection = { MediaStore.Images.ImageColumns.DISPLAY_NAME };
+        try (Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null)) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
+    }
     //파일 확장자 가져오기
     public static String getFileType(String fileStr) {
         //String fileExtension = fileStr.substring(fileStr.lastIndexOf(".")+1,fileStr.length());
@@ -104,5 +111,6 @@ public class FileDB {
 
         return ret.toString();
     }
+
 
 }

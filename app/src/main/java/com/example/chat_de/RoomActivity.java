@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -91,7 +89,6 @@ public class RoomActivity extends AppCompatActivity {
         setContentView(view);
         //화면 기본 설정
         setUpRoomActivity();
-
         /*리스너 설정*/
         // 처음 CHAT_LIMIT + 1개의 채팅 불러오고 채팅에 대한 리스너 설정
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, joinedUserList -> {
@@ -119,7 +116,7 @@ public class RoomActivity extends AppCompatActivity {
                     String key = changedUser.getUserKey();
                     //강퇴당했을 때 액티비티 종료
                     if(key.equals(currentUser.getUserKey()) && !changedUser.getExist()) {
-                        Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RoomActivity.this, "방에서 퇴장하셨습니다.", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                     userList.put(key, changedUser);
@@ -130,7 +127,7 @@ public class RoomActivity extends AppCompatActivity {
                     String key = exitedUser.getUserKey();
                     //방이 폐쇄당했을 때 액티비티 종료
                     if(key.equals(currentUser.getUserKey())) {
-                        Toast.makeText(RoomActivity.this, "방에서 퇴장당하셨습니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RoomActivity.this, "방에서 퇴장하셨습니다.", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 }
@@ -206,7 +203,7 @@ public class RoomActivity extends AppCompatActivity {
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Uri filePath = result.getData().getData();
-                String fileName = getName(filePath);
+                String fileName = FileDB.getFileName(filePath,this);
                 if (filePath != null){
                     if(requestCode==FILE_CODE)
                         uploadFile(requestCode,filePath,fileName);
@@ -228,9 +225,9 @@ public class RoomActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if(ChatDB.getAdminMode())
-                    binding.drawerView.functions.setVisibility(View.VISIBLE);
+                    binding.drawerView.settings.setVisibility(View.VISIBLE);
                 else
-                    binding.drawerView.functions.setVisibility(View.GONE);
+                    binding.drawerView.settings.setVisibility(View.GONE);
                 //drawerView에 채팅 참가자 리스트 띄워주기
                 ArrayList<AUser> joinUser = new ArrayList<>();
                 AUser userMe= currentUser.userMeta();
@@ -242,7 +239,7 @@ public class RoomActivity extends AppCompatActivity {
                 }
 
                 JoinUserListAdapter joinUserListAdapter;
-                joinUserListAdapter = new JoinUserListAdapter(joinUser, userMe);
+                joinUserListAdapter = new JoinUserListAdapter(joinUser);
                 binding.drawerView.joinUser.setAdapter(joinUserListAdapter);
 
                 binding.drawerView.joinUser.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -253,8 +250,6 @@ public class RoomActivity extends AppCompatActivity {
                             Intent intent = new Intent(RoomActivity.this, UserProfileActivity.class);
                             //선택한 사용자 정보 전송
                             intent.putExtra("userOther", joinUser.get(i));
-                            //로그인된 사용자 정보 전송
-                            intent.putExtra("userMe", currentUser.userMeta());
                             startActivity(intent);
                         }
                     }
@@ -263,7 +258,7 @@ public class RoomActivity extends AppCompatActivity {
                 binding.drawerView.settings.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(RoomActivity.this, CreateRoomMetaActivity.class);
+                        Intent intent = new Intent(RoomActivity.this, SetUpRoomMetaActivity.class);
                         intent.putExtra("chatRoomKey",chatRoomKey);
                         intent.putExtra("chatRoomName",chatRoomMeta.getName());
                         intent.putExtra("chatRoomPicture",chatRoomMeta.getPictureURL());
@@ -278,7 +273,15 @@ public class RoomActivity extends AppCompatActivity {
             }
         });
 
-
+        //나가기 버튼에 대한 클릭 리스너 지정
+        binding.drawerView.exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ArrayList<AUser> user = new ArrayList<>();
+                user.add(ChatDB.getCurrentUser());
+                ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {});
+            }
+        });
 
         //초대하기 버튼에 대한 클릭 리스너 지정
         if(!ChatDB.getAdminMode()) { //adminmode가 아니면
@@ -552,16 +555,6 @@ public class RoomActivity extends AppCompatActivity {
 
         dlg.show();
 
-    }
-
-    //FileDB로 못 옮김! AppCompatActivity를 상속해야지 사용할 수 있는 함수가 있어서!!
-    private String getName(Uri uri) {
-        /*파일명 찾기*/
-        String[] projection = { MediaStore.Images.ImageColumns.DISPLAY_NAME };
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
     }
 
     public void uploadFile(int requestCode,Uri filePath,String FileNameOrExtension) {

@@ -259,7 +259,7 @@ public class RoomActivity extends AppCompatActivity {
                 binding.drawerView.settings.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(RoomActivity.this, CreateRoomMetaActivity.class);
+                        Intent intent = new Intent(RoomActivity.this, SetUpRoomMetaActivity.class);
                         intent.putExtra("chatRoomKey",chatRoomKey);
                         intent.putExtra("chatRoomName",chatRoomMeta.getName());
                         intent.putExtra("chatRoomPicture",chatRoomMeta.getPictureURL());

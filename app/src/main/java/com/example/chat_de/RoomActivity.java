@@ -582,7 +582,7 @@ public class RoomActivity extends AppCompatActivity {
             fileName = sdf.format(new Date()) + "_" + currentUser.userMeta().getUserKey()+"."+FileNameOrExtension;
 
 
-        FileDB.uploadFileToFireStorage(chatRoomMeta.getName(), fileName, filePath, new IUploadFileEventListener() {
+        FileDB.uploadFileToFireStorage(chatRoomKey, fileName, filePath, new IUploadFileEventListener() {
             @Override
             public void SuccessUpload(Uri uri) {
                 ChatDB.uploadMessage(uri.toString(), ++lastIndex, messageType, chatRoomKey, currentUser.userMeta().getUserKey(), userList);

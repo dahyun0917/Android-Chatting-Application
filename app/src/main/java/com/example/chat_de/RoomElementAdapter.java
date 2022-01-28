@@ -332,7 +332,6 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         }
 
                     })
-                    .centerCrop()
                     .thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading))
                     .into(leftVideoBinding.videoMsg);
 
@@ -469,7 +468,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String chatDate = simpleDateFormat.format(item.normalDate());
             Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightImageBinding.imagevMsg);
-            rightImageBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
+            //rightImageBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
             rightImageBinding.textvTime.setText(chatDate);
         }
     }
@@ -515,13 +514,12 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         }
 
                     })
-                    .centerCrop()
                     .thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading))
                     .into(rightVideoBinding.videoMsg);
             //Glide.with(itemView.getContext()).load(item.getText()).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(rightVideoBinding.imagevMsg);
             //Glide.with(itemView.getContext()).load(R.drawable.player_black).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).error(R.drawable.no).into(rightVideoBinding.videoPlayer);
             //Glide.with(itemView.getContext()).load(R.drawable.player).centerCrop().thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightVideoBinding.imagevMsg);
-            rightVideoBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
+            //rightVideoBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
             rightVideoBinding.textvTime.setText(chatDate);
         }
     }
@@ -552,7 +550,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             String chatDate = simpleDateFormat.format(item.normalDate());
             Glide.with(itemView.getContext()).load(R.drawable.file_icon).thumbnail(Glide.with(itemView.getContext()).load(R.drawable.loading)).into(rightFileBinding.fileMsg);
-            rightFileBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
+            //rightFileBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
             rightFileBinding.textvTime.setText(chatDate);
         }
     }
@@ -571,7 +569,7 @@ public class RoomElementAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             chatDate = simpleDateFormat.format(item.normalDate());
 
             rightTextBinding.textvMsg.setText(item.getText());
-            rightTextBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
+            //rightTextBinding.textvNicname.setText(myCurrentUser.userMeta().getName());
             rightTextBinding.textvTime.setText(chatDate);
         }
     }

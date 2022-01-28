@@ -31,7 +31,7 @@ public class UserProfileActivity extends AppCompatActivity {
         //로그인된 사용자 정보 전송
         userMe = ChatDB.getCurrentUser();
 
-
+        binding.userGeneration.setText(userMe.getGeneration() +" 기");
         binding.makeChat.setVisibility(View.VISIBLE);
         //프로필 사진 설정
         Glide

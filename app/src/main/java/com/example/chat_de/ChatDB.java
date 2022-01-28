@@ -38,7 +38,7 @@ public class ChatDB {
     public static final String CHAT_ROOM_NAME = "name";
     public static final String CHAT_ROOM_PICTURE = "pictureURL";
     public static final String ROOT = "KNU_AMP";
-    public static final String ALL = "0_ALL";
+    public static final String ALL = "0";
 
     private static DatabaseReference ref = null;
     private static final HashMap<Integer, ArrayList<Pair<String, ChildEventListener>>> childEventListeners = new HashMap<>();

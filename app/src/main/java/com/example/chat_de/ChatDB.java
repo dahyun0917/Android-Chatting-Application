@@ -496,28 +496,10 @@ public class ChatDB {
         });
     }
     public static void closeChatRoomCompleteListener(String chatRoomKey, IVoidEventListener listener) {
-        ref.child(makePath(CHAT_ROOM_JOINED, chatRoomKey)).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                HashMap<String, Object> result = new HashMap<>();
-                // 채팅방 삭제
-                result.put(makePath(CHAT_ROOMS, chatRoomKey), null);
-                // 채팅방에 속한 유저 정보 삭제
-                result.put(makePath(CHAT_ROOM_JOINED, chatRoomKey), null);
-                for (DataSnapshot snapshot : task.getResult().getChildren()) {
-                    String userKey = snapshot.getValue(User.class).getUserKey();
-                    // 유저가 속한 채팅방 정보 삭제
-                    result.put(makePath(USER_JOINED, userKey, chatRoomKey), null);
-                }
-                ref.updateChildren(result, (error, rf) -> {
-                    if(error == null) {
-                        listener.eventListener();
-                    } else {
-                        Log.e("FRD", "Can not delete data: " + error);
-                    }
-                });
-            } else {
-                Log.e("FRD", "Can not get users");
-            }
+        getChatRoomUserListCompleteListener(chatRoomKey, joinedUserList -> {
+            ArrayList<AUser> userList = new ArrayList<>();
+            userList.addAll(joinedUserList.values());
+            exitChatRoomCompleteListener(chatRoomKey, userList, listener);
         });
     }
 

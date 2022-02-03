@@ -124,12 +124,6 @@ public class RoomActivity extends AppCompatActivity {
 
                 @Override
                 public void onRemoved(ChatRoomUser exitedUser) {
-                    String key = exitedUser.getUserKey();
-                    //방이 폐쇄당했을 때 액티비티 종료
-                    if(key.equals(currentUser.getUserKey())) {
-                        Toast.makeText(RoomActivity.this, "방에서 퇴장하셨습니다.", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
                 }
             });
         });

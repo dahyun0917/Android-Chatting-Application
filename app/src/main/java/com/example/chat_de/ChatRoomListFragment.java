@@ -134,7 +134,7 @@ public class ChatRoomListFragment extends Fragment {
                     break;
                 case 2: //채팅방 폐쇄하기
                     AlertDialog.Builder cautionDialog = new AlertDialog.Builder(getActivity());
-                    cautionDialog.setTitle("경고").setMessage("채팅방을 폐쇄하면 모든 사용자가 해당 채팅방에서 강제퇴장 당하고, 채팅방의 모든 정보가 영구적으로 삭제됩니다. 계속 진행하시겠습니까?");
+                    cautionDialog.setTitle("경고").setMessage("채팅방을 폐쇄하면 모든 사용자가 해당 채팅방에서 강제퇴장 당합니다. 계속 진행하시겠습니까?");
                     cautionDialog.setPositiveButton("예", (dialog, id) -> {
                         ChatDB.closeChatRoomCompleteListener(chatRoomListItem.getChatRoomKey(), () -> {});
                     });

@@ -1,7 +1,6 @@
 package com.example.chat_de.datas;
 
 import androidx.annotation.NonNull;
-
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties

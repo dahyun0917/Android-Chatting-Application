@@ -60,8 +60,8 @@ public class UserProfileActivity extends AppCompatActivity {
                 });
             }
         });
-        //강퇴시키기 버튼 설정
+/*        //강퇴시키기 버튼 설정
         if(!ChatDB.getAdminMode())
-            binding.kickUserButton.setVisibility(View.GONE);
+            binding.kickUserButton.setVisibility(View.GONE);*/
     }
 }

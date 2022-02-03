@@ -311,7 +311,7 @@ public class RoomActivity extends AppCompatActivity {
                     }
                 });
 
-                binding.drawerLayout.openDrawer(binding_temp.getRoot());
+                binding.drawerLayout.openDrawer(binding.drawerView.getRoot());
                 binding.drawerLayout.setDrawerListener(drawerL);
 
                 //showJoinedUserList();

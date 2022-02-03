@@ -78,6 +78,11 @@ public class RoomActivity extends AppCompatActivity {
     private Uri filePath;
 
     private boolean isDrawerOpened;
+    ArrayList<AUser> joinUser = new ArrayList<>();
+    AUser userMe;
+    JoinUserListAdapter joinUserListAdapter;
+
+    HashMap<String, AUser> joinUserDictionary = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +99,21 @@ public class RoomActivity extends AppCompatActivity {
         ChatDB.getChatRoomUserListCompleteListener(chatRoomKey, joinedUserList -> {
             userList.putAll(joinedUserList);
             currentUser = joinedUserList.get(ChatDB.getCurrentUserKey());
+
+            userMe= currentUser.userMeta();
+
+            joinUser.clear();
+
+            joinUser.add(userList.get(userMe.getUserKey()));
+            for (ChatRoomUser e : userList.values()) {
+                if(e.getExist() && !e.getUserKey().equals(userMe.getUserKey())) {
+                    joinUser.add(e);
+                    joinUserDictionary.put(e.getUserKey(),e);
+                }
+            }
+            joinUserListAdapter.notifyDataSetChanged();
+
+
             roomElementAdapter.setCurrentUser(currentUser);
             ChatDB.getLastChatCompleteListener(chatRoomKey, (chatKey, chatValue) -> {
                 frontChatKey = chatKey;
@@ -120,6 +140,19 @@ public class RoomActivity extends AppCompatActivity {
                         finish();
                     }
                     userList.put(key, changedUser);
+                    if(changedUser.getExist() && !changedUser.getUserKey().equals(userMe.getUserKey())) {
+                        if(!joinUserDictionary.containsKey(changedUser.getUserKey())) {
+                            joinUser.add(changedUser);
+                            joinUserDictionary.put(changedUser.getUserKey(),changedUser);
+                            joinUserListAdapter.notifyDataSetChanged();
+                        }
+                        //프로필 변경 시
+                    }
+                    if(!changedUser.getExist()&& (joinUserDictionary.containsKey(changedUser.getUserKey()))) {
+                        joinUser.remove(joinUserDictionary.get(changedUser.getUserKey()));
+                        joinUserDictionary.remove(changedUser.getUserKey());
+                        joinUserListAdapter.notifyDataSetChanged();
+                    }
                 }
 
                 @Override
@@ -130,8 +163,7 @@ public class RoomActivity extends AppCompatActivity {
                         Toast.makeText(RoomActivity.this, "방에서 퇴장하셨습니다.", Toast.LENGTH_SHORT).show();
                         finish();
                     }
-                }
-            });
+            }});
         });
         //채팅방에 들어왔으니 유저는 가장 최근 메시지를 읽었다고 가정
         ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
@@ -143,6 +175,8 @@ public class RoomActivity extends AppCompatActivity {
 
         //리사이클러뷰 스크롤 리스너 설정
         initScrollListener();
+
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -154,6 +188,8 @@ public class RoomActivity extends AppCompatActivity {
         //리사이클러뷰 설정
         initRecyclerView();
 
+        setUserList();
+
         //채팅방 설정
         chatRoomKey = getIntent().getStringExtra("chatRoomKey");
         ChatDB.chatRoomMetaChangedEventListener(chatRoomKey, HASH_CODE, meta -> {
@@ -164,6 +200,7 @@ public class RoomActivity extends AppCompatActivity {
         //액션바 타이틀 바 이름 설정
         setSupportActionBar(binding.toolbarRoom);
         getSupportActionBar().setTitle("");
+
 
         //메시지 전송 버튼에 대한 클릭 리스너 지정
         binding.chatSent.setOnClickListener(new View.OnClickListener() {
@@ -229,7 +266,7 @@ public class RoomActivity extends AppCompatActivity {
                 else
                     binding.drawerView.settings.setVisibility(View.GONE);
                 //drawerView에 채팅 참가자 리스트 띄워주기
-                ArrayList<AUser> joinUser = new ArrayList<>();
+                /*ArrayList<AUser> joinUser = new ArrayList<>();
                 AUser userMe= currentUser.userMeta();
                 joinUser.add(userList.get(userMe.getUserKey()));
                 for (ChatRoomUser e : userList.values()) {
@@ -240,7 +277,7 @@ public class RoomActivity extends AppCompatActivity {
 
                 JoinUserListAdapter joinUserListAdapter;
                 joinUserListAdapter = new JoinUserListAdapter(joinUser);
-                binding.drawerView.joinUser.setAdapter(joinUserListAdapter);
+                binding.drawerView.joinUser.setAdapter(joinUserListAdapter);*/
 
                 binding.drawerView.joinUser.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -252,6 +289,14 @@ public class RoomActivity extends AppCompatActivity {
                             intent.putExtra("userOther", joinUser.get(i));
                             startActivity(intent);
                         }
+                    }
+                });
+
+                binding.drawerView.joinUser.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        joinUserControlDialog(joinUser.get(i));
+                        return true;
                     }
                 });
 
@@ -298,9 +343,7 @@ public class RoomActivity extends AppCompatActivity {
     //drawerlayout의 리스너 : 네비게이션 드로워가 열려있는지 닫혀있는지를 구분하여 backpress를 눌렀을 때 다른 동작
     DrawerLayout.DrawerListener drawerL = new DrawerLayout.DrawerListener() {
         @Override
-        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-
-        }
+        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {}
 
         @Override
         public void onDrawerOpened(@NonNull View drawerView) {
@@ -318,6 +361,30 @@ public class RoomActivity extends AppCompatActivity {
         }
     };
 
+    public void setUserList(){
+
+        joinUserListAdapter = new JoinUserListAdapter(joinUser);
+        binding.drawerView.joinUser.setAdapter(joinUserListAdapter);
+
+    }
+    public void joinUserControlDialog(AUser exitedUser){
+        if(ChatDB.getAdminMode()&&!(exitedUser.getUserKey().equals(currentUser.getUserKey()))){
+            String control[] ={"강제 퇴장"};
+            AlertDialog.Builder dlg = new AlertDialog.Builder(RoomActivity.this);
+            dlg.setTitle("관리자 권한").setItems(control, (dialogInterface, position) -> {
+                switch(position) {
+                    case 0: //채팅방 나가기
+                        ArrayList<AUser> user = new ArrayList<>();
+                        user.add(exitedUser);
+                        //joinUser.remove(exitedUser);
+                        ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {
+                            Toast.makeText(RoomActivity.this, "나감", Toast.LENGTH_SHORT).show();
+                        });
+                        break;
+                }
+            }).show();
+        }
+    }
     @Override
     public void onBackPressed(){
         if(isDrawerOpened){
@@ -405,6 +472,8 @@ public class RoomActivity extends AppCompatActivity {
         super.onResume();
         //onCreate를 통해 만들어 진 것이 아니면 messageAddedEventListener를 붙임
         initScrollListener();
+
+
     }
 
     @Override

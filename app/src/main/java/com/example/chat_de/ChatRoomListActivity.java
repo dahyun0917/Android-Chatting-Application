@@ -10,7 +10,6 @@ import com.example.chat_de.databinding.ActivityChatRoomListBinding;
 
 public class ChatRoomListActivity extends AppCompatActivity {
     ChatRoomListFragment mainFragment;
-    private final String USER_KEY = "user2";
     private ActivityChatRoomListBinding binding;
 
     @Override
@@ -20,20 +19,29 @@ public class ChatRoomListActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        if(!ChatDB.isGenAccessPossible()) {
+        if(!ChatDB.isGenAccessPossible()) { //003
             binding.textMode.setVisibility(View.GONE);
-            binding.changeModeImage.setVisibility(View.GONE);
+            binding.upImage.setVisibility(View.GONE);
+            binding.downImage.setVisibility(View.GONE);
             binding.toolbarChatRoomList.setClickable(false);
         }
         else {
-            binding.toolbaTitle.setOnClickListener(view1 -> {
+            binding.toolbaTitle.setOnClickListener(view1 -> { //클릭시 전체모드, 기수모드 변경
                 Intent intent = new Intent(ChatRoomListActivity.this, ChatRoomListActivity.class);
                 ChatDB.changeRef();
                 startActivity(intent);
                 finish();
             });
-            if (ChatDB.getChatMode() == 0) {
+            if (ChatDB.getChatMode() == 0) { //전체모드
+                binding.ampLogo.setVisibility(View.GONE);
+                binding.generationNumber.setVisibility(View.GONE);
                 binding.textMode.setVisibility(View.GONE);
+                binding.downImage.setVisibility(View.GONE);
+            }
+            else { //기수모드
+                binding.knuLogo.setVisibility(View.GONE);
+                binding.generationNumber.setText(String.valueOf(ChatDB.getChatMode()));
+                binding.upImage.setVisibility(View.GONE);
             }
         }
 

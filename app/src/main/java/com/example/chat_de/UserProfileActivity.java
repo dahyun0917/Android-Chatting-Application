@@ -31,8 +31,8 @@ public class UserProfileActivity extends AppCompatActivity {
         //로그인된 사용자 정보 전송
         userMe = ChatDB.getCurrentUser();
 
-
-        binding.makeChat.setVisibility(View.VISIBLE);
+        binding.userGeneration.setText(userMe.getGeneration() +" 기");
+        binding.makeChatButton.setVisibility(View.VISIBLE);
         //프로필 사진 설정
         Glide
                 .with(this)
@@ -43,9 +43,9 @@ public class UserProfileActivity extends AppCompatActivity {
         binding.userName.setText(userOther.getName());
 
         if(userMe.getUserKey().equals(userOther.getUserKey()))
-            binding.makeChat.setVisibility(View.GONE);
+            binding.makeChatButton.setVisibility(View.GONE);
         //채팅방 만들기 버튼 설정
-        binding.makeChat.setOnClickListener(new View.OnClickListener() {
+        binding.makeChatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ArrayList<AUser> userList = new ArrayList<>();
@@ -60,5 +60,8 @@ public class UserProfileActivity extends AppCompatActivity {
                 });
             }
         });
+        //강퇴시키기 버튼 설정
+        if(!ChatDB.getAdminMode())
+            binding.kickUserButton.setVisibility(View.GONE);
     }
 }

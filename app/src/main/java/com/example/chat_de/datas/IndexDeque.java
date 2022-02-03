@@ -5,7 +5,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-// push:       O(1)
+// push:       Amortized O(1)
 // pop:        Amortized O(1)
 // getByIndex: O(1)
 

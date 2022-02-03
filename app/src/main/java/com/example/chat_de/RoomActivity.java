@@ -157,13 +157,8 @@ public class RoomActivity extends AppCompatActivity {
 
                 @Override
                 public void onRemoved(ChatRoomUser exitedUser) {
-                    String key = exitedUser.getUserKey();
-                    //방이 폐쇄당했을 때 액티비티 종료
-                    if(key.equals(currentUser.getUserKey())) {
-                        Toast.makeText(RoomActivity.this, "방에서 퇴장하셨습니다.", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-            }});
+                }
+            });
         });
         //채팅방에 들어왔으니 유저는 가장 최근 메시지를 읽었다고 가정
         ChatDB.userReadLastMessage(chatRoomKey, ChatDB.getCurrentUserKey());
@@ -175,8 +170,6 @@ public class RoomActivity extends AppCompatActivity {
 
         //리사이클러뷰 스크롤 리스너 설정
         initScrollListener();
-
-
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -200,7 +193,6 @@ public class RoomActivity extends AppCompatActivity {
         //액션바 타이틀 바 이름 설정
         setSupportActionBar(binding.toolbarRoom);
         getSupportActionBar().setTitle("");
-
 
         //메시지 전송 버튼에 대한 클릭 리스너 지정
         binding.chatSent.setOnClickListener(new View.OnClickListener() {
@@ -311,7 +303,7 @@ public class RoomActivity extends AppCompatActivity {
                     }
                 });
 
-                binding.drawerLayout.openDrawer(binding.drawerView.getRoot());
+                binding.drawerLayout.openDrawer(binding_temp.getRoot());
                 binding.drawerLayout.setDrawerListener(drawerL);
 
                 //showJoinedUserList();
@@ -343,7 +335,9 @@ public class RoomActivity extends AppCompatActivity {
     //drawerlayout의 리스너 : 네비게이션 드로워가 열려있는지 닫혀있는지를 구분하여 backpress를 눌렀을 때 다른 동작
     DrawerLayout.DrawerListener drawerL = new DrawerLayout.DrawerListener() {
         @Override
-        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {}
+        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+        }
 
         @Override
         public void onDrawerOpened(@NonNull View drawerView) {
@@ -472,8 +466,6 @@ public class RoomActivity extends AppCompatActivity {
         super.onResume();
         //onCreate를 통해 만들어 진 것이 아니면 messageAddedEventListener를 붙임
         initScrollListener();
-
-
     }
 
     @Override

@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
+import java.util.Map;
 
 public class RoomActivity extends AppCompatActivity {
     private final int HASH_CODE = hashCode();
@@ -82,7 +83,7 @@ public class RoomActivity extends AppCompatActivity {
     AUser userMe;
     JoinUserListAdapter joinUserListAdapter;
 
-    HashMap<String, AUser> joinUserDictionary = new HashMap<>();
+    HashMap<String, Integer> joinUserDictionary = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,12 +104,13 @@ public class RoomActivity extends AppCompatActivity {
             userMe= currentUser.userMeta();
 
             joinUser.clear();
-
+            int i=0;
             joinUser.add(userList.get(userMe.getUserKey()));
+            joinUserDictionary.put(userMe.getUserKey(),i++);
             for (ChatRoomUser e : userList.values()) {
                 if(e.getExist() && !e.getUserKey().equals(userMe.getUserKey())) {
                     joinUser.add(e);
-                    joinUserDictionary.put(e.getUserKey(),e);
+                    joinUserDictionary.put(e.getUserKey(),i++);
                 }
             }
             joinUserListAdapter.notifyDataSetChanged();
@@ -143,14 +145,22 @@ public class RoomActivity extends AppCompatActivity {
                     if(changedUser.getExist() && !changedUser.getUserKey().equals(userMe.getUserKey())) {
                         if(!joinUserDictionary.containsKey(changedUser.getUserKey())) {
                             joinUser.add(changedUser);
-                            joinUserDictionary.put(changedUser.getUserKey(),changedUser);
-                            joinUserListAdapter.notifyDataSetChanged();
+                            joinUserDictionary.put(changedUser.getUserKey(),joinUser.size()-1);
+                        } else {
+                            int index = joinUserDictionary.get(changedUser.getUserKey());
+                            joinUser.set(index, changedUser);
                         }
-                        //프로필 변경 시
+                        joinUserListAdapter.notifyDataSetChanged();
                     }
                     if(!changedUser.getExist()&& (joinUserDictionary.containsKey(changedUser.getUserKey()))) {
-                        joinUser.remove(joinUserDictionary.get(changedUser.getUserKey()));
+                        int index = joinUserDictionary.get(changedUser.getUserKey()).intValue();
+                        joinUser.remove(index);
                         joinUserDictionary.remove(changedUser.getUserKey());
+                        for (Map.Entry<String, Integer> e : joinUserDictionary.entrySet()) {
+                            if(e.getValue()>index) {
+                                joinUserDictionary.put(e.getKey(),e.getValue()-1);
+                            }
+                        }
                         joinUserListAdapter.notifyDataSetChanged();
                     }
                 }
@@ -181,6 +191,7 @@ public class RoomActivity extends AppCompatActivity {
         //리사이클러뷰 설정
         initRecyclerView();
 
+        //네비게이션 드로어에 참가자 목록 set
         setUserList();
 
         //채팅방 설정
@@ -257,19 +268,7 @@ public class RoomActivity extends AppCompatActivity {
                     binding.drawerView.settings.setVisibility(View.VISIBLE);
                 else
                     binding.drawerView.settings.setVisibility(View.GONE);
-                //drawerView에 채팅 참가자 리스트 띄워주기
-                /*ArrayList<AUser> joinUser = new ArrayList<>();
-                AUser userMe= currentUser.userMeta();
-                joinUser.add(userList.get(userMe.getUserKey()));
-                for (ChatRoomUser e : userList.values()) {
-                    if(e.getExist() && !e.getUserKey().equals(userMe.getUserKey())) {
-                        joinUser.add(e);
-                    }
-                }
 
-                JoinUserListAdapter joinUserListAdapter;
-                joinUserListAdapter = new JoinUserListAdapter(joinUser);
-                binding.drawerView.joinUser.setAdapter(joinUserListAdapter);*/
 
                 binding.drawerView.joinUser.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -306,7 +305,6 @@ public class RoomActivity extends AppCompatActivity {
                 binding.drawerLayout.openDrawer(binding_temp.getRoot());
                 binding.drawerLayout.setDrawerListener(drawerL);
 
-                //showJoinedUserList();
             }
         });
 
@@ -370,10 +368,7 @@ public class RoomActivity extends AppCompatActivity {
                     case 0: //채팅방 나가기
                         ArrayList<AUser> user = new ArrayList<>();
                         user.add(exitedUser);
-                        //joinUser.remove(exitedUser);
-                        ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {
-                            Toast.makeText(RoomActivity.this, "나감", Toast.LENGTH_SHORT).show();
-                        });
+                        ChatDB.exitChatRoomCompleteListener(chatRoomKey, user, () -> {});
                         break;
                 }
             }).show();
@@ -486,7 +481,6 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     public void initRecyclerView() {
-        //binding.RecyclerView.setItemViewCacheSize(50);
         manager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         manager.setStackFromEnd(true);
         binding.recyclerView.setLayoutManager(manager);

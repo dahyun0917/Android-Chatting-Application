@@ -12,9 +12,13 @@
 - 보낸 메세지 삭제  
 - 강제 퇴장  
 ### 프로젝트에 활용된 기술
-- Realtime Firebase
+- <img src="https://img.shields.io/badge/AndroidStudio-0c70f2?style=flat-square&logo=AndroidStudio&logoColor=92b8b1"/>
+- <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=white"/> - Firebase Realtime Database를 활용한 데이터베이스 개발
 - Glide
 - exoplayer
 - PhotoView
 ### 성과  
 - 경북대학교 총동창회 어플리케이션에 개발한 채팅 기능이 포함되어 **구글 플레이스토어**에 출시되었습니다.
+### [ 시연영상 및 관련 링크 ]
+- 시연 영상 :
+- 노션 링크 : <a href="https://chat-de.notion.site/Chat_de-5b2dfc990b0442989ae2c84b0bfeff34" target="_blank"><img src="https://img.shields.io/badge/Notion-000000.svg?style=flat-square&logo=Notion&logoColor=white"/></a> 
